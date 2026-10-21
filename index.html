@@ -158,4 +158,51 @@
 
         <div>
           <label class="block text-xs font-medium text-slate-300 mb-1">Nom de l'épreuve *</label>
-          <input type="text" id="form-name" required placeholder="ex: Marathon de Paris, Trail des Lucioles" class="w-full bg-slate-900 border border-slate-700 rounded-xl
+          <input type="text" id="form-name" required placeholder="ex: Marathon de Paris, Trail des Lucioles" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Discipline *</label>
+            <select id="form-sport" onchange="toggleSportFields()" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+              <option value="running">Course à Pied</option>
+              <option value="trail">Trail</option>
+              <option value="triathlon">Triathlon</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Date *</label>
+            <input type="date" id="form-date" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Distance Totale (Km) *</label>
+            <input type="number" step="0.01" id="form-distance" required placeholder="42.195" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Dénivelé D+ (m)</label>
+            <input type="number" id="form-elevation" placeholder="ex: 1200" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
+          <label class="block text-xs font-medium text-slate-300 mb-2">Temps Total (HH : MM : SS) *</label>
+          <div class="grid grid-cols-3 gap-2">
+            <input type="number" id="form-time-h" min="0" placeholder="Heures" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-sm">
+            <input type="number" id="form-time-m" min="0" max="59" placeholder="Minutes" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-sm">
+            <input type="number" id="form-time-s" min="0" max="59" placeholder="Secondes" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-sm">
+          </div>
+        </div>
+
+        <div id="triathlon-fields" class="space-y-3 bg-indigo-950/20 p-3 rounded-xl border border-indigo-800/30 hidden">
+          <div class="text-xs font-semibold text-indigo-400">Détails Triathlon (Optionnel)</div>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <div>
+              <label class="text-slate-400 mb-1 block">Natation</label>
+              <input type="text" id="form-tri-swim" placeholder="mm:ss" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center">
+            </div>
+            <div>
+              <label class="text-slate-400 mb-1 block">T1</label>
+              <input type="text" id="form-tri-t1" placeholder="mm:ss" class="w-full bg-slate-900 border border-slate-700 rounded
