@@ -27,7 +27,7 @@
                 <i class="fa-solid fa-person-triathlon text-3xl text-blue-500"></i>
                 <div>
                     <h1 class="font-bold text-lg tracking-wide text-white">NutriFit Tri</h1>
-                    <p class="text-xs text-blue-400 font-medium">Planning 28 Jours / Nolio</p>
+                    <p class="text-xs text-blue-400 font-medium" id="side-objective-badge">Planning 28 Jours / Nolio</p>
                 </div>
             </div>
 
@@ -67,6 +67,7 @@
 
         <!-- TAB CALENDRIER NOLIO -->
         <section id="tab-calendar" class="space-y-6">
+            <!-- Header & Import CSV -->
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
                 <div>
                     <h2 class="text-2xl font-bold text-white flex items-center gap-2">
@@ -85,49 +86,5 @@
                 </div>
             </div>
 
-            <div id="import-notification" class="hidden p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center">
-                <span id="import-notification-text">CSV Nolio importé avec succès !</span>
-                <button onclick="this.parentElement.classList.add('hidden')" class="text-emerald-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-lg text-white">Vue Calendrier Mensuelle</h3>
-                    <div class="flex items-center gap-4 text-xs">
-                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Aujourd'hui</span>
-                        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Sélectionné</span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-7 gap-2 text-center font-bold text-xs text-slate-400 uppercase tracking-wider py-1 border-b border-slate-700">
-                    <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
-                </div>
-
-                <div class="grid grid-cols-7 gap-2" id="calendar-grid"></div>
-            </div>
-
-            <div class="bg-slate-800 p-6 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-slate-800 to-slate-900">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/60 pb-4">
-                    <div>
-                        <span class="text-xs font-bold uppercase tracking-widest text-blue-400" id="selected-day-tag">Jour Sélectionné</span>
-                        <h3 class="text-xl font-extrabold text-white mt-0.5" id="selected-day-title">--</h3>
-                    </div>
-                    <button onclick="switchTab('recipes')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
-                        <i class="fa-solid fa-utensils"></i> Voir les recettes de ce jour
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Discipline</span>
-                        <p class="text-lg font-bold text-blue-400 mt-1 flex items-center gap-2" id="selected-day-discipline">--</p>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Durée / Intensité</span>
-                        <p class="text-lg font-bold text-white mt-1" id="selected-day-duration">--</p>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Dépense Est. Séance</span>
-                        <p class="text-lg font-bold text-amber-400 mt-1" id="selected-day-workout-burn">--</p>
-                    </div>
-                    <div class="bg-slate-900/80 p-4 rounded-xl border border
+            <!-- Notice Import -->
+            <div id="import-notification" class="hidden p-4 bg-emerald-900/40 border border-emerald-5
