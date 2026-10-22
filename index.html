@@ -402,6 +402,32 @@
           </div>
         </div>
 
+        <!-- ==================== NOUVEAUTÉ: EXTRACTION DE RECORDS INTERMÉDIAIRES ==================== -->
+        <div class="space-y-2 bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <i class="fas fa-stopwatch-20"></i> Extraire un Record Intermédiaire (Split facultatif)
+            </span>
+            <span class="text-[10px] text-slate-400">ex: passage au 5k, 10k...</span>
+          </div>
+          <p class="text-[10px] text-slate-400">Si vous avez battu un record personnel sur une distance inférieure pendant cette course, indiquez le temps de passage officiel :</p>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">Passage 5 km</label>
+              <input type="text" id="form-split-5k" placeholder="ex: 19:45" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">Passage 10 km</label>
+              <input type="text" id="form-split-10k" placeholder="ex: 41:10" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs text-white">
+            </div>
+            <div>
+              <label class="block text-[10px] text-slate-400 mb-1">Passage Semi (21.1k)</label>
+              <input type="text" id="form-split-semi" placeholder="ex: 1:32:15" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs text-white">
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Classement Scratch</label>
@@ -523,7 +549,59 @@
         timeSeconds: 12900, // 3h 35m 00s
         rank: "3420/45000",
         location: "Paris, France",
-        notes: "Premier marathon !"
+        notes: "Premier marathon !",
+        splits: {
+          split10k: "48:15",
+          splitSemi: "1:44:30"
+        }
+      },
+      {
+        id: "2",
+        name: "Marathon de Paris",
+        sport: "running",
+        date: "2025-04-13",
+        distance: 42.195,
+        elevation: 150,
+        timeSeconds: 12180, // 3h 23m 00s (-12 min)
+        rank: "2150/48000",
+        location: "Paris, France",
+        notes: "Nouveau record sur le marathon, negative split !",
+        splits: {
+          split5k: "23:40",
+          split10k: "47:20",
+          splitSemi: "1:40:50"
+        }
+      },
+      {
+        id: "3",
+        name: "10km de la Braderie",
+        sport: "running",
+        date: "2024-09-07",
+        distance: 10.0,
+        elevation: 20,
+        timeSeconds: 2460, // 41m 00s
+        rank: "88/1500",
+        location: "Lille",
+        notes: "Superbe allure constante.",
+        splits: {
+          split5k: "20:10"
+        }
+      },
+      {
+        id: "4",
+        name: "Semi-Marathon de Boulogne",
+        sport: "running",
+        date: "2024-11-17",
+        distance: 21.1,
+        elevation: 40,
+        timeSeconds: 5640, // 1h 34m 00s
+        rank: "450/7000",
+        location: "Boulogne-Billancourt",
+        notes: "Parcours plat et très rapide.",
+        splits: {
+          split5k: "21:30",
+          split10k: "43:45"
+        }
       },
       {
         id: "2",
@@ -996,10 +1074,11 @@
     // --- ONGLET 3: NOUVEAUTÉ RECORDS PERSONNELS (PR / PB) ---
     function calculateAndRenderPersonalRecords() {
       // 1. Records Course à pied : 5k, 10k, Semi, Marathon
-      var pr5k = findBestRun(4.5, 5.5);
-      var pr10k = findBestRun(9.5, 10.5);
-      var prSemi = findBestRun(20.5, 21.5);
-      var prMarathon = findBestRun(41.5, 43.0);
+      // Recherche à la fois dans les courses complètes ET dans les passages intermédiaires extraits
+      var pr5k = findBestRunRecord('5k', 4.5, 5.5, 5.0);
+      var pr10k = findBestRunRecord('10k', 9.5, 10.5, 10.0);
+      var prSemi = findBestRunRecord('semi', 20.5, 21.5, 21.0975);
+      var prMarathon = findBestRunRecord('marathon', 41.5, 43.0, 42.195);
 
       updatePrCard('5k', pr5k);
       updatePrCard('10k', pr10k);
@@ -1018,13 +1097,43 @@
       updateSwimPrCard('swim-3800', prSwim3800, 3800);
     }
 
-    function findBestRun(minDist, maxDist) {
-      var matching = races.filter(function(r) {
-        return (r.sport === 'running' || r.sport === 'trail') && r.distance >= minDist && r.distance <= maxDist && r.timeSeconds > 0;
-      });
-      if (matching.length === 0) return null;
-      matching.sort(function(a, b) { return a.timeSeconds - b.timeSeconds; });
-      return matching[0];
+    // Fonction recherchant la meilleure performance (course entière ou split extrait)
+    function findBestRunRecord(splitKey, minDist, maxDist, targetDistKm) {
+      var candidates = [];
+
+      for (var i = 0; i < races.length; i++) {
+        var r = races[i];
+        
+        // Option A: La course elle-même est sur la distance cible
+        if ((r.sport === 'running' || r.sport === 'trail') && r.distance >= minDist && r.distance <= maxDist && r.timeSeconds > 0) {
+          candidates.push({
+            race: r,
+            timeSeconds: r.timeSeconds,
+            distance: r.distance,
+            sourceLabel: r.name,
+            isSplit: false
+          });
+        }
+
+        // Option B: Un temps intermédiaire (split) a été extrait d'une course plus longue
+        var splitProp = 'split' + splitKey.charAt(0).toUpperCase() + splitKey.slice(1);
+        if (r.splits && r.splits[splitProp]) {
+          var splitSec = parseTimeToSeconds(r.splits[splitProp]);
+          if (splitSec > 0) {
+            candidates.push({
+              race: r,
+              timeSeconds: splitSec,
+              distance: targetDistKm,
+              sourceLabel: "Passage " + splitKey.toUpperCase() + " (" + r.name + ")",
+              isSplit: true
+            });
+          }
+        }
+      }
+
+      if (candidates.length === 0) return null;
+      candidates.sort(function(a, b) { return a.timeSeconds - b.timeSeconds; });
+      return candidates[0];
     }
 
     function findBestSwim(distTag) {
@@ -1041,22 +1150,22 @@
       return matching[0];
     }
 
-    function updatePrCard(id, pr) {
+    function updatePrCard(id, prCandidate) {
       var timeEl = document.getElementById('pr-time-' + id);
       var paceEl = document.getElementById('pr-pace-' + id);
       var raceEl = document.getElementById('pr-race-' + id);
       var dateEl = document.getElementById('pr-date-' + id);
 
-      if (pr) {
-        timeEl.innerText = formatTime(pr.timeSeconds);
-        paceEl.innerText = calculatePace(pr.distance, pr.timeSeconds);
-        raceEl.innerText = pr.name;
-        dateEl.innerText = new Date(pr.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+      if (prCandidate) {
+        timeEl.innerText = formatTime(prCandidate.timeSeconds);
+        paceEl.innerText = calculatePace(prCandidate.distance, prCandidate.timeSeconds);
+        raceEl.innerHTML = (prCandidate.isSplit ? '<span class="text-amber-400 text-[10px] font-bold mr-1">[SPLIT]</span>' : '') + prCandidate.sourceLabel;
+        dateEl.innerText = new Date(prCandidate.race.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
       } else {
         timeEl.innerText = "--:--:--";
         paceEl.innerText = "-- /km";
         raceEl.innerText = "Aucun chrono enregistré";
-        dateEl.innerText = "Ajoutez une course de cette distance";
+        dateEl.innerText = "Ajoutez une course ou un split";
       }
     }
 
@@ -1105,6 +1214,20 @@
       var location = document.getElementById('form-location').value.trim();
       var notes = document.getElementById('form-notes').value.trim();
 
+      // Extraction des records intermédiaires (splits)
+      var split5k = document.getElementById('form-split-5k').value.trim();
+      var split10k = document.getElementById('form-split-10k').value.trim();
+      var splitSemi = document.getElementById('form-split-semi').value.trim();
+      
+      var splits = null;
+      if (split5k || split10k || splitSemi) {
+        splits = {
+          split5k: split5k,
+          split10k: split10k,
+          splitSemi: splitSemi
+        };
+      }
+
       var triDetails = null;
       if (sport === 'triathlon') {
         triDetails = {
@@ -1128,6 +1251,7 @@
         rank: rank,
         location: location,
         notes: notes,
+        splits: splits,
         triDetails: triDetails
       };
 
@@ -1147,6 +1271,9 @@
     function resetForm() {
       document.getElementById('race-id').value = '';
       document.getElementById('race-form').reset();
+      document.getElementById('form-split-5k').value = '';
+      document.getElementById('form-split-10k').value = '';
+      document.getElementById('form-split-semi').value = '';
       document.getElementById('form-title').innerText = "Enregistrer une Course";
       toggleSportFields();
     }
@@ -1175,6 +1302,11 @@
       document.getElementById('form-rank').value = race.rank || '';
       document.getElementById('form-location').value = race.location || '';
       document.getElementById('form-notes').value = race.notes || '';
+
+      // Chargement des splits s'ils existent
+      document.getElementById('form-split-5k').value = (race.splits && race.splits.split5k) ? race.splits.split5k : '';
+      document.getElementById('form-split-10k').value = (race.splits && race.splits.split10k) ? race.splits.split10k : '';
+      document.getElementById('form-split-semi').value = (race.splits && race.splits.splitSemi) ? race.splits.splitSemi : '';
 
       if (race.triDetails) {
         document.getElementById('form-tri-swim-dist').value = race.triDetails.swimDist || 'none';
