@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RaceTracker - Suivi & Comparateur de Performances</title>
+  <title>RaceTracker - Suivi, Comparateur & Records Personnels</title>
   
-  <!-- PWA meta tags -->
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,129 +23,290 @@
     .glass { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(12px); }
   </style>
 </head>
-<body class="h-full bg-slate-900 text-slate-100 flex flex-col font-sans antialiased pb-20 md:pb-6">
+<body class="h-full bg-slate-900 text-slate-100 flex flex-col font-sans antialiased pb-24 md:pb-6">
 
-  <!-- Header -->
+  <!-- Header Principal -->
   <header class="sticky top-0 z-40 glass border-b border-slate-800 px-4 py-3">
-    <div class="max-w-5xl mx-auto flex justify-between items-center">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-          <i class="fas fa-trophy text-lg"></i>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+          <i class="fas fa-medal text-lg"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">RaceTracker</h1>
+          <h1 class="text-xl font-bold bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">RaceTracker</h1>
           <p class="text-xs text-slate-400">Course, Trail & Triathlon</p>
         </div>
       </div>
       
-      <div class="flex items-center gap-3">
-        <!-- Bouton + Visible sur Ordinateur ET Mobile -->
+      <div class="flex items-center gap-2">
         <button onclick="switchTab('add')" class="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2 rounded-xl font-medium text-sm flex items-center gap-2 transition shadow-lg shadow-indigo-600/30">
           <i class="fas fa-plus"></i>
-          <span>Ajouter</span>
+          <span class="hidden sm:inline">Ajouter une course</span>
         </button>
 
-        <!-- Navigation Horizontale Desktop -->
-        <nav class="hidden md:flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700/50 text-sm">
-          <button onclick="switchTab('stats')" id="desk-tab-stats" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium hover:text-white transition">Stats</button>
-          <button onclick="switchTab('compare')" id="desk-tab-compare" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium hover:text-white transition">Même Course</button>
-          <button onclick="switchTab('journal')" id="desk-tab-journal" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium hover:text-white transition">Journal</button>
-          <button onclick="switchTab('settings')" id="desk-tab-settings" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 font-medium hover:text-white transition">Réglages</button>
+        <nav class="hidden md:flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700/60 text-xs font-semibold gap-1">
+          <button onclick="switchTab('stats')" id="desk-tab-stats" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition">Stats</button>
+          <button onclick="switchTab('compare')" id="desk-tab-compare" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition">Même Course</button>
+          <button onclick="switchTab('records')" id="desk-tab-records" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition"><i class="fas fa-award text-amber-400 mr-1"></i>Records</button>
+          <button onclick="switchTab('journal')" id="desk-tab-journal" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition">Journal</button>
+          <button onclick="switchTab('settings')" id="desk-tab-settings" class="desk-nav-btn px-3 py-1.5 rounded-lg text-slate-300 hover:text-white transition">Réglages</button>
         </nav>
       </div>
     </div>
   </header>
 
   <!-- Contenu Principal -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-4 space-y-6">
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 space-y-6">
 
-    <!-- ONGLET 1: STATS & DASHBOARD -->
+    <!-- ==================== ONGLET 1: STATS & DASHBOARD ==================== -->
     <section id="view-stats" class="tab-view space-y-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 class="text-2xl font-bold">Tableau de Bord</h2>
-        <div class="flex items-center gap-2 bg-slate-800 p-1 rounded-xl border border-slate-700">
-          <span class="text-xs text-slate-400 pl-2">Année :</span>
-          <select id="stats-year-select" onchange="renderStats()" class="bg-slate-900 text-white font-medium text-sm rounded-lg px-2 py-1 outline-none">
-            <!-- Rempli en JS -->
+        <div>
+          <h2 class="text-2xl font-bold">Tableau de Bord</h2>
+          <p class="text-xs text-slate-400">Synthèse de votre saison et de vos volumes d'entraînement</p>
+        </div>
+        <div class="flex items-center gap-2 bg-slate-800 p-1.5 rounded-xl border border-slate-700">
+          <span class="text-xs text-slate-400 pl-2 font-medium">Année :</span>
+          <select id="stats-year-select" onchange="renderStats()" class="bg-slate-900 text-white font-semibold text-xs rounded-lg px-2.5 py-1 outline-none">
           </select>
         </div>
       </div>
 
-      <!-- Cartes KPi -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-          <div class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Courses Totales</div>
+          <div class="text-[11px] text-slate-400 font-medium uppercase tracking-wider mb-1">Courses Totales</div>
           <div id="kpi-total-races" class="text-2xl font-bold text-white">-</div>
-          <div id="kpi-total-races-diff" class="text-xs mt-1">--</div>
+          <div id="kpi-total-races-diff" class="text-[11px] mt-1">--</div>
         </div>
         <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-          <div class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Distance Totale</div>
+          <div class="text-[11px] text-slate-400 font-medium uppercase tracking-wider mb-1">Distance Totale</div>
           <div id="kpi-total-dist" class="text-2xl font-bold text-emerald-400">-</div>
-          <div id="kpi-total-dist-diff" class="text-xs mt-1">--</div>
+          <div id="kpi-total-dist-diff" class="text-[11px] mt-1">--</div>
         </div>
         <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-          <div class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Dénivelé D+</div>
+          <div class="text-[11px] text-slate-400 font-medium uppercase tracking-wider mb-1">Dénivelé D+</div>
           <div id="kpi-total-elevation" class="text-2xl font-bold text-purple-400">-</div>
-          <div id="kpi-total-elevation-diff" class="text-xs mt-1">--</div>
+          <div id="kpi-total-elevation-diff" class="text-[11px] mt-1">--</div>
         </div>
         <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-          <div class="text-xs text-slate-400 font-medium uppercase tracking-wider mb-1">Podiums / Top 10</div>
+          <div class="text-[11px] text-slate-400 font-medium uppercase tracking-wider mb-1">Podiums / Top 10</div>
           <div id="kpi-podiums" class="text-2xl font-bold text-amber-400">-</div>
-          <div class="text-xs text-slate-400 mt-1">Performances</div>
+          <div class="text-[11px] text-slate-400 mt-1">Performances</div>
         </div>
       </div>
 
-      <!-- Graphiques -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-          <h3 class="text-sm font-semibold text-slate-300 mb-4">Volume Mensuel (Km)</h3>
+          <h3 class="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+            <i class="fas fa-chart-bar text-indigo-400"></i> Volume Mensuel (Km)
+          </h3>
           <div class="h-64"><canvas id="chart-monthly-volume"></canvas></div>
         </div>
         <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-          <h3 class="text-sm font-semibold text-slate-300 mb-4">Répartition par Discipline</h3>
+          <h3 class="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
+            <i class="fas fa-chart-pie text-emerald-400"></i> Répartition par Discipline
+          </h3>
           <div class="h-64"><canvas id="chart-sports-repartition"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- ONGLET 2: COMPARATEUR "MÊME COURSE" -->
+    <!-- ==================== ONGLET 2: COMPARATEUR "MÊME COURSE" ==================== -->
     <section id="view-compare" class="tab-view space-y-6 hidden">
       <div>
-        <h2 class="text-2xl font-bold mb-1">Même Course, Différentes Années</h2>
-        <p class="text-slate-400 text-sm">Sélectionnez une épreuve récurrente pour analyser votre progression.</p>
+        <h2 class="text-2xl font-bold mb-1">Comparateur "Même Course, Multi-Éditions"</h2>
+        <p class="text-slate-400 text-xs">Analysez vos gains de temps globaux et le détail segment par segment (Triathlon : Natation, T1, Vélo, T2, CAP).</p>
       </div>
 
-      <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Choisir une course récurrente</label>
-        <select id="compare-race-select" onchange="renderRaceComparison()" class="w-full bg-slate-900 border border-slate-700 text-white font-medium text-sm rounded-xl p-3 outline-none focus:border-indigo-500">
-          <!-- Rempli en JS -->
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-2">
+        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Sélectionner une course récurrente :</label>
+        <select id="compare-race-select" onchange="renderRaceComparison()" class="w-full bg-slate-900 border border-slate-700 text-white font-semibold text-sm rounded-xl p-3 outline-none focus:border-indigo-500">
         </select>
       </div>
 
-      <!-- Résultat de la comparaison -->
       <div id="compare-results-container" class="space-y-6 hidden">
-        <!-- Graphique d'évolution du temps -->
+        
+        <!-- Graphique du temps total -->
         <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4">
-          <h3 class="text-sm font-semibold text-slate-300 mb-4">Évolution du Temps Total (min)</h3>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+              <i class="fas fa-stopwatch text-indigo-400"></i> Progression Chronométrique Globale
+            </h3>
+            <span id="compare-discipline-badge"></span>
+          </div>
           <div class="h-64"><canvas id="chart-race-comparison"></canvas></div>
         </div>
 
-        <!-- Liste Chronologique des Éditions -->
+        <!-- Graphique détaillé Triathlon si applicable -->
+        <div id="compare-triathlon-charts-box" class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 hidden space-y-3">
+          <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+            <i class="fas fa-layer-group text-amber-400"></i> Décomposition des Segments (Triathlon)
+          </h3>
+          <p class="text-xs text-slate-400">Temps passés sur la Natation, les transitions T1 / T2, le Vélo et la Course à pied à chaque édition.</p>
+          <div class="h-72"><canvas id="chart-triathlon-breakdown"></canvas></div>
+        </div>
+
+        <!-- Cartes chronologiques détaillées avec deltas -->
         <div class="space-y-3">
-          <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Historique des Éditions</h3>
-          <div id="compare-editions-list" class="space-y-3">
-            <!-- Injecté en JS -->
+          <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-history text-slate-500"></i> Historique Comparatif par Édition
+          </h3>
+          <div id="compare-editions-list" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <div id="compare-empty-state" class="text-center py-16 text-slate-500 bg-slate-800/30 rounded-2xl border border-slate-800">
+        <i class="fas fa-route text-4xl mb-3 text-slate-600"></i>
+        <p class="text-sm">Sélectionnez une épreuve ci-dessus pour comparer vos performances.</p>
+      </div>
+    </section>
+
+    <!-- ==================== ONGLET 3: NOUVEAUTÉ RECORDS PERSONNELS (PR / PB) ==================== -->
+    <section id="view-records" class="tab-view space-y-6 hidden">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div>
+          <h2 class="text-2xl font-bold flex items-center gap-2 text-white">
+            <i class="fas fa-trophy text-amber-400"></i> Records Personnels (PR)
+          </h2>
+          <p class="text-xs text-slate-400">Vos meilleurs chronos absolus détectés automatiquement d'après vos courses et temps intermédiaires.</p>
+        </div>
+        <span class="text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20 px-3 py-1 rounded-full">
+          Calcul automatique en direct
+        </span>
+      </div>
+
+      <!-- SECTION 1: COURSE À PIED -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-2">
+          <i class="fas fa-running"></i> Course à Pied (5k, 10k, Semi & Marathon)
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- 5K -->
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-3 -top-3 w-16 h-16 bg-blue-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-blue-500/20 text-3xl font-black">5K</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">5 Kilomètres</span>
+              <div id="pr-time-5k" class="text-2xl font-black text-white mt-1">--:--:--</div>
+              <div id="pr-pace-5k" class="text-xs text-sky-400 font-semibold mt-0.5">-- /km</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-5k" class="text-xs text-slate-300 font-medium truncate">Aucun chrono</p>
+              <span id="pr-date-5k" class="text-[10px] text-slate-500">Ajoutez une course de ~5km</span>
+            </div>
+          </div>
+
+          <!-- 10K -->
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-3 -top-3 w-16 h-16 bg-blue-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-blue-500/20 text-3xl font-black">10K</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">10 Kilomètres</span>
+              <div id="pr-time-10k" class="text-2xl font-black text-white mt-1">--:--:--</div>
+              <div id="pr-pace-10k" class="text-xs text-sky-400 font-semibold mt-0.5">-- /km</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-10k" class="text-xs text-slate-300 font-medium truncate">Aucun chrono</p>
+              <span id="pr-date-10k" class="text-[10px] text-slate-500">Ajoutez une course de ~10km</span>
+            </div>
+          </div>
+
+          <!-- Semi-Marathon -->
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-3 -top-3 w-16 h-16 bg-blue-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-blue-500/20 text-2xl font-black">21K</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Semi-Marathon (21.1 km)</span>
+              <div id="pr-time-semi" class="text-2xl font-black text-white mt-1">--:--:--</div>
+              <div id="pr-pace-semi" class="text-xs text-sky-400 font-semibold mt-0.5">-- /km</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-semi" class="text-xs text-slate-300 font-medium truncate">Aucun chrono</p>
+              <span id="pr-date-semi" class="text-[10px] text-slate-500">Ajoutez une course de ~21.1km</span>
+            </div>
+          </div>
+
+          <!-- Marathon -->
+          <div class="bg-slate-800/70 border border-amber-500/40 bg-amber-500/5 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group">
+            <div class="absolute -right-3 -top-3 w-16 h-16 bg-amber-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-amber-500/20 text-2xl font-black">42K</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300">Marathon (42.195 km)</span>
+              <div id="pr-time-marathon" class="text-2xl font-black text-amber-300 mt-1">--:--:--</div>
+              <div id="pr-pace-marathon" class="text-xs text-amber-400/80 font-semibold mt-0.5">-- /km</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-marathon" class="text-xs text-slate-200 font-medium truncate">Aucun chrono</p>
+              <span id="pr-date-marathon" class="text-[10px] text-slate-400">Ajoutez un marathon</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div id="compare-empty-state" class="text-center py-12 text-slate-500">
-        <i class="fas fa-route text-4xl mb-3"></i>
-        <p>Sélectionnez une épreuve ci-dessus pour afficher la comparaison.</p>
+      <!-- SECTION 2: NATATION (TRIATHLON & EAU LIBRE) -->
+      <div class="space-y-3">
+        <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+          <i class="fas fa-water"></i> Natation (Formats Triathlon : 750m, 1500m, 1900m, 3900m)
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <!-- 750m -->
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute -right-2 -top-2 w-16 h-16 bg-cyan-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-cyan-500/20 text-xl font-black">750m</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Format S (750 m)</span>
+              <div id="pr-time-swim-750" class="text-2xl font-black text-white mt-1">--:--</div>
+              <div id="pr-pace-swim-750" class="text-xs text-cyan-400 font-semibold mt-0.5">-- /100m</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-swim-750" class="text-xs text-slate-300 font-medium truncate">Aucun temps</p>
+              <span id="pr-date-swim-750" class="text-[10px] text-slate-500">Intermédiaire Triathlon S</span>
+            </div>
+          </div>
+
+          <!-- 1500m -->
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute -right-2 -top-2 w-16 h-16 bg-cyan-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-cyan-500/20 text-xl font-black">1.5k</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Format M / Olympique (1500 m)</span>
+              <div id="pr-time-swim-1500" class="text-2xl font-black text-white mt-1">--:--</div>
+              <div id="pr-pace-swim-1500" class="text-xs text-cyan-400 font-semibold mt-0.5">-- /100m</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-swim-1500" class="text-xs text-slate-300 font-medium truncate">Aucun temps</p>
+              <span id="pr-date-swim-1500" class="text-[10px] text-slate-500">Intermédiaire Triathlon M</span>
+            </div>
+          </div>
+
+          <!-- 1900m -->
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute -right-2 -top-2 w-16 h-16 bg-cyan-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-cyan-500/20 text-xl font-black">1.9k</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Format L / 70.3 (1900 m)</span>
+              <div id="pr-time-swim-1900" class="text-2xl font-black text-white mt-1">--:--</div>
+              <div id="pr-pace-swim-1900" class="text-xs text-cyan-400 font-semibold mt-0.5">-- /100m</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-swim-1900" class="text-xs text-slate-300 font-medium truncate">Aucun temps</p>
+              <span id="pr-date-swim-1900" class="text-[10px] text-slate-500">Intermédiaire Triathlon L</span>
+            </div>
+          </div>
+
+          <!-- 3800 / 3900m -->
+          <div class="bg-slate-800/70 border border-slate-700/70 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute -right-2 -top-2 w-16 h-16 bg-cyan-500/10 rounded-full flex items-end justify-start pl-2 pb-2 text-cyan-500/20 text-xl font-black">3.8k</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ironman / XXL (3800-3900 m)</span>
+              <div id="pr-time-swim-3800" class="text-2xl font-black text-white mt-1">--:--</div>
+              <div id="pr-pace-swim-3800" class="text-xs text-cyan-400 font-semibold mt-0.5">-- /100m</div>
+            </div>
+            <div class="pt-3 mt-3 border-t border-slate-700/50">
+              <p id="pr-race-swim-3800" class="text-xs text-slate-300 font-medium truncate">Aucun temps</p>
+              <span id="pr-date-swim-3800" class="text-[10px] text-slate-500">Intermédiaire Ironman</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- ONGLET 3: FORMULAIRE D'AJOUT -->
+    <!-- ==================== ONGLET 4: FORMULAIRE D'AJOUT ==================== -->
     <section id="view-add" class="tab-view max-w-2xl mx-auto space-y-6 hidden">
       <div class="flex justify-between items-center">
         <h2 id="form-title" class="text-2xl font-bold">Enregistrer une Course</h2>
@@ -158,7 +318,8 @@
 
         <div>
           <label class="block text-xs font-medium text-slate-300 mb-1">Nom de l'épreuve *</label>
-          <input type="text" id="form-name" required placeholder="ex: Marathon de Paris, Trail des Lucioles" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+          <input type="text" id="form-name" required placeholder="ex: Marathon de Paris, Triathlon d'Annecy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+          <p class="text-[10px] text-slate-500 mt-1">Indiquez le même nom chaque année pour activer le comparateur multi-éditions !</p>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -179,17 +340,16 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Distance Totale (Km) *</label>
-            <input type="number" step="0.01" id="form-distance" required placeholder="42.195" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+            <input type="number" step="0.01" id="form-distance" required placeholder="ex: 10, 21.1, 42.195, 113..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Dénivelé D+ (m)</label>
-            <input type="number" id="form-elevation" placeholder="ex: 1200" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+            <input type="number" id="form-elevation" placeholder="ex: 150, 1100..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
           </div>
         </div>
 
-        <!-- Temps Total -->
-        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700/50">
-          <label class="block text-xs font-medium text-slate-300 mb-2">Temps Total (HH : MM : SS) *</label>
+        <div class="bg-slate-900/50 p-3.5 rounded-xl border border-slate-700/50 space-y-2">
+          <label class="block text-xs font-medium text-slate-300">Temps Total Officiel (HH : MM : SS) *</label>
           <div class="grid grid-cols-3 gap-2">
             <input type="number" id="form-time-h" min="0" placeholder="Heures" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-sm">
             <input type="number" id="form-time-m" min="0" max="59" placeholder="Minutes" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-center text-sm">
@@ -197,34 +357,51 @@
           </div>
         </div>
 
-        <!-- Champs spécifiques Triathlon -->
-        <div id="triathlon-fields" class="space-y-3 bg-indigo-950/20 p-3 rounded-xl border border-indigo-800/30 hidden">
-          <div class="text-xs font-semibold text-indigo-400">Détails Triathlon (Optionnel)</div>
-          <div class="grid grid-cols-3 gap-2 text-xs">
+        <!-- ==================== TEMPS INTERMÉDIAIRES TRIATHLON ==================== -->
+        <div id="triathlon-fields" class="space-y-3 bg-indigo-950/20 p-4 rounded-xl border border-indigo-800/40 hidden">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
+              <i class="fas fa-swimmer"></i> Intermédiaires Triathlon
+            </span>
+            <span class="text-[10px] text-slate-400">Format : MM:SS ou HH:MM:SS</span>
+          </div>
+
+          <!-- Format spécifique de natation pour les PRs -->
+          <div>
+            <label class="block text-[11px] text-slate-300 font-medium mb-1">Distance Natation (pour vos records) :</label>
+            <select id="form-tri-swim-dist" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
+              <option value="none">Autre distance</option>
+              <option value="750">Format S (750 m)</option>
+              <option value="1500">Format M / Olympique (1500 m)</option>
+              <option value="1900">Format L / 70.3 (1900 m)</option>
+              <option value="3800">Format XXL / Ironman (3800 - 3900 m)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-5 gap-1.5 text-[10px]">
             <div>
-              <label class="text-slate-400 mb-1 block">Natation</label>
-              <input type="text" id="form-tri-swim" placeholder="mm:ss" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center">
+              <label class="text-slate-400 mb-1 block text-center">Natation</label>
+              <input type="text" id="form-tri-swim" placeholder="32:30" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs">
             </div>
             <div>
-              <label class="text-slate-400 mb-1 block">T1</label>
-              <input type="text" id="form-tri-t1" placeholder="mm:ss" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center">
+              <label class="text-slate-400 mb-1 block text-center">T1</label>
+              <input type="text" id="form-tri-t1" placeholder="02:40" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs">
             </div>
             <div>
-              <label class="text-slate-400 mb-1 block">Vélo</label>
-              <input type="text" id="form-tri-bike" placeholder="hh:mm:ss" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center">
+              <label class="text-slate-400 mb-1 block text-center">Vélo</label>
+              <input type="text" id="form-tri-bike" placeholder="2:38:00" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs">
             </div>
             <div>
-              <label class="text-slate-400 mb-1 block">T2</label>
-              <input type="text" id="form-tri-t2" placeholder="mm:ss" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center">
+              <label class="text-slate-400 mb-1 block text-center">T2</label>
+              <input type="text" id="form-tri-t2" placeholder="01:50" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs">
             </div>
-            <div class="col-span-2">
-              <label class="text-slate-400 mb-1 block">Course à pied</label>
-              <input type="text" id="form-tri-run" placeholder="hh:mm:ss" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center">
+            <div>
+              <label class="text-slate-400 mb-1 block text-center">Course</label>
+              <input type="text" id="form-tri-run" placeholder="1:30:00" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-xs">
             </div>
           </div>
         </div>
 
-        <!-- Classement & Remarques -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Classement Scratch</label>
@@ -232,13 +409,13 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Lieu</label>
-            <input type="text" id="form-location" placeholder="ex: Paris, France" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
+            <input type="text" id="form-location" placeholder="ex: Paris, Annecy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Notes / Impressions</label>
-          <textarea id="form-notes" rows="2" placeholder="Sensations, météo, alimentation..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500"></textarea>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Notes / Sensations</label>
+          <textarea id="form-notes" rows="2" placeholder="Météo, sensations, ravitaillement, matériel..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm outline-none focus:border-indigo-500"></textarea>
         </div>
 
         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-indigo-600/30">
@@ -247,12 +424,14 @@
       </form>
     </section>
 
-    <!-- ONGLET 4: JOURNAL DES COURSES -->
+    <!-- ==================== ONGLET 5: JOURNAL DES COURSES ==================== -->
     <section id="view-journal" class="tab-view space-y-4 hidden">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <h2 class="text-2xl font-bold">Journal des Courses</h2>
+        <div>
+          <h2 class="text-2xl font-bold">Journal des Courses</h2>
+          <p class="text-xs text-slate-400">Toutes vos épreuves enregistrées par ordre chronologique</p>
+        </div>
         
-        <!-- Filtres -->
         <div class="flex items-center gap-2 w-full sm:w-auto">
           <input type="text" id="journal-search" oninput="renderJournal()" placeholder="Rechercher..." class="bg-slate-800 border border-slate-700 text-xs text-white rounded-xl px-3 py-2 outline-none focus:border-indigo-500 w-full sm:w-48">
           <select id="journal-filter-sport" onchange="renderJournal()" class="bg-slate-800 border border-slate-700 text-xs text-white rounded-xl px-2 py-2 outline-none">
@@ -264,26 +443,28 @@
         </div>
       </div>
 
-      <!-- Liste des cartes -->
-      <div id="journal-list" class="space-y-3">
-        <!-- Injecté en JS -->
-      </div>
+      <div id="journal-list" class="space-y-3"></div>
     </section>
 
-    <!-- ONGLET 5: RÉGLAGES & DONNÉES -->
+    <!-- ==================== ONGLET 6: RÉGLAGES & DONNÉES ==================== -->
     <section id="view-settings" class="tab-view max-w-2xl mx-auto space-y-6 hidden">
-      <h2 class="text-2xl font-bold">Réglages & Données</h2>
+      <div>
+        <h2 class="text-2xl font-bold">Réglages & Données</h2>
+        <p class="text-xs text-slate-400">Sauvegardez vos données et transférez-les facilement entre vos appareils.</p>
+      </div>
 
       <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-4">
-        <h3 class="text-base font-semibold">Sauvegarde & Exportation</h3>
-        <p class="text-xs text-slate-400">Vos données sont stockées localement sur votre téléphone. Vous pouvez exporter une sauvegarde au format JSON à tout moment.</p>
+        <h3 class="text-base font-semibold flex items-center gap-2">
+          <i class="fas fa-file-export text-indigo-400"></i> Sauvegarde & Transfert (JSON)
+        </h3>
+        <p class="text-xs text-slate-400">Pour synchroniser vos courses entre votre ordinateur et votre smartphone, exportez le fichier JSON sur le premier appareil puis importez-le sur le second.</p>
         
         <div class="flex flex-wrap gap-3">
-          <button onclick="exportData()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-4 py-2.5 rounded-xl font-medium flex items-center gap-2">
-            <i class="fas fa-download"></i> Exporter JSON
+          <button onclick="exportData()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 transition">
+            <i class="fas fa-download text-emerald-400"></i> Exporter JSON
           </button>
-          <label class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 cursor-pointer">
-            <i class="fas fa-upload"></i> Importer JSON
+          <label class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 cursor-pointer transition">
+            <i class="fas fa-upload text-sky-400"></i> Importer JSON
             <input type="file" id="import-file" onchange="importData(event)" accept=".json" class="hidden">
           </label>
         </div>
@@ -292,10 +473,10 @@
       <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 space-y-4">
         <h3 class="text-base font-semibold">Réinitialisation</h3>
         <div class="flex flex-wrap gap-3">
-          <button onclick="loadDemoData()" class="bg-indigo-900/40 hover:bg-indigo-800/50 text-indigo-300 border border-indigo-700/50 text-xs px-4 py-2.5 rounded-xl font-medium">
-            Charger les données de démonstration
+          <button onclick="loadDemoData()" class="bg-indigo-900/40 hover:bg-indigo-800/50 text-indigo-300 border border-indigo-700/50 text-xs px-4 py-2.5 rounded-xl font-medium transition">
+            Recharger les données de démonstration
           </button>
-          <button onclick="clearAllData()" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 text-xs px-4 py-2.5 rounded-xl font-medium">
+          <button onclick="clearAllData()" class="bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 text-xs px-4 py-2.5 rounded-xl font-medium transition">
             Tout effacer
           </button>
         </div>
@@ -304,30 +485,34 @@
 
   </main>
 
-  <!-- Navigation Mobile Inférieure -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-800 grid grid-cols-4 py-2 px-1 text-center">
+  <!-- Navigation Mobile Inférieure (5 onglets natifs) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-800 grid grid-cols-5 py-2 px-1 text-center shadow-2xl">
     <button onclick="switchTab('stats')" id="mob-tab-stats" class="mob-nav-btn text-slate-400 flex flex-col items-center gap-1">
-      <i class="fas fa-chart-line text-lg"></i>
-      <span class="text-[10px]">Stats</span>
+      <i class="fas fa-chart-line text-base"></i>
+      <span class="text-[9px]">Stats</span>
     </button>
     <button onclick="switchTab('compare')" id="mob-tab-compare" class="mob-nav-btn text-slate-400 flex flex-col items-center gap-1">
-      <i class="fas fa-code-compare text-lg"></i>
-      <span class="text-[10px]">Même Course</span>
+      <i class="fas fa-code-compare text-base"></i>
+      <span class="text-[9px]">Même Course</span>
+    </button>
+    <button onclick="switchTab('records')" id="mob-tab-records" class="mob-nav-btn text-slate-400 flex flex-col items-center gap-1">
+      <i class="fas fa-trophy text-base text-amber-400"></i>
+      <span class="text-[9px]">Records</span>
     </button>
     <button onclick="switchTab('journal')" id="mob-tab-journal" class="mob-nav-btn text-slate-400 flex flex-col items-center gap-1">
-      <i class="fas fa-list text-lg"></i>
-      <span class="text-[10px]">Journal</span>
+      <i class="fas fa-list text-base"></i>
+      <span class="text-[9px]">Journal</span>
     </button>
     <button onclick="switchTab('settings')" id="mob-tab-settings" class="mob-nav-btn text-slate-400 flex flex-col items-center gap-1">
-      <i class="fas fa-cog text-lg"></i>
-      <span class="text-[10px]">Réglages</span>
+      <i class="fas fa-cog text-base"></i>
+      <span class="text-[9px]">Réglages</span>
     </button>
   </nav>
 
-  <!-- JS APPLICATION -->
+  <!-- ==================== JAVASCRIPT COMPLET SANS DÉPENDANCE BLOQUANTE ==================== -->
   <script>
-    // --- DONNÉES & DÉMONSTRATION ---
-    const DEMO_RACES = [
+    // Jeu de données démo riche avec plusieurs éditions & triathlons
+    var DEMO_RACES = [
       {
         id: "1",
         name: "Marathon de Paris",
@@ -335,10 +520,10 @@
         date: "2023-04-02",
         distance: 42.195,
         elevation: 150,
-        timeSeconds: 12900,
+        timeSeconds: 12900, // 3h 35m 00s
         rank: "3420/45000",
         location: "Paris, France",
-        notes: "Très bonnes sensations sur la première moitié."
+        notes: "Premier marathon !"
       },
       {
         id: "2",
@@ -347,257 +532,317 @@
         date: "2025-04-13",
         distance: 42.195,
         elevation: 150,
-        timeSeconds: 12180,
+        timeSeconds: 12180, // 3h 23m 00s (-12 min)
         rank: "2150/48000",
         location: "Paris, France",
-        notes: "Nouveau PR ! Météo idéale."
+        notes: "Nouveau record sur le marathon, negative split !"
       },
       {
         id: "3",
-        name: "Trail des Lucioles",
-        sport: "trail",
-        date: "2023-10-14",
-        distance: 25.0,
-        elevation: 1100,
-        timeSeconds: 9900,
-        rank: "85/400",
-        location: "Saint-Étienne",
-        notes: "Nuit froide, terrain très boueux."
+        name: "10km de la Braderie",
+        sport: "running",
+        date: "2024-09-07",
+        distance: 10.0,
+        elevation: 20,
+        timeSeconds: 2460, // 41m 00s
+        rank: "88/1500",
+        location: "Lille",
+        notes: "Superbe allure constante."
       },
       {
         id: "4",
-        name: "Trail des Lucioles",
-        sport: "trail",
-        date: "2024-10-12",
-        distance: 25.0,
-        elevation: 1100,
-        timeSeconds: 9420,
-        rank: "52/450",
-        location: "Saint-Étienne",
-        notes: "Gestion de course au top."
+        name: "Semi-Marathon de Boulogne",
+        sport: "running",
+        date: "2024-11-17",
+        distance: 21.1,
+        elevation: 40,
+        timeSeconds: 5640, // 1h 34m 00s
+        rank: "450/7000",
+        location: "Boulogne-Billancourt",
+        notes: "Parcours plat et très rapide."
       },
       {
         id: "5",
         name: "Trail des Lucioles",
         sport: "trail",
-        date: "2025-10-11",
+        date: "2023-10-14",
         distance: 25.0,
         elevation: 1100,
-        timeSeconds: 9180,
-        rank: "38/500",
+        timeSeconds: 9900, // 2h 45m 00s
+        rank: "85/400",
         location: "Saint-Étienne",
-        notes: "Troisième participation, superbe forme !"
+        notes: "Terrain boueux et glissant."
       },
       {
         id: "6",
-        name: "Triathlon L d'Annecy",
-        sport: "triathlon",
-        date: "2023-06-25",
-        distance: 113.0,
-        elevation: 1400,
-        timeSeconds: 18000,
-        rank: "120/800",
-        location: "Annecy",
-        triDetails: { swim: "35:00", t1: "03:12", bike: "2:45:00", t2: "02:00", run: "1:34:48" },
-        notes: "Grave chaud sur la course à pied."
+        name: "Trail des Lucioles",
+        sport: "trail",
+        date: "2024-10-12",
+        distance: 25.0,
+        elevation: 1100,
+        timeSeconds: 9420, // 2h 37m 00s (-8 min)
+        rank: "52/450",
+        location: "Saint-Étienne",
+        notes: "Meilleure gestion dans les montées."
       },
       {
         id: "7",
         name: "Triathlon L d'Annecy",
         sport: "triathlon",
+        date: "2023-06-25",
+        distance: 113.0,
+        elevation: 1400,
+        timeSeconds: 18000, // 5h 00m 00s
+        rank: "120/800",
+        location: "Annecy",
+        triDetails: {
+          swimDist: "1900",
+          swim: "35:10",
+          t1: "03:15",
+          bike: "2:45:00",
+          t2: "02:05",
+          run: "1:34:30"
+        },
+        notes: "Chaud sur la course à pied."
+      },
+      {
+        id: "8",
+        name: "Triathlon L d'Annecy",
+        sport: "triathlon",
         date: "2025-06-22",
         distance: 113.0,
         elevation: 1400,
-        timeSeconds: 17100,
+        timeSeconds: 16980, // 4h 43m 00s (-17 min)
         rank: "64/850",
         location: "Annecy",
-        triDetails: { swim: "32:30", t1: "02:40", bike: "2:38:00", t2: "01:50", run: "1:30:00" },
-        notes: "Gros progrès en vélo et natation !"
+        triDetails: {
+          swimDist: "1900",
+          swim: "32:20",
+          t1: "02:30",
+          bike: "2:37:10",
+          t2: "01:45",
+          run: "1:29:15"
+        },
+        notes: "Gros progrès en vélo et gestion des transitions !"
       }
     ];
 
-    let races = JSON.parse(localStorage.getItem('racetracker_races')) || DEMO_RACES;
-    let monthlyChart = null;
-    let sportsChart = null;
-    let compareChart = null;
+    var races = JSON.parse(localStorage.getItem('racetracker_races')) || DEMO_RACES;
+    var currentTab = 'stats';
+
+    var monthlyChart = null;
+    var sportsChart = null;
+    var compareChart = null;
+    var triBreakdownChart = null;
 
     // --- NAVIGATION ---
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
-      const activeView = document.getElementById('view-' + tabId);
+      currentTab = tabId;
+      var views = document.querySelectorAll('.tab-view');
+      for (var i = 0; i < views.length; i++) views[i].classList.add('hidden');
+      
+      var activeView = document.getElementById('view-' + tabId);
       if (activeView) activeView.classList.remove('hidden');
 
-      // Styles boutons Desktop
-      document.querySelectorAll('.desk-nav-btn').forEach(btn => btn.classList.remove('bg-indigo-600', 'text-white'));
-      const activeDesk = document.getElementById('desk-tab-' + tabId);
-      if(activeDesk) activeDesk.classList.add('bg-indigo-600', 'text-white');
+      // Boutons Desktop
+      var deskBtns = document.querySelectorAll('.desk-nav-btn');
+      for (var j = 0; j < deskBtns.length; j++) deskBtns[j].classList.remove('bg-indigo-600', 'text-white');
+      var activeDesk = document.getElementById('desk-tab-' + tabId);
+      if (activeDesk) activeDesk.classList.add('bg-indigo-600', 'text-white');
 
-      // Styles boutons Mobile
-      document.querySelectorAll('.mob-nav-btn').forEach(btn => btn.classList.replace('text-indigo-400', 'text-slate-400'));
-      const activeMob = document.getElementById('mob-tab-' + tabId);
-      if(activeMob) activeMob.classList.replace('text-slate-400', 'text-indigo-400');
+      // Boutons Mobile
+      var mobBtns = document.querySelectorAll('.mob-nav-btn');
+      for (var k = 0; k < mobBtns.length; k++) mobBtns[k].classList.replace('text-indigo-400', 'text-slate-400');
+      var activeMob = document.getElementById('mob-tab-' + tabId);
+      if (activeMob) activeMob.classList.replace('text-slate-400', 'text-indigo-400');
 
-      if(tabId === 'stats') renderStats();
-      if(tabId === 'compare') setupCompareSelect();
-      if(tabId === 'journal') renderJournal();
+      if (tabId === 'stats') renderStats();
+      if (tabId === 'compare') setupCompareSelect();
+      if (tabId === 'records') calculateAndRenderPersonalRecords();
+      if (tabId === 'journal') renderJournal();
     }
 
-    // --- LOGIQUE UTILITAIRE ---
-    function saveRaces() {
+    function saveLocalData() {
       localStorage.setItem('racetracker_races', JSON.stringify(races));
     }
 
+    // --- UTILITAIRES DE TEMPS ET CONVERSIONS ---
     function formatTime(seconds) {
-      const h = Math.floor(seconds / 3600);
-      const m = Math.floor((seconds % 3600) / 60);
-      const s = seconds % 60;
-      if (h > 0) return h + 'h ' + m.toString().padStart(2, '0') + 'm ' + s.toString().padStart(2, '0') + 's';
-      return m + 'm ' + s.toString().padStart(2, '0') + 's';
+      if (isNaN(seconds) || seconds === null || seconds === undefined) return "-";
+      var h = Math.floor(seconds / 3600);
+      var m = Math.floor((seconds % 3600) / 60);
+      var s = Math.round(seconds % 60);
+      if (h > 0) return h + 'h ' + (m < 10 ? '0' : '') + m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+      return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+    }
+
+    // Convertit "HH:MM:SS" ou "MM:SS" en secondes
+    function parseTimeToSeconds(timeStr) {
+      if (!timeStr) return 0;
+      var parts = timeStr.toString().trim().split(':').map(Number);
+      if (parts.some(isNaN)) return 0;
+      if (parts.length === 3) return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+      if (parts.length === 2) return (parts[0] * 60) + parts[1];
+      if (parts.length === 1) return parts[0];
+      return 0;
     }
 
     function calculatePace(distanceKm, seconds) {
-      if (!distanceKm || distanceKm <= 0) return "-";
-      const paceSecondsPerKm = seconds / distanceKm;
-      const min = Math.floor(paceSecondsPerKm / 60);
-      const sec = Math.round(paceSecondsPerKm % 60);
-      const kmh = (distanceKm / (seconds / 3600)).toFixed(1);
-      return min + ':' + sec.toString().padStart(2, '0') + ' /km (' + kmh + ' km/h)';
+      if (!distanceKm || distanceKm <= 0 || !seconds) return "-";
+      var paceSecondsPerKm = seconds / distanceKm;
+      var min = Math.floor(paceSecondsPerKm / 60);
+      var sec = Math.round(paceSecondsPerKm % 60);
+      var kmh = (distanceKm / (seconds / 3600)).toFixed(1);
+      return min + ':' + (sec < 10 ? '0' : '') + sec + ' /km (' + kmh + ' km/h)';
+    }
+
+    function calculateSwimPace100m(distanceMeters, seconds) {
+      if (!distanceMeters || distanceMeters <= 0 || !seconds) return "-";
+      var paceSeconds100m = (seconds / distanceMeters) * 100;
+      var min = Math.floor(paceSeconds100m / 60);
+      var sec = Math.round(paceSeconds100m % 60);
+      return min + ':' + (sec < 10 ? '0' : '') + sec + ' /100m';
     }
 
     function getSportBadge(sport) {
-      if(sport === 'running') return '<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] px-2.5 py-1 rounded-full font-medium"><i class="fas fa-running mr-1"></i> Course</span>';
-      if(sport === 'trail') return '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] px-2.5 py-1 rounded-full font-medium"><i class="fas fa-mountain mr-1"></i> Trail</span>';
+      if (sport === 'running') return '<span class="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] px-2.5 py-1 rounded-full font-medium"><i class="fas fa-running mr-1"></i> Course</span>';
+      if (sport === 'trail') return '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] px-2.5 py-1 rounded-full font-medium"><i class="fas fa-mountain mr-1"></i> Trail</span>';
       return '<span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[11px] px-2.5 py-1 rounded-full font-medium"><i class="fas fa-swimmer mr-1"></i> Triathlon</span>';
     }
 
-    // --- RENDER 1: STATS & DASHBOARD ---
+    // --- ONGLET 1: STATS & DASHBOARD ---
     function renderStats() {
-      const yearSelect = document.getElementById('stats-year-select');
-      const years = [...new Set(races.map(r => new Date(r.date).getFullYear()))].sort((a,b) => b-a);
+      var yearSelect = document.getElementById('stats-year-select');
+      var years = [];
+      for (var i = 0; i < races.length; i++) {
+        var y = new Date(races[i].date).getFullYear();
+        if (years.indexOf(y) === -1) years.push(y);
+      }
+      years.sort(function(a, b) { return b - a; });
+
+      var currentSelectedYear = yearSelect.value || (years[0] ? years[0].toString() : new Date().getFullYear().toString());
       
-      const currentSelectedYear = yearSelect.value || (years[0] ? years[0].toString() : new Date().getFullYear().toString());
-      yearSelect.innerHTML = years.map(y => '<option value="' + y + '" ' + (y.toString() === currentSelectedYear ? 'selected' : '') + '>' + y + '</option>').join('');
+      var optionsHtml = '';
+      for (var j = 0; j < years.length; j++) {
+        optionsHtml += '<option value="' + years[j] + '" ' + (years[j].toString() === currentSelectedYear ? 'selected' : '') + '>' + years[j] + '</option>';
+      }
+      yearSelect.innerHTML = optionsHtml;
 
-      const selectedYear = parseInt(yearSelect.value) || new Date().getFullYear();
-      const prevYear = selectedYear - 1;
+      var selectedYear = parseInt(yearSelect.value) || new Date().getFullYear();
+      var prevYear = selectedYear - 1;
 
-      const currentYearRaces = races.filter(r => new Date(r.date).getFullYear() === selectedYear);
-      const prevYearRaces = races.filter(r => new Date(r.date).getFullYear() === prevYear);
+      var currentYearRaces = races.filter(function(r) { return new Date(r.date).getFullYear() === selectedYear; });
+      var prevYearRaces = races.filter(function(r) { return new Date(r.date).getFullYear() === prevYear; });
 
-      // Calcul KPIs
-      const curDist = currentYearRaces.reduce((acc, r) => acc + r.distance, 0);
-      const prevDist = prevYearRaces.reduce((acc, r) => acc + r.distance, 0);
-      
-      const curElev = currentYearRaces.reduce((acc, r) => acc + (r.elevation || 0), 0);
-      const prevElev = prevYearRaces.reduce((acc, r) => acc + (r.elevation || 0), 0);
+      var curDist = currentYearRaces.reduce(function(acc, r) { return acc + r.distance; }, 0);
+      var prevDist = prevYearRaces.reduce(function(acc, r) { return acc + r.distance; }, 0);
+      var curElev = currentYearRaces.reduce(function(acc, r) { return acc + (r.elevation || 0); }, 0);
+      var prevElev = prevYearRaces.reduce(function(acc, r) { return acc + (r.elevation || 0); }, 0);
 
       document.getElementById('kpi-total-races').innerText = currentYearRaces.length;
       document.getElementById('kpi-total-races-diff').innerText = (currentYearRaces.length - prevYearRaces.length) + ' vs ' + prevYear;
-      
       document.getElementById('kpi-total-dist').innerText = curDist.toFixed(1) + ' km';
-      const distDiff = curDist - prevDist;
-      document.getElementById('kpi-total-dist-diff').innerText = (distDiff >= 0 ? '+' : '') + distDiff.toFixed(1) + ' km vs ' + prevYear;
-
+      document.getElementById('kpi-total-dist-diff').innerText = ((curDist - prevDist) >= 0 ? '+' : '') + (curDist - prevDist).toFixed(1) + ' km vs ' + prevYear;
       document.getElementById('kpi-total-elevation').innerText = curElev + ' m';
-      const elevDiff = curElev - prevElev;
-      document.getElementById('kpi-total-elevation-diff').innerText = (elevDiff >= 0 ? '+' : '') + elevDiff + ' m vs ' + prevYear;
+      document.getElementById('kpi-total-elevation-diff').innerText = ((curElev - prevElev) >= 0 ? '+' : '') + (curElev - prevElev) + ' m vs ' + prevYear;
 
-      const podiums = currentYearRaces.filter(r => r.rank && (r.rank.startsWith('1/') || r.rank.startsWith('2/') || r.rank.startsWith('3/'))).length;
+      var podiums = currentYearRaces.filter(function(r) { return r.rank && (r.rank.indexOf('1/') === 0 || r.rank.indexOf('2/') === 0 || r.rank.indexOf('3/') === 0); }).length;
       document.getElementById('kpi-podiums').innerText = podiums;
 
       renderCharts(currentYearRaces);
     }
 
     function renderCharts(yearRaces) {
-      const monthlyDist = Array(12).fill(0);
-      yearRaces.forEach(r => {
-        const month = new Date(r.date).getMonth();
-        monthlyDist[month] += r.distance;
-      });
+      var monthlyDist = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      for (var i = 0; i < yearRaces.length; i++) {
+        var m = new Date(yearRaces[i].date).getMonth();
+        monthlyDist[m] += yearRaces[i].distance;
+      }
 
-      const ctx1 = document.getElementById('chart-monthly-volume').getContext('2d');
+      var ctx1 = document.getElementById('chart-monthly-volume').getContext('2d');
       if (monthlyChart) monthlyChart.destroy();
       monthlyChart = new Chart(ctx1, {
         type: 'bar',
         data: {
           labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
-          datasets: [{
-            label: 'Distance (km)',
-            data: monthlyDist,
-            backgroundColor: '#6366f1',
-            borderRadius: 6
-          }]
+          datasets: [{ label: 'Km', data: monthlyDist, backgroundColor: '#6366f1', borderRadius: 6 }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      const sportsCount = { running: 0, trail: 0, triathlon: 0 };
-      yearRaces.forEach(r => sportsCount[r.sport] = (sportsCount[r.sport] || 0) + 1);
+      var sportsCount = { running: 0, trail: 0, triathlon: 0 };
+      for (var j = 0; j < yearRaces.length; j++) {
+        sportsCount[yearRaces[j].sport] = (sportsCount[yearRaces[j].sport] || 0) + 1;
+      }
 
-      const ctx2 = document.getElementById('chart-sports-repartition').getContext('2d');
+      var ctx2 = document.getElementById('chart-sports-repartition').getContext('2d');
       if (sportsChart) sportsChart.destroy();
       sportsChart = new Chart(ctx2, {
         type: 'doughnut',
         data: {
           labels: ['Course', 'Trail', 'Triathlon'],
-          datasets: [{
-            data: [sportsCount.running, sportsCount.trail, sportsCount.triathlon],
-            backgroundColor: ['#3b82f6', '#10b981', '#a855f7']
-          }]
+          datasets: [{ data: [sportsCount.running, sportsCount.trail, sportsCount.triathlon], backgroundColor: ['#3b82f6', '#10b981', '#a855f7'] }]
         },
         options: { responsive: true, maintainAspectRatio: false }
       });
     }
 
-    // --- RENDER 2: COMPARATEUR "MÊME COURSE" ---
+    // --- ONGLET 2: COMPARATEUR "MÊME COURSE" AVEC SPLITS TRIATHLON ---
     function setupCompareSelect() {
-      const select = document.getElementById('compare-race-select');
-      const raceNames = [...new Set(races.map(r => r.name.trim()))].sort();
-      
-      if(raceNames.length === 0) {
-        select.innerHTML = '<option value="">Aucune course disponible</option>';
-        return;
+      var select = document.getElementById('compare-race-select');
+      var names = [];
+      for (var i = 0; i < races.length; i++) {
+        var n = races[i].name.trim();
+        if (names.indexOf(n) === -1) names.push(n);
       }
+      names.sort();
 
-      select.innerHTML = '<option value="">-- Sélectionnez une course --</option>' + 
-        raceNames.map(name => {
-          const count = races.filter(r => r.name.trim().toLowerCase() === name.toLowerCase()).length;
-          return '<option value="' + name + '">' + name + ' (' + count + ' édition' + (count > 1 ? 's' : '') + ')</option>';
-        }).join('');
+      if (names.length === 0) { select.innerHTML = '<option value="">Aucune course enregistrée</option>'; return; }
+
+      var html = '<option value="">-- Sélectionnez une course à comparer --</option>';
+      for (var j = 0; j < names.length; j++) {
+        var count = races.filter(function(r) { return r.name.trim().toLowerCase() === names[j].toLowerCase(); }).length;
+        html += '<option value="' + names[j] + '">' + names[j] + ' (' + count + ' participation' + (count > 1 ? 's' : '') + ')</option>';
+      }
+      select.innerHTML = html;
     }
 
     function renderRaceComparison() {
-      const raceName = document.getElementById('compare-race-select').value;
-      const resultsContainer = document.getElementById('compare-results-container');
-      const emptyState = document.getElementById('compare-empty-state');
+      var raceName = document.getElementById('compare-race-select').value;
+      var resultsContainer = document.getElementById('compare-results-container');
+      var emptyState = document.getElementById('compare-empty-state');
+      var triChartsBox = document.getElementById('compare-triathlon-charts-box');
 
       if (!raceName) {
         resultsContainer.classList.add('hidden');
         emptyState.classList.remove('hidden');
         return;
       }
-
       resultsContainer.classList.remove('hidden');
       emptyState.classList.add('hidden');
 
-      const editions = races
-        .filter(r => r.name.trim().toLowerCase() === raceName.toLowerCase())
-        .sort((a,b) => new Date(a.date) - new Date(b.date));
+      // Filtrer et trier par ordre chronologique
+      var editions = races.filter(function(r) { return r.name.trim().toLowerCase() === raceName.toLowerCase(); });
+      editions.sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
 
-      const labels = editions.map(e => new Date(e.date).getFullYear().toString());
-      const timesMinutes = editions.map(e => (e.timeSeconds / 60).toFixed(1));
+      var isTriathlon = editions.some(function(e) { return e.sport === 'triathlon'; });
+      document.getElementById('compare-discipline-badge').innerHTML = getSportBadge(editions[0].sport);
 
-      const ctx = document.getElementById('chart-race-comparison').getContext('2d');
+      var labels = editions.map(function(e) { return new Date(e.date).getFullYear().toString(); });
+      var timesMinutes = editions.map(function(e) { return (e.timeSeconds / 60).toFixed(1); });
+
+      // 1. Graphique d'évolution du temps total
+      var ctx = document.getElementById('chart-race-comparison').getContext('2d');
       if (compareChart) compareChart.destroy();
       compareChart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: labels,
           datasets: [{
-            label: 'Temps (minutes)',
+            label: 'Temps Total (min)',
             data: timesMinutes,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
             fill: true,
             tension: 0.2,
             pointRadius: 6,
@@ -610,35 +855,102 @@
           plugins: {
             tooltip: {
               callbacks: {
-                label: (ctx) => 'Temps: ' + formatTime(editions[ctx.dataIndex].timeSeconds)
+                label: function(c) { return " Chrono: " + formatTime(editions[c.dataIndex].timeSeconds); }
               }
             }
           }
         }
       });
 
-      const listContainer = document.getElementById('compare-editions-list');
-      let html = '';
+      // 2. Si Triathlon : Graphique détaillé des segments (Natation, T1, Vélo, T2, CAP)
+      if (isTriathlon) {
+        triChartsBox.classList.remove('hidden');
+        var swimData = editions.map(function(e) { return e.triDetails ? (parseTimeToSeconds(e.triDetails.swim) / 60).toFixed(1) : 0; });
+        var t1Data = editions.map(function(e) { return e.triDetails ? (parseTimeToSeconds(e.triDetails.t1) / 60).toFixed(1) : 0; });
+        var bikeData = editions.map(function(e) { return e.triDetails ? (parseTimeToSeconds(e.triDetails.bike) / 60).toFixed(1) : 0; });
+        var t2Data = editions.map(function(e) { return e.triDetails ? (parseTimeToSeconds(e.triDetails.t2) / 60).toFixed(1) : 0; });
+        var runData = editions.map(function(e) { return e.triDetails ? (parseTimeToSeconds(e.triDetails.run) / 60).toFixed(1) : 0; });
 
-      const bestEdition = [...editions].sort((a,b) => a.timeSeconds - b.timeSeconds)[0];
-
-      editions.reverse().forEach((edition, idx) => {
-        const year = new Date(edition.date).getFullYear();
-        const isBest = edition.id === bestEdition.id;
-        
-        const previousEdition = editions[idx + 1];
-        let deltaHtml = '';
-        
-        if (previousEdition) {
-          const diffSeconds = edition.timeSeconds - previousEdition.timeSeconds;
-          const percent = ((Math.abs(diffSeconds) / previousEdition.timeSeconds) * 100).toFixed(1);
-          if (diffSeconds < 0) {
-            deltaHtml = '<span class="text-emerald-400 text-xs font-semibold"><i class="fas fa-arrow-down mr-1"></i>-' + formatTime(Math.abs(diffSeconds)) + ' (-' + percent + '%) vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
-          } else if (diffSeconds > 0) {
-            deltaHtml = '<span class="text-rose-400 text-xs font-semibold"><i class="fas fa-arrow-up mr-1"></i>+' + formatTime(diffSeconds) + ' (+' + percent + '%) vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
-          } else {
-            deltaHtml = '<span class="text-slate-400 text-xs font-semibold">Temps identique vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
+        var ctxTri = document.getElementById('chart-triathlon-breakdown').getContext('2d');
+        if (triBreakdownChart) triBreakdownChart.destroy();
+        triBreakdownChart = new Chart(ctxTri, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Natation', data: swimData, backgroundColor: '#06b6d4', borderRadius: 4 },
+              { label: 'T1', data: t1Data, backgroundColor: '#94a3b8', borderRadius: 4 },
+              { label: 'Vélo', data: bikeData, backgroundColor: '#f59e0b', borderRadius: 4 },
+              { label: 'T2', data: t2Data, backgroundColor: '#64748b', borderRadius: 4 },
+              { label: 'Course', data: runData, backgroundColor: '#10b981', borderRadius: 4 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { stacked: true },
+              y: { stacked: true, title: { display: true, text: 'Minutes' } }
+            }
           }
+        });
+      } else {
+        triChartsBox.classList.add('hidden');
+      }
+
+      // 3. Fiches comparatives détaillées avec comparaison des splits
+      var listContainer = document.getElementById('compare-editions-list');
+      var html = '';
+      var bestEdition = editions.slice().sort(function(a, b) { return a.timeSeconds - b.timeSeconds; })[0];
+      var reversed = editions.slice().reverse();
+
+      for (var i = 0; i < reversed.length; i++) {
+        var edition = reversed[i];
+        var year = new Date(edition.date).getFullYear();
+        var isBest = edition.id === bestEdition.id;
+        var previousEdition = reversed[i + 1]; // édition chronologiquement précédente
+        
+        var globalDeltaHtml = '';
+        var triDeltaHtml = '';
+
+        if (previousEdition) {
+          // Delta Temps Global
+          var diffSeconds = edition.timeSeconds - previousEdition.timeSeconds;
+          var percent = ((Math.abs(diffSeconds) / previousEdition.timeSeconds) * 100).toFixed(1);
+          if (diffSeconds < 0) {
+            globalDeltaHtml = '<span class="text-emerald-400 text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-arrow-down"></i> -' + formatTime(Math.abs(diffSeconds)) + ' (-' + percent + '%) sur le chrono global vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
+          } else if (diffSeconds > 0) {
+            globalDeltaHtml = '<span class="text-rose-400 text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-arrow-up"></i> +' + formatTime(diffSeconds) + ' (+' + percent + '%) sur le chrono global vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
+          } else {
+            globalDeltaHtml = '<span class="text-slate-400 text-xs font-semibold">Temps global identique vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
+          }
+
+          // Si les deux éditions disposent de splits Triathlon, on compare chaque discipline
+          if (edition.sport === 'triathlon' && edition.triDetails && previousEdition.triDetails) {
+            function buildSplitDiff(currentVal, prevVal, label) {
+              var cSec = parseTimeToSeconds(currentVal);
+              var pSec = parseTimeToSeconds(prevVal);
+              if (!cSec || !pSec) return '<div class="text-[11px] text-slate-400"><b class="text-slate-300">' + label + ':</b> ' + (currentVal || '-') + '</div>';
+              var d = cSec - pSec;
+              var badge = d < 0 
+                ? '<span class="text-emerald-400 font-bold ml-1">-' + formatTime(Math.abs(d)) + '</span>'
+                : (d > 0 ? '<span class="text-rose-400 font-bold ml-1">+' + formatTime(d) + '</span>' : '<span class="text-slate-400 ml-1">=</span>');
+              return '<div class="bg-slate-900/80 p-2 rounded-lg border border-slate-700/60 text-center"><span class="text-slate-400 block text-[10px]">' + label + '</span><span class="font-bold text-white text-xs">' + currentVal + '</span><div class="text-[10px] mt-0.5">' + badge + '</div></div>';
+            }
+
+            triDeltaHtml = '<div class="pt-2 border-t border-slate-700/50 space-y-1.5">' +
+              '<span class="text-[10px] font-bold text-sky-400 uppercase tracking-wider block"><i class="fas fa-stopwatch mr-1"></i> Comparatif des Segments Triathlon vs ' + new Date(previousEdition.date).getFullYear() + ' :</span>' +
+              '<div class="grid grid-cols-5 gap-2">' +
+                buildSplitDiff(edition.triDetails.swim, previousEdition.triDetails.swim, 'Natation') +
+                buildSplitDiff(edition.triDetails.t1, previousEdition.triDetails.t1, 'T1') +
+                buildSplitDiff(edition.triDetails.bike, previousEdition.triDetails.bike, 'Vélo') +
+                buildSplitDiff(edition.triDetails.t2, previousEdition.triDetails.t2, 'T2') +
+                buildSplitDiff(edition.triDetails.run, previousEdition.triDetails.run, 'Course') +
+              '</div>' +
+            '</div>';
+          }
+        } else {
+          globalDeltaHtml = '<span class="text-slate-500 text-xs italic">Première participation enregistrée</span>';
         }
 
         html += '<div class="bg-slate-800/60 border ' + (isBest ? 'border-amber-500/50 shadow-lg shadow-amber-500/10' : 'border-slate-700/60') + ' rounded-2xl p-4 space-y-3">' +
@@ -654,63 +966,180 @@
             '</div>' +
 
             '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-700/50">' +
-              '<div><div class="text-[10px] text-slate-400 uppercase">Temps Total</div><div class="text-base font-bold text-white">' + formatTime(edition.timeSeconds) + '</div></div>' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Temps Global</div><div class="text-base font-bold text-white">' + formatTime(edition.timeSeconds) + '</div></div>' +
               '<div><div class="text-[10px] text-slate-400 uppercase">Allure / Vitesse</div><div class="text-xs font-semibold text-slate-200 mt-1">' + calculatePace(edition.distance, edition.timeSeconds) + '</div></div>' +
               '<div><div class="text-[10px] text-slate-400 uppercase">Distance / D+</div><div class="text-xs font-semibold text-slate-200 mt-1">' + edition.distance + ' km ' + (edition.elevation ? '• ' + edition.elevation + 'm D+' : '') + '</div></div>' +
               '<div><div class="text-[10px] text-slate-400 uppercase">Classement</div><div class="text-xs font-semibold text-slate-200 mt-1">' + (edition.rank || 'N/C') + '</div></div>' +
             '</div>' +
-            (deltaHtml ? '<div class="pt-2 border-t border-slate-700/40">' + deltaHtml + '</div>' : '') +
+
+            // Si affichage des intermédiaires sans édition précédente
+            (edition.sport === 'triathlon' && edition.triDetails && !triDeltaHtml ? 
+              '<div class="pt-2 border-t border-slate-700/50">' +
+                '<span class="text-[10px] text-slate-400 uppercase font-semibold block mb-1.5">Temps des segments :</span>' +
+                '<div class="grid grid-cols-5 gap-1.5 text-center text-xs bg-slate-900/60 p-2 rounded-xl border border-slate-700/40">' +
+                  '<div><span class="text-[10px] text-slate-400 block">Nat</span><b class="text-white">' + (edition.triDetails.swim || '-') + '</b></div>' +
+                  '<div><span class="text-[10px] text-slate-400 block">T1</span><b class="text-white">' + (edition.triDetails.t1 || '-') + '</b></div>' +
+                  '<div><span class="text-[10px] text-slate-400 block">Vélo</span><b class="text-white">' + (edition.triDetails.bike || '-') + '</b></div>' +
+                  '<div><span class="text-[10px] text-slate-400 block">T2</span><b class="text-white">' + (edition.triDetails.t2 || '-') + '</b></div>' +
+                  '<div><span class="text-[10px] text-slate-400 block">Course</span><b class="text-white">' + (edition.triDetails.run || '-') + '</b></div>' +
+                '</div>' +
+              '</div>' : '') +
+
+            triDeltaHtml +
+            (globalDeltaHtml ? '<div class="pt-2 border-t border-slate-700/40">' + globalDeltaHtml + '</div>' : '') +
           '</div>';
-      });
+      }
 
       listContainer.innerHTML = html;
     }
 
-    // --- FORMULAIRE ET ÉDITION ---
+    // --- ONGLET 3: NOUVEAUTÉ RECORDS PERSONNELS (PR / PB) ---
+    function calculateAndRenderPersonalRecords() {
+      // 1. Records Course à pied : 5k, 10k, Semi, Marathon
+      var pr5k = findBestRun(4.5, 5.5);
+      var pr10k = findBestRun(9.5, 10.5);
+      var prSemi = findBestRun(20.5, 21.5);
+      var prMarathon = findBestRun(41.5, 43.0);
+
+      updatePrCard('5k', pr5k);
+      updatePrCard('10k', pr10k);
+      updatePrCard('semi', prSemi);
+      updatePrCard('marathon', prMarathon);
+
+      // 2. Records Natation : 750m, 1500m, 1900m, 3800m
+      var prSwim750 = findBestSwim("750");
+      var prSwim1500 = findBestSwim("1500");
+      var prSwim1900 = findBestSwim("1900");
+      var prSwim3800 = findBestSwim("3800");
+
+      updateSwimPrCard('swim-750', prSwim750, 750);
+      updateSwimPrCard('swim-1500', prSwim1500, 1500);
+      updateSwimPrCard('swim-1900', prSwim1900, 1900);
+      updateSwimPrCard('swim-3800', prSwim3800, 3800);
+    }
+
+    function findBestRun(minDist, maxDist) {
+      var matching = races.filter(function(r) {
+        return (r.sport === 'running' || r.sport === 'trail') && r.distance >= minDist && r.distance <= maxDist && r.timeSeconds > 0;
+      });
+      if (matching.length === 0) return null;
+      matching.sort(function(a, b) { return a.timeSeconds - b.timeSeconds; });
+      return matching[0];
+    }
+
+    function findBestSwim(distTag) {
+      var matching = [];
+      for (var i = 0; i < races.length; i++) {
+        var r = races[i];
+        if (r.triDetails && r.triDetails.swim && r.triDetails.swimDist === distTag) {
+          var sec = parseTimeToSeconds(r.triDetails.swim);
+          if (sec > 0) matching.push({ race: r, swimSeconds: sec, raw: r.triDetails.swim });
+        }
+      }
+      if (matching.length === 0) return null;
+      matching.sort(function(a, b) { return a.swimSeconds - b.swimSeconds; });
+      return matching[0];
+    }
+
+    function updatePrCard(id, pr) {
+      var timeEl = document.getElementById('pr-time-' + id);
+      var paceEl = document.getElementById('pr-pace-' + id);
+      var raceEl = document.getElementById('pr-race-' + id);
+      var dateEl = document.getElementById('pr-date-' + id);
+
+      if (pr) {
+        timeEl.innerText = formatTime(pr.timeSeconds);
+        paceEl.innerText = calculatePace(pr.distance, pr.timeSeconds);
+        raceEl.innerText = pr.name;
+        dateEl.innerText = new Date(pr.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+      } else {
+        timeEl.innerText = "--:--:--";
+        paceEl.innerText = "-- /km";
+        raceEl.innerText = "Aucun chrono enregistré";
+        dateEl.innerText = "Ajoutez une course de cette distance";
+      }
+    }
+
+    function updateSwimPrCard(id, prObj, distMeters) {
+      var timeEl = document.getElementById('pr-time-' + id);
+      var paceEl = document.getElementById('pr-pace-' + id);
+      var raceEl = document.getElementById('pr-race-' + id);
+      var dateEl = document.getElementById('pr-date-' + id);
+
+      if (prObj) {
+        timeEl.innerText = prObj.raw;
+        paceEl.innerText = calculateSwimPace100m(distMeters, prObj.swimSeconds);
+        raceEl.innerText = prObj.race.name;
+        dateEl.innerText = new Date(prObj.race.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+      } else {
+        timeEl.innerText = "--:--";
+        paceEl.innerText = "-- /100m";
+        raceEl.innerText = "Aucun chrono enregistré";
+        dateEl.innerText = "Indiquez le format dans un Triathlon";
+      }
+    }
+
+    // --- FORMULAIRE & ACTIONS ---
     function toggleSportFields() {
-      const sport = document.getElementById('form-sport').value;
-      const triFields = document.getElementById('triathlon-fields');
-      if(sport === 'triathlon') triFields.classList.remove('hidden');
+      var sport = document.getElementById('form-sport').value;
+      var triFields = document.getElementById('triathlon-fields');
+      if (sport === 'triathlon') triFields.classList.remove('hidden');
       else triFields.classList.add('hidden');
     }
 
     function handleFormSubmit(e) {
       e.preventDefault();
+      var id = document.getElementById('race-id').value || Date.now().toString();
+      var name = document.getElementById('form-name').value.trim();
+      var sport = document.getElementById('form-sport').value;
+      var date = document.getElementById('form-date').value;
+      var distance = parseFloat(document.getElementById('form-distance').value);
+      var elevation = parseInt(document.getElementById('form-elevation').value) || 0;
       
-      const id = document.getElementById('race-id').value || Date.now().toString();
-      const name = document.getElementById('form-name').value;
-      const sport = document.getElementById('form-sport').value;
-      const date = document.getElementById('form-date').value;
-      const distance = parseFloat(document.getElementById('form-distance').value);
-      const elevation = parseInt(document.getElementById('form-elevation').value) || 0;
-      
-      const h = parseInt(document.getElementById('form-time-h').value) || 0;
-      const m = parseInt(document.getElementById('form-time-m').value) || 0;
-      const s = parseInt(document.getElementById('form-time-s').value) || 0;
-      const timeSeconds = (h * 3600) + (m * 60) + s;
+      var h = parseInt(document.getElementById('form-time-h').value) || 0;
+      var m = parseInt(document.getElementById('form-time-m').value) || 0;
+      var s = parseInt(document.getElementById('form-time-s').value) || 0;
+      var timeSeconds = (h * 3600) + (m * 60) + s;
 
-      const rank = document.getElementById('form-rank').value;
-      const location = document.getElementById('form-location').value;
-      const notes = document.getElementById('form-notes').value;
+      var rank = document.getElementById('form-rank').value.trim();
+      var location = document.getElementById('form-location').value.trim();
+      var notes = document.getElementById('form-notes').value.trim();
 
-      let triDetails = null;
-      if(sport === 'triathlon') {
+      var triDetails = null;
+      if (sport === 'triathlon') {
         triDetails = {
-          swim: document.getElementById('form-tri-swim').value,
-          t1: document.getElementById('form-tri-t1').value,
-          bike: document.getElementById('form-tri-bike').value,
-          t2: document.getElementById('form-tri-t2').value,
-          run: document.getElementById('form-tri-run').value
+          swimDist: document.getElementById('form-tri-swim-dist').value,
+          swim: document.getElementById('form-tri-swim').value.trim(),
+          t1: document.getElementById('form-tri-t1').value.trim(),
+          bike: document.getElementById('form-tri-bike').value.trim(),
+          t2: document.getElementById('form-tri-t2').value.trim(),
+          run: document.getElementById('form-tri-run').value.trim()
         };
       }
 
-      const raceData = { id, name, sport, date, distance, elevation, timeSeconds, rank, location, notes, triDetails };
+      var raceData = {
+        id: id,
+        name: name,
+        sport: sport,
+        date: date,
+        distance: distance,
+        elevation: elevation,
+        timeSeconds: timeSeconds,
+        rank: rank,
+        location: location,
+        notes: notes,
+        triDetails: triDetails
+      };
 
-      const existingIdx = races.findIndex(r => r.id === id);
-      if(existingIdx >= 0) races[existingIdx] = raceData;
+      var existingIdx = -1;
+      for (var i = 0; i < races.length; i++) {
+        if (races[i].id === id) { existingIdx = i; break; }
+      }
+
+      if (existingIdx >= 0) races[existingIdx] = raceData;
       else races.push(raceData);
 
-      saveRaces();
+      saveLocalData();
       resetForm();
       switchTab('journal');
     }
@@ -723,8 +1152,11 @@
     }
 
     function editRace(id) {
-      const race = races.find(r => r.id === id);
-      if(!race) return;
+      var race = null;
+      for (var i = 0; i < races.length; i++) {
+        if (races[i].id === id) { race = races[i]; break; }
+      }
+      if (!race) return;
 
       document.getElementById('race-id').value = race.id;
       document.getElementById('form-name').value = race.name;
@@ -733,9 +1165,9 @@
       document.getElementById('form-distance').value = race.distance;
       document.getElementById('form-elevation').value = race.elevation || '';
 
-      const h = Math.floor(race.timeSeconds / 3600);
-      const m = Math.floor((race.timeSeconds % 3600) / 60);
-      const s = race.timeSeconds % 60;
+      var h = Math.floor(race.timeSeconds / 3600);
+      var m = Math.floor((race.timeSeconds % 3600) / 60);
+      var s = race.timeSeconds % 60;
       document.getElementById('form-time-h').value = h;
       document.getElementById('form-time-m').value = m;
       document.getElementById('form-time-s').value = s;
@@ -744,7 +1176,8 @@
       document.getElementById('form-location').value = race.location || '';
       document.getElementById('form-notes').value = race.notes || '';
 
-      if(race.triDetails) {
+      if (race.triDetails) {
+        document.getElementById('form-tri-swim-dist').value = race.triDetails.swimDist || 'none';
         document.getElementById('form-tri-swim').value = race.triDetails.swim || '';
         document.getElementById('form-tri-t1').value = race.triDetails.t1 || '';
         document.getElementById('form-tri-bike').value = race.triDetails.bike || '';
@@ -758,118 +1191,118 @@
     }
 
     function deleteRace(id) {
-      if(confirm('Voulez-vous vraiment supprimer cette course ?')) {
-        races = races.filter(r => r.id !== id);
-        saveRaces();
+      if (confirm('Voulez-vous vraiment supprimer cette course ?')) {
+        races = races.filter(function(r) { return r.id !== id; });
+        saveLocalData();
         renderJournal();
       }
     }
 
-    // --- RENDER 3: JOURNAL ---
+    // --- JOURNAL ---
     function renderJournal() {
-      const search = document.getElementById('journal-search').value.toLowerCase();
-      const sportFilter = document.getElementById('journal-filter-sport').value;
-      const container = document.getElementById('journal-list');
+      var search = document.getElementById('journal-search').value.toLowerCase();
+      var sportFilter = document.getElementById('journal-filter-sport').value;
+      var container = document.getElementById('journal-list');
 
-      const filtered = races.filter(r => {
-        const matchesSearch = r.name.toLowerCase().includes(search) || (r.location && r.location.toLowerCase().includes(search));
-        const matchesSport = sportFilter === 'all' || r.sport === sportFilter;
+      var filtered = races.filter(function(r) {
+        var matchesSearch = r.name.toLowerCase().indexOf(search) !== -1 || (r.location && r.location.toLowerCase().indexOf(search) !== -1);
+        var matchesSport = sportFilter === 'all' || r.sport === sportFilter;
         return matchesSearch && matchesSport;
-      }).sort((a,b) => new Date(b.date) - new Date(a.date));
+      });
 
-      if(filtered.length === 0) {
-        container.innerHTML = '<div class="text-center py-12 text-slate-500">Aucune course trouvée.</div>';
+      filtered.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-slate-500 bg-slate-800/30 rounded-2xl border border-slate-800">Aucune épreuve trouvée.</div>';
         return;
       }
 
-      container.innerHTML = filtered.map(race => `
-        <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-3 hover:border-slate-600 transition">
-          <div class="flex justify-between items-start">
-            <div>
-              <h3 class="font-bold text-lg text-white">${race.name}</h3>
-              <div class="text-xs text-slate-400">${new Date(race.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} • ${race.location || 'Lieu non renseigné'}</div>
-            </div>
-            ${getSportBadge(race.sport)}
-          </div>
+      var html = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var race = filtered[i];
+        html += '<div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-3 hover:border-slate-600 transition">' +
+            '<div class="flex justify-between items-start">' +
+              '<div>' +
+                '<h3 class="font-bold text-lg text-white">' + race.name + '</h3>' +
+                '<div class="text-xs text-slate-400">' + new Date(race.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + ' • ' + (race.location || 'Lieu non renseigné') + '</div>' +
+              '</div>' +
+              getSportBadge(race.sport) +
+            '</div>' +
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-700/50">
-            <div>
-              <div class="text-[10px] text-slate-400 uppercase">Temps</div>
-              <div class="text-sm font-bold text-white">${formatTime(race.timeSeconds)}</div>
-            </div>
-            <div>
-              <div class="text-[10px] text-slate-400 uppercase">Distance / D+</div>
-              <div class="text-xs font-medium text-slate-200 mt-0.5">${race.distance} km ${race.elevation ? '• ' + race.elevation + 'm' : ''}</div>
-            </div>
-            <div>
-              <div class="text-[10px] text-slate-400 uppercase">Allure</div>
-              <div class="text-xs font-medium text-slate-200 mt-0.5">${calculatePace(race.distance, race.timeSeconds)}</div>
-            </div>
-            <div>
-              <div class="text-[10px] text-slate-400 uppercase">Classement</div>
-              <div class="text-xs font-medium text-slate-200 mt-0.5">${race.rank || 'N/C'}</div>
-            </div>
-          </div>
+            '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-700/50">' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Temps</div><div class="text-sm font-bold text-white">' + formatTime(race.timeSeconds) + '</div></div>' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Distance / D+</div><div class="text-xs font-medium text-slate-200">' + race.distance + ' km ' + (race.elevation ? '• ' + race.elevation + 'm' : '') + '</div></div>' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Allure</div><div class="text-xs font-medium text-slate-200">' + calculatePace(race.distance, race.timeSeconds) + '</div></div>' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Rang</div><div class="text-xs font-medium text-slate-200">' + (race.rank || 'N/C') + '</div></div>' +
+            '</div>' +
 
-          ${race.notes ? `<p class="text-xs text-slate-300 italic bg-slate-900/40 p-2 rounded-lg border border-slate-800">"${race.notes}"</p>` : ''}
+            (race.sport === 'triathlon' && race.triDetails ? 
+              '<div class="bg-slate-900/60 p-2 rounded-xl border border-slate-700/40 grid grid-cols-5 text-center text-[10px]">' +
+                '<div><span class="text-slate-400 block">Nat</span><b class="text-white">' + (race.triDetails.swim || '-') + '</b></div>' +
+                '<div><span class="text-slate-400 block">T1</span><b class="text-white">' + (race.triDetails.t1 || '-') + '</b></div>' +
+                '<div><span class="text-slate-400 block">Vélo</span><b class="text-white">' + (race.triDetails.bike || '-') + '</b></div>' +
+                '<div><span class="text-slate-400 block">T2</span><b class="text-white">' + (race.triDetails.t2 || '-') + '</b></div>' +
+                '<div><span class="text-slate-400 block">CAP</span><b class="text-white">' + (race.triDetails.run || '-') + '</b></div>' +
+              '</div>' : '') +
 
-          <div class="flex justify-end gap-2 pt-2 border-t border-slate-700/40">
-            <button onclick="editRace('${race.id}')" class="text-xs text-indigo-400 hover:text-indigo-300 px-2 py-1"><i class="fas fa-edit mr-1"></i> Modifier</button>
-            <button onclick="deleteRace('${race.id}')" class="text-xs text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fas fa-trash mr-1"></i> Supprimer</button>
-          </div>
-        </div>
-      `).join('');
+            (race.notes ? '<p class="text-xs text-slate-300 italic bg-slate-900/40 p-2.5 rounded-xl border border-slate-800">"' + race.notes + '"</p>' : '') +
+
+            '<div class="flex justify-end gap-2 pt-2 border-t border-slate-700/40">' +
+              '<button onclick="editRace(\'' + race.id + '\')" class="text-xs text-indigo-400 hover:text-indigo-300 px-2 py-1"><i class="fas fa-edit mr-1"></i> Modifier</button>' +
+              '<button onclick="deleteRace(\'' + race.id + '\')" class="text-xs text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fas fa-trash mr-1"></i> Supprimer</button>' +
+            '</div>' +
+          '</div>';
+      }
+      container.innerHTML = html;
     }
 
-    // --- IMPORT / EXPORT ---
+    // --- IMPORT / EXPORT JSON ---
     function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(races, null, 2));
-      const downloadAnchor = document.createElement('a');
+      var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(races, null, 2));
+      var downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `racetracker_backup_${new Date().toISOString().slice(0,10)}.json`);
+      downloadAnchor.setAttribute("download", "racetracker_backup_" + new Date().toISOString().slice(0, 10) + ".json");
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
     }
 
     function importData(e) {
-      const file = e.target.files[0];
+      var file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
+      var reader = new FileReader();
       reader.onload = function(evt) {
         try {
-          const imported = JSON.parse(evt.target.result);
+          var imported = JSON.parse(evt.target.result);
           if (Array.isArray(imported)) {
             races = imported;
-            saveRaces();
-            alert("Données importées avec succès !");
+            saveLocalData();
+            alert("Vos données ont été importées avec succès !");
             switchTab('stats');
           }
-        } catch(err) {
-          alert("Fichier JSON invalide.");
-        }
+        } catch(err) { alert("Format de fichier JSON invalide."); }
       };
       reader.readAsText(file);
     }
 
     function loadDemoData() {
-      if(confirm("Charger les données de démonstration ?")) {
+      if (confirm("Recharger les données de démonstration ?")) {
         races = DEMO_RACES;
-        saveRaces();
+        saveLocalData();
         switchTab('stats');
       }
     }
 
     function clearAllData() {
-      if(confirm("Supprimer TOUTES vos données ? Cette action est irréversible.")) {
+      if (confirm("Attention : supprimer toutes vos données ?")) {
         races = [];
-        saveRaces();
+        saveLocalData();
         switchTab('stats');
       }
     }
 
     // --- INITIALISATION ---
-    window.onload = () => {
+    window.onload = function() {
       switchTab('stats');
     };
   </script>
