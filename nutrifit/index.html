@@ -99,7 +99,7 @@
         </button>
         <button onclick="switchTab('import-nolio')" id="tab-import-nolio" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-700/40 hover:text-slate-200 transition-all">
           <i data-lucide="upload-cloud" class="w-5 h-5 text-teal-400"></i>
-          <span>Importer Nolio / FIT</span>
+          <span>Importer Nolio / CSV / FIT</span>
         </button>
         <button onclick="switchTab('progress')" id="tab-progress" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-700/40 hover:text-slate-200 transition-all">
           <i data-lucide="trending-down" class="w-5 h-5"></i>
@@ -185,24 +185,15 @@
               <i data-lucide="upload-cloud" class="w-4 h-4"></i>
               <span>Importer Fichier Nolio</span>
             </button>
-          </div>
-
-          <!-- Weekly Schedule Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" id="workoutWeekGrid">
-            <!-- Dynamic workout cards per day -->
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= 2B. NOLIO / FIT IMPORT VIEW ================= -->
+      <!-- ================= 2B. NOLIO / FIT / CSV IMPORT VIEW ================= -->
       <section id="view-import-nolio" class="hidden space-y-4 sm:space-y-6">
         <div class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div class="border-b border-slate-700/60 pb-3 sm:pb-4">
             <h2 class="text-lg sm:text-xl font-bold text-slate-100 flex items-center space-x-2">
               <i data-lucide="upload-cloud" class="w-5 h-5 sm:w-6 sm:h-6 text-teal-400"></i>
-              <span>Import Nolio / GPX / FIT / JSON</span>
+              <span>Import Nolio / CSV / GPX / FIT / JSON</span>
             </h2>
-            <p class="text-xs sm:text-sm text-slate-400 mt-1">Glissez-déposez ou sélectionnez l'export de votre séance pour réajuster la nutrition.</p>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Glissez-déposez ou sélectionnez votre fichier d'entraînement ou planning CSV pour réajuster la nutrition.</p>
           </div>
 
           <!-- Dropzone -->
@@ -213,7 +204,7 @@
             </div>
             <div>
               <h3 class="font-bold text-slate-200 text-sm sm:text-base">Importer votre fichier d'entraînement</h3>
-              <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Formats : Exports Nolio (JSON/CSV) ou fichiers GPX/FIT</p>
+              <p class="text-[11px] sm:text-xs text-slate-400 mt-1">Formats : CSV (planning complet ou séance), JSON, GPX ou FIT</p>
             </div>
             <button onclick="document.getElementById('nolioFileInput').click()" class="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-slate-950 font-semibold text-xs rounded-xl transition">
               Parcourir mes fichiers
@@ -222,7 +213,10 @@
 
           <!-- Target Day Selection -->
           <div class="bg-slate-900/60 p-3 sm:p-4 rounded-xl border border-slate-700/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <label class="text-xs font-semibold text-slate-300">Attribuer la séance au jour :</label>
+            <div>
+              <label class="text-xs font-semibold text-slate-300">Attribuer la séance au jour :</label>
+              <p class="text-[10px] text-slate-400">Pour les fichiers CSV multi-jours, les jours détectés seront appliqués automatiquement.</p>
+            </div>
             <select id="importTargetDay" class="bg-slate-800 text-slate-200 border border-slate-700 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-teal-500">
               <option value="0">Lundi</option>
               <option value="1">Mardi</option>
@@ -234,11 +228,17 @@
             </select>
           </div>
 
+          <!-- CSV Template Example / Notice -->
+          <div class="p-3 bg-slate-900/40 rounded-xl border border-slate-700/30 text-xs text-slate-400 space-y-1">
+            <span class="font-semibold text-teal-400">Format CSV supporté :</span>
+            <p class="text-[11px]">Vous pouvez importer un fichier CSV avec les en-têtes : <code class="text-slate-300">jour, type, duree, calories</code> (ex: <code class="text-slate-300">Lundi, Vélo endurance, 90, 750</code>) ou n'importe quel export d'activité Nolio/Garmin CSV.</p>
+          </div>
+
           <!-- Import Log Status -->
           <div id="importStatusCard" class="hidden bg-slate-900/80 p-4 rounded-xl border border-emerald-500/30 text-xs space-y-2">
             <div class="flex items-center space-x-2 text-emerald-400 font-bold">
               <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-              <span>Séance importée avec succès !</span>
+              <span>Séance(s) importée(s) avec succès !</span>
             </div>
             <p id="importDetailsText" class="text-slate-300"></p>
           </div>
@@ -268,13 +268,14 @@
           <div class="mt-4 sm:mt-6">
             <h3 class="font-semibold text-xs sm:text-sm text-slate-300 mb-3">Historique des pesées</h3>
             <div class="overflow-x-auto -mx-2 sm:mx-0">
-              <table class="w-full text-left text-xs text-slate-400 min-w-[320px]">
+              <table class="w-full text-left text-xs text-slate-400 min-w-[360px]">
                 <thead class="bg-slate-900/60 text-slate-300 uppercase">
                   <tr>
                     <th class="p-2 sm:p-3">Date</th>
                     <th class="p-2 sm:p-3">Poids (kg)</th>
                     <th class="p-2 sm:p-3">Écart Cible</th>
                     <th class="p-2 sm:p-3">Statut</th>
+                    <th class="p-2 sm:p-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody id="weightHistoryBody" class="divide-y divide-slate-700/40">
@@ -546,6 +547,25 @@
 
       reader.onload = function(event) {
         const content = event.target.result;
+        
+        if (file.name.toLowerCase().endsWith('.csv')) {
+          let csvResult = parseCSVContent(content, targetDay);
+          if (csvResult.success) {
+            saveStoredData();
+            renderWorkoutGrid();
+
+            const statusCard = document.getElementById('importStatusCard');
+            const detailsText = document.getElementById('importDetailsText');
+            statusCard.classList.remove('hidden');
+            detailsText.innerText = csvResult.message;
+
+            calculateDailyNutrition(selectedDayIndex);
+            renderMealsView();
+            lucide.createIcons();
+            return;
+          }
+        }
+
         let workoutData = parseNolioContent(file.name, content);
 
         if (workoutData) {
@@ -565,7 +585,7 @@
 
           lucide.createIcons();
         } else {
-          alert("Impossible de lire les données de la séance. Assurez-vous que le fichier exporté de Nolio/Garmin est valide.");
+          alert("Impossible de lire les données du fichier. Assurez-vous d'utiliser un format valide (CSV, JSON, GPX, FIT).");
         }
       };
 
@@ -574,6 +594,63 @@
       } else {
         reader.readAsArrayBuffer(file);
       }
+    }
+
+    function parseCSVContent(csvText, defaultTargetDay) {
+      let lines = csvText.split(/\r\n|\n/).map(l => l.trim()).filter(l => l.length > 0);
+      if (lines.length === 0) return { success: false };
+
+      let importedCount = 0;
+      let hasHeader = lines[0].toLowerCase().includes("jour") || lines[0].toLowerCase().includes("type") || lines[0].toLowerCase().includes("activity");
+      let startIdx = hasHeader ? 1 : 0;
+
+      for (let i = startIdx; i < lines.length; i++) {
+        let cols = lines[i].split(/[,;]/).map(c => c.trim().replace(/^["']|["']$/g, ''));
+        if (cols.length < 2) continue;
+
+        let dayIdx = defaultTargetDay;
+        let activityType = "";
+        let duration = 60;
+        let cals = 500;
+
+        // Check if first column is a day name
+        let firstColLower = cols[0].toLowerCase();
+        let foundDay = DAYS.findIndex(d => d.toLowerCase() === firstColLower);
+
+        if (foundDay !== -1) {
+          dayIdx = foundDay;
+          activityType = cols[1] || "Séance Importée";
+          duration = parseInt(cols[2]) || 60;
+          cals = parseInt(cols[3]) || (duration * 8);
+        } else {
+          activityType = cols[0] || "Séance CSV";
+          duration = parseInt(cols[1]) || 60;
+          cals = parseInt(cols[2]) || (duration * 8);
+        }
+
+        let icon = "activity";
+        let typeLower = activityType.toLowerCase();
+        if (typeLower.includes("natation") || typeLower.includes("swim")) icon = "waves";
+        else if (typeLower.includes("vélo") || typeLower.includes("velo") || typeLower.includes("bike") || typeLower.includes("cyclisme")) icon = "bike";
+        else if (typeLower.includes("course") || typeLower.includes("run") || typeLower.includes("pied")) icon = "footprints";
+
+        weeklyWorkouts[dayIdx] = {
+          type: activityType,
+          duration: duration,
+          intensity: cals > 500 ? "high" : "medium",
+          calsBurned: cals,
+          icon: icon
+        };
+        importedCount++;
+      }
+
+      if (importedCount > 0) {
+        return {
+          success: true,
+          message: `${importedCount} séance(s) CSV importée(s) et synchronisée(s) avec votre planning.`
+        };
+      }
+      return { success: false };
     }
 
     function parseNolioContent(filename, content) {
@@ -953,7 +1030,7 @@ ATTENTION : Inclure OBLIGATOIREMENT une Collation Post-Entraînement si la charg
       const tbody = document.getElementById('weightHistoryBody');
       tbody.innerHTML = '';
 
-      weightHistory.forEach(entry => {
+      weightHistory.forEach((entry, idx) => {
         let tr = document.createElement('tr');
         tr.className = "hover:bg-slate-800/40";
         let diff = (entry.weight - userProfile.startWeight).toFixed(1);
@@ -963,37 +1040,35 @@ ATTENTION : Inclure OBLIGATOIREMENT une Collation Post-Entraînement si la charg
           <td class="p-3 font-bold text-emerald-400">${entry.weight} kg</td>
           <td class="p-3 ${diff <= 0 ? 'text-emerald-400' : 'text-rose-400'}">${diff} kg</td>
           <td class="p-3 text-slate-400">En bonne voie</td>
+          <td class="p-3 text-right">
+            <button onclick="deleteWeightLog(${idx})" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition" title="Supprimer cette pesée">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
+
+      lucide.createIcons();
     }
 
-    function renderShoppingList() {
-      const container = document.getElementById('shoppingListContainer');
-      container.innerHTML = '';
+    function deleteWeightLog(index) {
+      if (index >= 0 && index < weightHistory.length) {
+        weightHistory.splice(index, 1);
+        
+        // Update current weight if history still has items
+        if (weightHistory.length > 0) {
+          userProfile.currentWeight = weightHistory[weightHistory.length - 1].weight;
+        }
 
-      let categories = {
-        "Protéines & Viandes": ["Poulet / Dinde (800g)", "Pavés de Saumon (400g)", "Œufs bio (2 douzaines)", "Whey Protéine"],
-        "Féculents & Céréales": ["Flocons d'avoine (1kg)", "Quinoa (500g)", "Patates douces (1kg)", "Riz Basmati"],
-        "Légumes & Fruits": ["Brocolis frais", "Avocats (3)", "Bananes", "Myrtilles / Baies", "Poivrons & Courgettes"],
-        "Épicerie & Oleagineux": ["Huile d'olive extra vierge", "Amandes douces", "Lait d'amande sans sucre"]
-      };
+        saveStoredData();
+        updateProfileDisplay();
+        renderWeightTable();
 
-      for (let [cat, items] of Object.entries(categories)) {
-        let block = document.createElement('div');
-        block.className = "bg-slate-900/50 border border-slate-700/40 rounded-xl p-4 space-y-2";
-        block.innerHTML = `
-          <h4 class="font-bold text-xs uppercase tracking-wider text-emerald-400">${cat}</h4>
-          <ul class="space-y-1 text-xs text-slate-300">
-            ${items.map(i => `
-              <li class="flex items-center space-x-2">
-                <input type="checkbox" class="rounded bg-slate-800 border-slate-700 text-emerald-500 focus:ring-0">
-                <span>${i}</span>
-              </li>
-            `).join('')}
-          </ul>
-        `;
-        container.appendChild(block);
+        if (weightChartInstance) {
+          weightChartInstance.data.datasets[0].data = weightHistory.map(x => x.weight);
+          weightChartInstance.update();
+        }
       }
     }
 
