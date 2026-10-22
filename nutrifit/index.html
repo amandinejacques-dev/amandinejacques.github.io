@@ -47,6 +47,9 @@
                 <button onclick="switchTab('groceries')" id="btn-groceries" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
                     <i class="fa-solid fa-cart-shopping w-5"></i> Liste de Courses
                 </button>
+                <button onclick="openExportModal()" id="btn-export-sync" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-blue-400 hover:bg-slate-700 hover:text-blue-300">
+                    <i class="fa-solid fa-arrows-rotate w-5"></i> Synchro & Export
+                </button>
             </nav>
         </div>
 
@@ -85,7 +88,7 @@
                 </div>
             </div>
 
-            <!-- Notice Import -->
+            <!-- Notice Import & Diagnostics -->
             <div id="import-notification" class="hidden p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center">
                 <span id="import-notification-text">CSV Nolio importé avec succès !</span>
                 <button onclick="document.getElementById('import-notification').classList.add('hidden')" class="text-emerald-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -295,7 +298,71 @@
         <button onclick="switchTab('groceries')" id="btn-mob-groceries" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
             <i class="fa-solid fa-cart-shopping text-base"></i> Courses
         </button>
+        <button onclick="openExportModal()" id="btn-mob-export" class="mob-nav-btn flex flex-col items-center gap-1 text-blue-400 text-xs py-1">
+            <i class="fa-solid fa-arrows-rotate text-base"></i> Export
+        </button>
     </nav>
+
+    <!-- Modal d'Exportation & Synchronisation -->
+    <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate text-blue-500"></i> Synchronisation & Exportation
+                </h3>
+                <button onclick="closeExportModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Export iCal/ICS -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-blue-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-regular fa-calendar-check"></i> Calendrier (.ics)
+                        </span>
+                        <p class="text-xs text-slate-300 mt-1">Exportez le programme complet d'entraînements et de nutrition vers Google Calendar, Apple Calendar ou Outlook.</p>
+                    </div>
+                    <button onclick="exportToICS()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> Télécharger l'Agenda (.ics)
+                    </button>
+                </div>
+
+                <!-- Export/Import JSON -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-database"></i> Sauvegarde JSON
+                        </span>
+                        <p class="text-xs text-slate-300 mt-1">Sauvegardez l'ensemble de vos données (profil, poids, programme) pour restaurer votre session sur smartphone.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportJSON()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-download"></i> Exporter
+                        </button>
+                        <label class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-xl text-xs transition text-center cursor-pointer flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-upload"></i> Importer
+                            <input type="file" id="json-import-input" accept=".json" class="hidden" onchange="importJSON(event)">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Liste Texte Keep/Notes -->
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-regular fa-note-sticky"></i> Résumé Texte (Google Keep / Notes)
+                    </span>
+                    <button onclick="copyTextSummary()" class="text-xs bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
+                        <i class="fa-regular fa-copy"></i> Copier
+                    </button>
+                </div>
+                <textarea id="export-text-preview" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 h-32 focus:outline-none focus:border-amber-500/50"></textarea>
+            </div>
+        </div>
+    </div>
 
     <script>
         let profile = {
@@ -307,7 +374,10 @@
             deficit: 400
         };
 
-        const todayDateObj = new Date();
+        let todayDateObj = new Date();
+        let programStartDateObj = new Date(todayDateObj);
+        programStartDateObj.setDate(todayDateObj.getDate() - 3); // Start 3 days prior by default
+
         let selectedDayIndex = 0;
         let weightChart = null;
         let programDays = [];
@@ -407,7 +477,14 @@
             }
         }
 
-        function initProgramDays() {
+        function initProgramDays(startFromDate = null) {
+            if (startFromDate) {
+                programStartDateObj = new Date(startFromDate);
+            } else {
+                programStartDateObj = new Date(todayDateObj);
+                programStartDateObj.setDate(todayDateObj.getDate() - 3);
+            }
+
             const defaultWorkouts = [
                 { disc: 'Natation', dur: 50, cal: 480, desc: 'Technique & Allure Z2/Z3' },
                 { disc: 'Vélo', dur: 90, cal: 820, desc: 'Endurance fondamentale + rappel Seuil' },
@@ -420,13 +497,13 @@
 
             programDays = [];
             for (let i = 0; i < 28; i++) {
-                const d = new Date(todayDateObj);
-                d.setDate(todayDateObj.getDate() + (i - 3)); 
+                const d = new Date(programStartDateObj);
+                d.setDate(programStartDateObj.getDate() + i);
 
                 const template = defaultWorkouts[i % 7];
                 programDays.push({
                     dayIndex: i,
-                    dateStr: d.toISOString().split('T')[0],
+                    dateStr: formatDateISO(d),
                     dateObj: d,
                     discipline: template.disc,
                     duration: template.dur,
@@ -436,11 +513,16 @@
                 });
             }
 
-            const todayStr = todayDateObj.toISOString().split('T')[0];
+            const todayStr = formatDateISO(todayDateObj);
             const foundTodayIndex = programDays.findIndex(p => p.dateStr === todayStr);
-            if (foundTodayIndex !== -1) {
-                selectedDayIndex = foundTodayIndex;
-            }
+            selectedDayIndex = (foundTodayIndex !== -1) ? foundTodayIndex : 0;
+        }
+
+        function formatDateISO(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         }
 
         function renderCalendar() {
@@ -448,7 +530,7 @@
             if (!grid) return;
             grid.innerHTML = '';
 
-            const todayStr = todayDateObj.toISOString().split('T')[0];
+            const todayStr = formatDateISO(todayDateObj);
 
             programDays.forEach((day, index) => {
                 const isToday = day.dateStr === todayStr;
@@ -456,11 +538,13 @@
 
                 let discIcon = 'fa-bed';
                 let discColor = 'text-slate-400';
-                if (day.discipline.includes('Natation')) { discIcon = 'fa-person-swimming'; discColor = 'text-cyan-400'; }
-                else if (day.discipline.includes('Vélo') || day.discipline.includes('Cyclisme')) { discIcon = 'fa-person-biking'; discColor = 'text-emerald-400'; }
-                else if (day.discipline.includes('Course') || day.discipline.includes('CAP') || day.discipline.includes('Run')) { discIcon = 'fa-person-running'; discColor = 'text-amber-400'; }
-                else if (day.discipline.includes('Tri')) { discIcon = 'fa-person-triathlon'; discColor = 'text-purple-400'; }
-                else if (day.discipline.includes('Renforcement') || day.discipline.includes('Muscu')) { discIcon = 'fa-dumbbell'; discColor = 'text-rose-400'; }
+                const discLower = day.discipline.toLowerCase();
+                
+                if (discLower.includes('natation') || discLower.includes('swim')) { discIcon = 'fa-person-swimming'; discColor = 'text-cyan-400'; }
+                else if (discLower.includes('vélo') || discLower.includes('velo') || discLower.includes('bike') || discLower.includes('cyclisme')) { discIcon = 'fa-person-biking'; discColor = 'text-emerald-400'; }
+                else if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('pied')) { discIcon = 'fa-person-running'; discColor = 'text-amber-400'; }
+                else if (discLower.includes('tri') || discLower.includes('brick')) { discIcon = 'fa-person-triathlon'; discColor = 'text-purple-400'; }
+                else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gym')) { discIcon = 'fa-dumbbell'; discColor = 'text-rose-400'; }
 
                 const dayCard = document.createElement('div');
                 dayCard.className = `p-2 rounded-xl border text-left cursor-pointer transition flex flex-col justify-between h-24 sm:h-28 relative ${
@@ -478,7 +562,7 @@
                     </div>
                     <div>
                         <div class="text-xs font-bold ${discColor} truncate flex items-center gap-1 mt-1">
-                            <i class="fa-solid ${discIcon}"></i> <span class="hidden sm:inline">${day.discipline}</span>
+                            <i class="fa-solid ${discIcon}"></i> <span class="truncate">${day.discipline}</span>
                         </div>
                         <div class="text-[10px] text-slate-400">${day.duration > 0 ? day.duration + ' min' : 'Repos'}</div>
                     </div>
@@ -515,10 +599,10 @@
             document.getElementById('selected-day-tag').innerText = `Jour ${day.dayIndex + 1}`;
             document.getElementById('selected-day-title').innerText = day.dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
             document.getElementById('selected-day-discipline').innerText = day.discipline;
-            document.getElementById('selected-day-duration').innerText = day.duration > 0 ? `${day.duration} min` : 'Repos';
+            document.getElementById('selected-day-duration').innerText = day.duration > 0 ? `${day.duration} min` : '0 min (Repos)';
             document.getElementById('selected-day-workout-burn').innerText = `${day.caloriesBurn} kcal`;
             document.getElementById('selected-day-total-target').innerText = `${targetCalories} kcal`;
-            document.getElementById('selected-day-description').innerText = day.description || "Aucune description";
+            document.getElementById('selected-day-description').innerText = day.description || "Aucune description de séance";
             document.getElementById('sidebar-bmr-display').innerText = `${bmr} kcal`;
             document.getElementById('sidebar-weight-display').innerText = `${profile.currentWeight} kg`;
             document.getElementById('today-date-banner').innerText = todayDateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -594,71 +678,213 @@
             });
         }
 
-        // CSV Parser
+        // --- ROBUST CSV PARSER ---
+        function parseCustomCSV(text) {
+            // Remove UTF-8 BOM if present
+            text = text.replace(/^\uFEFF/, '');
+            
+            const lines = text.split(/\r\n|\n/).filter(line => line.trim().length > 0);
+            if (lines.length < 2) return [];
+
+            // Determine delimiter (; or , or \t)
+            const firstLine = lines[0];
+            let delimiter = ';';
+            if ((firstLine.match(/,/g) || []).length > (firstLine.match(/;/g) || []).length) {
+                delimiter = ',';
+            } else if ((firstLine.match(/\t/g) || []).length > (firstLine.match(/;/g) || []).length) {
+                delimiter = '\t';
+            }
+
+            // CSV tokenizer with quotes support
+            function tokenize(line) {
+                const result = [];
+                let cell = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === delimiter && !inQuotes) {
+                        result.push(cell.trim().replace(/^"|"$/g, ''));
+                        cell = '';
+                    } else {
+                        cell += char;
+                    }
+                }
+                result.push(cell.trim().replace(/^"|"$/g, ''));
+                return result;
+            }
+
+            const headers = tokenize(lines[0]).map(h => normalizeHeader(h));
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const cols = tokenize(lines[i]);
+                if (cols.length === 0 || cols.every(c => c === '')) continue;
+                const rowObj = {};
+                headers.forEach((h, idx) => {
+                    rowObj[h] = cols[idx] !== undefined ? cols[idx] : '';
+                });
+                rows.push(rowObj);
+            }
+            return { headers, rows };
+        }
+
+        function normalizeHeader(str) {
+            return str
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+                .replace(/[^a-z0-9]/g, ""); // keep alphanumeric only
+        }
+
+        function parseFlexibleDate(str) {
+            if (!str) return null;
+            str = str.trim().split(' ')[0]; // remove time if present
+            
+            // YYYY-MM-DD or YYYY/MM/DD
+            let m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+            if (m) {
+                return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+            }
+
+            // DD-MM-YYYY or DD/MM/YYYY
+            m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+            if (m) {
+                return `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
+            }
+
+            return null;
+        }
+
+        function parseFlexibleDuration(val) {
+            if (!val) return 0;
+            val = String(val).trim().toLowerCase();
+
+            // Format HH:MM:SS or HH:MM
+            if (val.includes(':')) {
+                const parts = val.split(':').map(p => parseInt(p, 10) || 0);
+                if (parts.length === 3) return (parts[0] * 60) + parts[1]; // hours + mins
+                if (parts.length === 2) return (parts[0] * 60) + parts[1];
+            }
+
+            // Extract trailing numeric
+            const num = parseInt(val.replace(/[^0-9]/g, ''), 10);
+            return isNaN(num) ? 0 : num;
+        }
+
         function handleNolioCSVImport(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                parseNolioCSV(e.target.result);
+                parseAndApplyNolioCSV(e.target.result);
             };
             reader.readAsText(file);
+            event.target.value = ''; // reset input
         }
 
-        function parseNolioCSV(csvText) {
-            const lines = csvText.split(/\r\n|\n/);
-            if (lines.length < 2) return;
+        function parseAndApplyNolioCSV(csvText) {
+            const parsed = parseCustomCSV(csvText);
+            const headers = parsed.headers;
+            const rows = parsed.rows;
 
-            const separator = lines[0].includes(';') ? ';' : ',';
-            const headers = lines[0].split(separator).map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-
-            const dateIdx = headers.findIndex(h => h.includes('date'));
-            const titleIdx = headers.findIndex(h => h.includes('titre') || h.includes('title') || h.includes('nom') || h.includes('sport') || h.includes('discipline') || h.includes('type'));
-            const durIdx = headers.findIndex(h => h.includes('duree') || h.includes('durée') || h.includes('duration') || h.includes('temps'));
-            const calIdx = headers.findIndex(h => h.includes('calorie') || h.includes('kcal') || h.includes('charge') || h.includes('burn'));
-            const descIdx = headers.findIndex(h => h.includes('description') || h.includes('note') || h.includes('detail') || h.includes('details'));
-
-            let importedCount = 0;
-
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const cols = lines[i].split(separator).map(c => c.trim().replace(/^"|"$/g, ''));
-                
-                if (dateIdx !== -1 && cols[dateIdx]) {
-                    const rawDate = cols[dateIdx];
-                    const matchingDay = programDays.find(d => d.dateStr === rawDate);
-                    if (matchingDay) {
-                        if (titleIdx !== -1 && cols[titleIdx]) matchingDay.discipline = cols[titleIdx];
-                        if (durIdx !== -1 && cols[durIdx]) matchingDay.duration = parseInt(cols[durIdx]) || matchingDay.duration;
-                        if (calIdx !== -1 && cols[calIdx]) matchingDay.caloriesBurn = parseInt(cols[calIdx]) || matchingDay.caloriesBurn;
-                        if (descIdx !== -1 && cols[descIdx]) matchingDay.description = cols[descIdx];
-                        importedCount++;
-                    }
-                }
+            if (rows.length === 0) {
+                showNotification("Le fichier CSV semble vide ou corrompu.", true);
+                return;
             }
 
+            // Find key column headers flexibly
+            const dateKey = headers.find(h => h.includes('date') || h.includes('debut') || h.includes('start'));
+            const titleKey = headers.find(h => h.includes('titre') || h.includes('title') || h.includes('sport') || h.includes('discipline') || h.includes('nom') || h.includes('activitytype') || h.includes('type'));
+            const durationKey = headers.find(h => h.includes('duree') || h.includes('duration') || h.includes('temps') || h.includes('time'));
+            const calorieKey = headers.find(h => h.includes('calorie') || h.includes('kcal') || h.includes('charge') || h.includes('burn'));
+            const descKey = headers.find(h => h.includes('description') || h.includes('note') || h.includes('detail') || h.includes('commentaire'));
+
+            if (!dateKey) {
+                showNotification("Impossible de trouver la colonne 'Date' dans votre CSV. Colonnes détectées: " + headers.join(', '), true);
+                return;
+            }
+
+            // Extract all parsed entries from CSV
+            const extractedEntries = [];
+            rows.forEach(r => {
+                const rawDate = r[dateKey];
+                const dateISO = parseFlexibleDate(rawDate);
+                if (dateISO) {
+                    extractedEntries.push({
+                        dateStr: dateISO,
+                        title: titleKey ? (r[titleKey] || 'Entraînement') : 'Entraînement',
+                        duration: durationKey ? parseFlexibleDuration(r[durationKey]) : 0,
+                        calories: calorieKey ? (parseInt(r[calorieKey], 10) || 0) : 0,
+                        description: descKey ? (r[descKey] || '') : ''
+                    });
+                }
+            });
+
+            if (extractedEntries.length === 0) {
+                showNotification("0 séance importée. Format de date non reconnu. Exexmples attendus : YYYY-MM-DD ou DD/MM/YYYY.", true);
+                return;
+            }
+
+            // Sort imported entries by date
+            extractedEntries.sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
+
+            // Adjust calendar start date if imported dates fall outside current 28-day window
+            const minImportDate = new Date(extractedEntries[0].dateStr);
+            const currentMinDate = programDays[0].dateObj;
+            const currentMaxDate = programDays[27].dateObj;
+
+            if (minImportDate < currentMinDate || minImportDate > currentMaxDate) {
+                // Re-align program to start from the earliest CSV date
+                initProgramDays(minImportDate);
+            }
+
+            // Match entries into calendar days
+            let importedCount = 0;
+            extractedEntries.forEach(entry => {
+                const targetDay = programDays.find(d => d.dateStr === entry.dateStr);
+                if (targetDay) {
+                    targetDay.discipline = entry.title;
+                    targetDay.duration = entry.duration;
+                    targetDay.caloriesBurn = entry.calories > 0 ? entry.calories : (entry.duration * 8); // estimate if missing
+                    targetDay.description = entry.description;
+                    importedCount++;
+                }
+            });
+
+            showNotification(`${importedCount} séance(s) importée(s) avec succès dans votre planning !`);
+            renderCalendar();
+            populateRecipeDayPicker();
+            renderDayRecipes();
+        }
+
+        function showNotification(msg, isError = false) {
             const notif = document.getElementById('import-notification');
             const notifText = document.getElementById('import-notification-text');
             if (notif && notifText) {
-                notifText.innerText = `${importedCount} séance(s) importée(s) avec succès dans le calendrier !`;
+                notifText.innerText = msg;
+                if (isError) {
+                    notif.className = "p-4 bg-rose-900/40 border border-rose-500/50 rounded-xl text-rose-300 text-xs flex justify-between items-center";
+                } else {
+                    notif.className = "p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center";
+                }
                 notif.classList.remove('hidden');
             }
-
-            renderCalendar();
-            renderDayRecipes();
         }
 
         function resetToDefaultProgram() {
-            initProgramDays();
+            // Effacer totalement toutes les séances (Remise à zéro / Repos)
+            programDays.forEach(day => {
+                day.discipline = 'Repos';
+                day.duration = 0;
+                day.caloriesBurn = 0;
+                day.description = 'Aucune séance planifiée';
+            });
+
             renderCalendar();
             renderDayRecipes();
-            const notif = document.getElementById('import-notification');
-            const notifText = document.getElementById('import-notification-text');
-            if (notif && notifText) {
-                notifText.innerText = `Programme réinitialisé aux valeurs par défaut.`;
-                notif.classList.remove('hidden');
-            }
+            showNotification(`Toutes les séances d'entraînement ont été effacées.`);
         }
 
         function saveProfile(e) {
@@ -672,20 +898,14 @@
 
             updateSelectedDayDisplay();
             renderDayRecipes();
-
-            const notif = document.getElementById('import-notification');
-            const notifText = document.getElementById('import-notification-text');
-            if (notif && notifText) {
-                notifText.innerText = `Profil et métabolisme mis à jour !`;
-                notif.classList.remove('hidden');
-            }
+            showNotification(`Profil et métabolisme mis à jour !`);
         }
 
         function addWeightLog() {
             const dateInput = document.getElementById('weight-date').value;
             const valInput = parseFloat(document.getElementById('weight-value').value);
             if (!dateInput || isNaN(valInput)) {
-                alert('Veuillez renseigner une date et un poids valide.');
+                showNotification('Veuillez renseigner une date et un poids valide.', true);
                 return;
             }
             weightLogs.push({ date: dateInput, weight: valInput });
@@ -770,12 +990,7 @@
             document.execCommand('copy');
             document.body.removeChild(textarea);
 
-            const notif = document.getElementById('import-notification');
-            const notifText = document.getElementById('import-notification-text');
-            if (notif && notifText) {
-                notifText.innerText = `Liste de courses copiée dans le presse-papier !`;
-                notif.classList.remove('hidden');
-            }
+            showNotification(`Liste de courses copiée dans le presse-papier !`);
         }
 
         window.onload = function() {
