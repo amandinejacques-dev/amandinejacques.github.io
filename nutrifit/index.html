@@ -47,8 +47,8 @@
                 <button onclick="switchTab('groceries')" id="btn-groceries" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
                     <i class="fa-solid fa-cart-shopping w-5"></i> Liste de Courses
                 </button>
-                <button onclick="openSyncModal()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-amber-400 hover:bg-slate-700 mt-4 border border-amber-500/30 bg-amber-500/10">
-                    <i class="fa-solid fa-arrow-up-right-from-square w-5"></i> Synchro & Export
+                <button onclick="openExportModal()" id="btn-export-sync" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-blue-400 hover:bg-slate-700 hover:text-blue-300">
+                    <i class="fa-solid fa-arrows-rotate w-5"></i> Synchro & Export
                 </button>
             </nav>
         </div>
@@ -70,7 +70,6 @@
 
         <!-- TAB CALENDRIER NOLIO -->
         <section id="tab-calendar" class="space-y-6">
-            <!-- Header & Import CSV -->
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
                 <div>
                     <h2 class="text-2xl font-bold text-white flex items-center gap-2">
@@ -89,10 +88,10 @@
                 </div>
             </div>
 
-            <!-- Notice Import -->
+            <!-- Notice Import & Diagnostics -->
             <div id="import-notification" class="hidden p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center">
                 <span id="import-notification-text">CSV Nolio importé avec succès !</span>
-                <button onclick="this.parentElement.classList.add('hidden')" class="text-emerald-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="document.getElementById('import-notification').classList.add('hidden')" class="text-emerald-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <!-- Grille Calendrier 28 Jours -->
@@ -105,14 +104,12 @@
                     </div>
                 </div>
 
-                <!-- En-tête des jours de la semaine -->
                 <div class="grid grid-cols-7 gap-2 text-center font-bold text-xs text-slate-400 uppercase tracking-wider py-1 border-b border-slate-700">
                     <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
                 </div>
 
-                <!-- Grille des 28 jours -->
                 <div class="grid grid-cols-7 gap-2" id="calendar-grid">
-                    <!-- Rempli en JS -->
+                    <!-- Dynamic Grid -->
                 </div>
             </div>
 
@@ -121,12 +118,1037 @@
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/60 pb-4">
                     <div>
                         <span class="text-xs font-bold uppercase tracking-widest text-blue-400" id="selected-day-tag">Jour Sélectionné</span>
-                        <h3 class="text-xl font-extrabold text-white mt-0.5" id="selected-day-title">Lundi 12 Octobre</h3>
+                        <h3 class="text-xl font-extrabold text-white mt-0.5" id="selected-day-title">--</h3>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="toggleEditSession()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-pen-to-square"></i> Modifier la séance
+                    <button onclick="switchTab('recipes')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-utensils"></i> Voir les recettes de ce jour
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Discipline</span>
+                        <p class="text-lg font-bold text-blue-400 mt-1 flex items-center gap-2" id="selected-day-discipline">
+                            <i class="fa-solid fa-person-swimming"></i> Repos
+                        </p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Durée / Intensité</span>
+                        <p class="text-lg font-bold text-white mt-1" id="selected-day-duration">0 min</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Dépense Est. Séance</span>
+                        <p class="text-lg font-bold text-amber-400 mt-1" id="selected-day-workout-burn">0 kcal</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Cible Total Jour</span>
+                        <p class="text-lg font-bold text-emerald-400 mt-1" id="selected-day-total-target">0 kcal</p>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs text-slate-400 italic" id="selected-day-description">
+                    Description / Séance Nolio : "Aucune séance"
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB RECETTES & MENUS DU JOUR -->
+        <section id="tab-recipes" class="space-y-6 hidden">
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Menu du Jour & Recettes Adaptées</h2>
+                    <p class="text-slate-400 text-sm">Chaque jour du programme dispose de recettes adaptées aux besoins métaboliques.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="text-xs text-slate-400 font-medium">Sélectionner Jour :</label>
+                    <select id="recipe-day-picker" onchange="selectDayFromPicker(parseInt(this.value))" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm font-bold focus:outline-none focus:border-blue-500">
+                    </select>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase">Calories Cibles</span>
+                    <p class="text-2xl font-extrabold text-blue-400 mt-1" id="recipe-target-kcal">0 <span class="text-xs font-normal text-slate-400">kcal</span></p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase">Protéines</span>
+                    <p class="text-2xl font-extrabold text-emerald-400 mt-1" id="recipe-target-prot">0 <span class="text-xs font-normal text-slate-400">g</span></p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase">Glucides</span>
+                    <p class="text-2xl font-extrabold text-amber-400 mt-1" id="recipe-target-carb">0 <span class="text-xs font-normal text-slate-400">g</span></p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
+                    <span class="text-xs text-slate-400 font-bold uppercase">Lipides</span>
+                    <p class="text-2xl font-extrabold text-rose-400 mt-1" id="recipe-target-fat">0 <span class="text-xs font-normal text-slate-400">g</span></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="recipes-cards-container">
+            </div>
+        </section>
+
+        <!-- TAB PROFILE -->
+        <section id="tab-profile" class="space-y-6 hidden">
+            <header class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <h2 class="text-2xl font-bold text-white">Profil Utilisateur & Calcul Métabolique</h2>
+                <p class="text-slate-400 text-sm">Calcul du métabolisme de base (Mifflin-St Jeor) et répartition ajustée.</p>
+            </header>
+
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 max-w-2xl">
+                <form id="profile-form" onsubmit="saveProfile(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Sexe</label>
+                            <select id="prof-sex" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                                <option value="M">Homme</option>
+                                <option value="F">Femme</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Âge</label>
+                            <input type="number" id="prof-age" value="32" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Taille (cm)</label>
+                            <input type="number" id="prof-height" value="178" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Poids Actuel (kg)</label>
+                            <input type="number" step="0.1" id="prof-current-weight" value="78.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Poids Cible (kg)</label>
+                            <input type="number" step="0.1" id="prof-target-weight" value="70.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Objectif Déficit / Jour (kcal)</label>
+                            <input type="number" id="prof-deficit" value="400" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl transition">
+                        Enregistrer et Mettre à jour
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB PROGRESS -->
+        <section id="tab-progress" class="space-y-6 hidden">
+            <header class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <h2 class="text-2xl font-bold text-white">Suivi du Poids</h2>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
+                    <h3 class="font-bold text-lg text-white">Ajouter une pesée</h3>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Date</label>
+                        <input type="date" id="weight-date" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Poids (kg)</label>
+                        <input type="number" step="0.1" id="weight-value" placeholder="ex: 78.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                    </div>
+                    <button onclick="addWeightLog()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-medium text-sm transition">
+                        Enregistrer
+                    </button>
+                </div>
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 md:col-span-2">
+                    <h3 class="font-bold text-lg text-white mb-4">Évolution du Poids</h3>
+                    <div class="h-64">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB GROCERIES -->
+        <section id="tab-groceries" class="space-y-6 hidden">
+            <header class="flex justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Liste de Courses Automatique</h2>
+                    <p class="text-slate-400 text-sm">Calculée pour le programme de 4 semaines.</p>
+                </div>
+                <button onclick="copyGroceryList()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center gap-2">
+                    <i class="fa-regular fa-copy"></i> Copier
+                </button>
+            </header>
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="grocery-list-container">
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Navigation Mobile Basse -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 flex justify-around p-2 z-50">
+        <button onclick="switchTab('calendar')" id="btn-mob-calendar" class="mob-nav-btn flex flex-col items-center gap-1 text-blue-400 text-xs py-1">
+            <i class="fa-solid fa-calendar-days text-base"></i> Planning
+        </button>
+        <button onclick="switchTab('recipes')" id="btn-mob-recipes" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
+            <i class="fa-solid fa-utensils text-base"></i> Recettes
+        </button>
+        <button onclick="switchTab('profile')" id="btn-mob-profile" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
+            <i class="fa-solid fa-user-gear text-base"></i> Profil
+        </button>
+        <button onclick="switchTab('progress')" id="btn-mob-progress" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
+            <i class="fa-solid fa-weight-scale text-base"></i> Poids
+        </button>
+        <button onclick="switchTab('groceries')" id="btn-mob-groceries" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
+            <i class="fa-solid fa-cart-shopping text-base"></i> Courses
+        </button>
+        <button onclick="openExportModal()" id="btn-mob-export" class="mob-nav-btn flex flex-col items-center gap-1 text-blue-400 text-xs py-1">
+            <i class="fa-solid fa-arrows-rotate text-base"></i> Export
+        </button>
+    </nav>
+
+    <!-- Modal d'Exportation & Synchronisation -->
+    <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate text-blue-500"></i> Synchronisation & Exportation
+                </h3>
+                <button onclick="closeExportModal()" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Export iCal/ICS -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-blue-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-regular fa-calendar-check"></i> Calendrier (.ics)
+                        </span>
+                        <p class="text-xs text-slate-300 mt-1">Exportez le programme complet d'entraînements et de nutrition vers Google Calendar, Apple Calendar ou Outlook.</p>
+                    </div>
+                    <button onclick="exportToICS()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> Télécharger l'Agenda (.ics)
+                    </button>
+                </div>
+
+                <!-- Export/Import JSON -->
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-database"></i> Sauvegarde JSON
+                        </span>
+                        <p class="text-xs text-slate-300 mt-1">Sauvegardez l'ensemble de vos données (profil, poids, programme) pour restaurer votre session sur smartphone.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportJSON()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-download"></i> Exporter
                         </button>
-                        <button onclick="switchTab('recipes')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
-                            <i class="fa-solid fa-utensils"></i> Voir les recettes
-                        </button>
+                        <label class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium py-2.5 rounded-xl text-xs transition text-center cursor-pointer flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-upload"></i> Importer
+                            <input type="file" id="json-import-input" accept=".json" class="hidden" onchange="importJSON(event)">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Liste Texte Keep/Notes -->
+            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center gap-2">
+                        <i class="fa-regular fa-note-sticky"></i> Résumé Texte (Google Keep / Notes)
+                    </span>
+                    <button onclick="copyTextSummary()" class="text-xs bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
+                        <i class="fa-regular fa-copy"></i> Copier
+                    </button>
+                </div>
+                <textarea id="export-text-preview" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 h-32 focus:outline-none focus:border-amber-500/50"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let profile = {
+            sex: 'M',
+            age: 32,
+            height: 178,
+            currentWeight: 78.5,
+            targetWeight: 70.0,
+            deficit: 400
+        };
+
+        let todayDateObj = new Date();
+        let programStartDateObj = new Date(todayDateObj);
+        programStartDateObj.setDate(todayDateObj.getDate() - 3); // Start 3 days prior by default
+
+        let selectedDayIndex = 0;
+        let weightChart = null;
+        let programDays = [];
+        let weightLogs = [
+            { date: '2026-10-01', weight: 79.2 },
+            { date: '2026-10-08', weight: 78.9 },
+            { date: '2026-10-15', weight: 78.5 }
+        ];
+
+        const recipeDatabase = [
+            {
+                breakfast: { name: "Porridge Avoine, Banane & Beurre de Cacahuète", kcal: 450, p: 18, c: 65, f: 14, items: ["80g Flocons d'avoine", "200ml Lait d'amande", "1 Banane", "15g Beurre de cacahuète"] },
+                lunch: { name: "Poulet Basmati & Courgettes Grillées", kcal: 620, p: 42, c: 70, f: 15, items: ["150g Blanc de poulet", "80g Riz basmati cru", "200g Courgettes", "10ml Huile d'olive"] },
+                snack: { name: "Shaker Whey & Pomme", kcal: 250, p: 25, c: 22, f: 5, items: ["30g Whey protéine", "1 Pomme", "15g Amandes"] },
+                dinner: { name: "Pavé de Saumon, Quinoa & Brocolis", kcal: 580, p: 35, c: 55, f: 20, items: ["140g Pavé de saumon", "70g Quinoa cru", "200g Brocolis à la vapeur"] }
+            },
+            {
+                breakfast: { name: "Omelette Sucrée Avoine & Myrtilles", kcal: 430, p: 22, c: 50, f: 14, items: ["3 Œufs", "50g Flocons d'avoine", "80g Myrtilles fraiches", "10g Miel"] },
+                lunch: { name: "Salade de Thon, Patate Douce & Maïs", kcal: 590, p: 38, c: 68, f: 14, items: ["130g Thon au naturel", "200g Patate douce rôtie", "100g Maïs", "Mâche & Vinaigrette"] },
+                snack: { name: "Fromage Blanc, Graines de Chia & Fruits Rouges", kcal: 230, p: 20, c: 20, f: 6, items: ["200g Fromage blanc 0%", "15g Graines de chia", "100g Fruits rouges"] },
+                dinner: { name: "Filet de Dinde, Lentilles & Carottes", kcal: 520, p: 40, c: 58, f: 10, items: ["150g Filet de dinde", "80g Lentilles vertes crues", "150g Carottes vapeur"] }
+            },
+            {
+                breakfast: { name: "Pancakes Protéinés Banane & Sirop d'Érable", kcal: 480, p: 26, c: 68, f: 10, items: ["1 Banane", "2 Œufs", "40g Farine d'avoine", "15ml Sirop d'érable"] },
+                lunch: { name: "Bœuf Haché 5%, Riz Complet & Poivrons", kcal: 640, p: 44, c: 72, f: 16, items: ["150g Bœuf 5%", "80g Riz complet cru", "200g Poivrons poêlés"] },
+                snack: { name: "Toast Pain Complet & Purée d'Amande", kcal: 260, p: 10, c: 30, f: 11, items: ["2 Tranches pain complet", "20g Purée d'amande", "1 C.à.c Miel"] },
+                dinner: { name: "Dos de Cabillaud, Bulgur & Épinards", kcal: 500, p: 36, c: 52, f: 11, items: ["160g Cabillaud", "70g Boulgour cru", "200g Épinards frais"] }
+            },
+            {
+                breakfast: { name: "Bowl Cake Choco-Banane Express", kcal: 440, p: 20, c: 62, f: 12, items: ["60g Flocons d'avoine", "1 Œuf", "1 Banane", "10g Cacao en poudre 100%"] },
+                lunch: { name: "Wrap Poulet, Avocat & Crudités", kcal: 610, p: 38, c: 60, f: 20, items: ["2 Wraps blé complet", "130g Poulet effiloché", "1/2 Avocat", "Tomates & Salade"] },
+                snack: { name: "Smoothie Protéiné Banane & Beurre de Peanut", kcal: 280, p: 22, c: 32, f: 8, items: ["25g Whey", "1 Banane", "200ml Lait végétal", "10g Beurre de cacahuète"] },
+                dinner: { name: "Omelette aux Champignons & Semoule Complète", kcal: 530, p: 30, c: 55, f: 18, items: ["3 Œufs bio", "150g Champignons", "60g Semoule complète", "Salade verte"] }
+            },
+            {
+                breakfast: { name: "Eggs & Toasts Avocat", kcal: 460, p: 22, c: 45, f: 20, items: ["2 Œufs pochés", "2 Tranches pain de seigle", "1/2 Avocat écrasé"] },
+                lunch: { name: "Pâtes Complètes, Crevettes & Sauce Tomate Basilic", kcal: 600, p: 36, c: 78, f: 11, items: ["90g Pâtes complètes crues", "150g Crevettes", "150g Coulis de tomate", "Basilic"] },
+                snack: { name: "Compote Sans Sucre & Poignée de Noix", kcal: 220, p: 5, c: 25, f: 12, items: ["1 Big pot compote pomme", "20g Noix de Grenoble"] },
+                dinner: { name: "Tofu Mariné Soja, Riz Thaï & Brocolis", kcal: 510, p: 28, c: 62, f: 14, items: ["150g Tofu ferme", "70g Riz thaï cru", "200g Brocolis", "Sauce soja & Huile séricine"] }
+            },
+            {
+                breakfast: { name: "Muesli Croustillant Maison, Yaourt Grec & Poire", kcal: 470, p: 18, c: 64, f: 15, items: ["60g Muesli flocon/graines", "150g Yaourt grec 0%", "1 Poire fraîche"] },
+                lunch: { name: "Sauté de Porc Émincé, Nouilles de Sarrasin & Wok Légumes", kcal: 650, p: 42, c: 75, f: 15, items: ["150g Filet de porc", "80g Nouilles Soba", "200g Légumes wok"] },
+                snack: { name: "Barre Énergétique Avoine/Dattes Maison", kcal: 240, p: 8, c: 38, f: 7, items: ["2 Dattes Medjool", "30g Flocons d'avoine", "10g Amandes"] },
+                dinner: { name: "Pavé de Thon Grillé, Purée de Patate Douce", kcal: 540, p: 40, c: 54, f: 13, items: ["140g Thon frais", "220g Patate douce", "Haricots verts"] }
+            },
+            {
+                breakfast: { name: "Skyr, Kiwi, Miel & Graines de Courge", kcal: 390, p: 25, c: 48, f: 9, items: ["200g Skyr", "2 Kiwis", "15g Miel", "15g Graines de courge"] },
+                lunch: { name: "Chili Con Carne Allégé au Bœuf & Haricots Rouges", kcal: 660, p: 45, c: 78, f: 14, items: ["140g Bœuf haché 5%", "100g Haricots rouges", "60g Riz cru", "Tomates"] },
+                snack: { name: "Formage Blanc & Fruits Séchés", kcal: 210, p: 18, c: 26, f: 3, items: ["200g Formage blanc", "20g Raisins secs"] },
+                dinner: { name: "Lieu Noir au Four, Risotto d'Épeautre & Courgettes", kcal: 490, p: 34, c: 56, f: 10, items: ["160g Lieu noir", "60g Petit épeautre", "200g Courgettes"] }
+            }
+        ];
+
+        for (let i = 7; i < 28; i++) {
+            const base = JSON.parse(JSON.stringify(recipeDatabase[i % 7]));
+            base.breakfast.name += ` (Var. J${i+1})`;
+            recipeDatabase.push(base);
+        }
+
+        function switchTab(tabId) {
+            const sections = document.querySelectorAll('main > section');
+            sections.forEach(sec => sec.classList.add('hidden'));
+
+            const targetSection = document.getElementById(`tab-${tabId}`);
+            if (targetSection) targetSection.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab'));
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) activeBtn.classList.add('active-tab');
+
+            document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-400');
+                btn.classList.add('text-slate-400');
+            });
+            const activeMobBtn = document.getElementById(`btn-mob-${tabId}`);
+            if (activeMobBtn) {
+                activeMobBtn.classList.remove('text-slate-400');
+                activeMobBtn.classList.add('text-blue-400');
+            }
+
+            if (tabId === 'progress') renderWeightChart();
+            if (tabId === 'recipes') {
+                populateRecipeDayPicker();
+                renderDayRecipes();
+            }
+            if (tabId === 'groceries') {
+                renderGroceryList();
+            }
+        }
+
+        function getBMR() {
+            if (profile.sex === 'M') {
+                return Math.round((10 * profile.currentWeight) + (6.25 * profile.height) - (5 * profile.age) + 5);
+            } else {
+                return Math.round((10 * profile.currentWeight) + (6.25 * profile.height) - (5 * profile.age) - 161);
+            }
+        }
+
+        function initProgramDays(startFromDate = null) {
+            if (startFromDate) {
+                programStartDateObj = new Date(startFromDate);
+            } else {
+                programStartDateObj = new Date(todayDateObj);
+                programStartDateObj.setDate(todayDateObj.getDate() - 3);
+            }
+
+            // Valeurs ajustées et réalistes des dépenses caloriens par séance (Course ajustée autour de 5.5 kcal/min soit ~330 kcal pour 45 min)
+            const defaultWorkouts = [
+                { disc: 'Natation', dur: 50, cal: 400, desc: 'Technique & Allure Z2/Z3' },
+                { disc: 'Vélo', dur: 90, cal: 700, desc: 'Endurance fondamentale + rappel Seuil' },
+                { disc: 'Course à pied', dur: 45, cal: 250, desc: 'Footing avec 5x2 min VMA' },
+                { disc: 'Repos', dur: 0, cal: 0, desc: 'Récupération active & Stretching' },
+                { disc: 'Natation', dur: 60, cal: 480, desc: 'Séries VMA 10x100m' },
+                { disc: 'Enchaînement Tri', dur: 120, cal: 850, desc: 'Brick : 2h Vélo + 30m Cap' },
+                { disc: 'Renforcement', dur: 45, cal: 210, desc: 'Gainage, PPG & Mobilité' }
+            ];
+
+            programDays = [];
+            for (let i = 0; i < 28; i++) {
+                const d = new Date(programStartDateObj);
+                d.setDate(programStartDateObj.getDate() + i);
+
+                const template = defaultWorkouts[i % 7];
+                programDays.push({
+                    dayIndex: i,
+                    dateStr: formatDateISO(d),
+                    dateObj: d,
+                    discipline: template.disc,
+                    duration: template.dur,
+                    caloriesBurn: template.cal,
+                    description: template.desc,
+                    recipes: recipeDatabase[i]
+                });
+            }
+
+            const todayStr = formatDateISO(todayDateObj);
+            const foundTodayIndex = programDays.findIndex(p => p.dateStr === todayStr);
+            selectedDayIndex = (foundTodayIndex !== -1) ? foundTodayIndex : 0;
+        }
+
+        function formatDateISO(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const todayStr = formatDateISO(todayDateObj);
+
+            programDays.forEach((day, index) => {
+                const isToday = day.dateStr === todayStr;
+                const isSelected = index === selectedDayIndex;
+
+                let discIcon = 'fa-bed';
+                let discColor = 'text-slate-400';
+                const discLower = day.discipline.toLowerCase();
+                
+                if (discLower.includes('natation') || discLower.includes('swim')) { discIcon = 'fa-person-swimming'; discColor = 'text-cyan-400'; }
+                else if (discLower.includes('vélo') || discLower.includes('velo') || discLower.includes('bike') || discLower.includes('cyclisme')) { discIcon = 'fa-person-biking'; discColor = 'text-emerald-400'; }
+                else if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('pied')) { discIcon = 'fa-person-running'; discColor = 'text-amber-400'; }
+                else if (discLower.includes('tri') || discLower.includes('brick')) { discIcon = 'fa-person-triathlon'; discColor = 'text-purple-400'; }
+                else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gym')) { discIcon = 'fa-dumbbell'; discColor = 'text-rose-400'; }
+
+                const dayCard = document.createElement('div');
+                dayCard.className = `p-2 rounded-xl border text-left cursor-pointer transition flex flex-col justify-between h-24 sm:h-28 relative ${
+                    isToday ? 'calendar-day-today' : 'bg-slate-900/60 border-slate-700/60'
+                } ${isSelected ? 'ring-2 ring-amber-500 border-amber-500 bg-slate-800' : 'hover:border-slate-500'}`;
+
+                dayCard.onclick = () => selectDay(index);
+
+                const formattedDate = day.dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+                dayCard.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold ${isToday ? 'text-blue-400' : 'text-slate-300'}">${formattedDate}</span>
+                        ${isToday ? '<span class="text-[9px] bg-blue-600 text-white px-1.5 py-0.5 rounded font-extrabold">Auj.</span>' : ''}
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold ${discColor} truncate flex items-center gap-1 mt-1">
+                            <i class="fa-solid ${discIcon}"></i> <span class="truncate">${day.discipline}</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400">${day.duration > 0 ? day.duration + ' min' : 'Repos'}</div>
+                    </div>
+                    <div class="text-right text-[10px] font-bold text-amber-400 mt-1">
+                        ${day.caloriesBurn > 0 ? '+' + day.caloriesBurn + ' kcal' : '-'}
+                    </div>
+                `;
+                grid.appendChild(dayCard);
+            });
+
+            updateSelectedDayDisplay();
+        }
+
+        function selectDay(index) {
+            selectedDayIndex = index;
+            renderCalendar();
+            populateRecipeDayPicker();
+            renderDayRecipes();
+        }
+
+        function selectDayFromPicker(index) {
+            selectedDayIndex = index;
+            renderCalendar();
+            renderDayRecipes();
+        }
+
+        function updateSelectedDayDisplay() {
+            const day = programDays[selectedDayIndex];
+            if (!day) return;
+
+            const bmr = getBMR();
+            const targetCalories = Math.round(bmr + day.caloriesBurn - profile.deficit);
+
+            document.getElementById('selected-day-tag').innerText = `Jour ${day.dayIndex + 1}`;
+            document.getElementById('selected-day-title').innerText = day.dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('selected-day-discipline').innerText = day.discipline;
+            document.getElementById('selected-day-duration').innerText = day.duration > 0 ? `${day.duration} min` : '0 min (Repos)';
+            document.getElementById('selected-day-workout-burn').innerText = `${day.caloriesBurn} kcal`;
+            document.getElementById('selected-day-total-target').innerText = `${targetCalories} kcal`;
+            document.getElementById('selected-day-description').innerText = day.description || "Aucune description de séance";
+            document.getElementById('sidebar-bmr-display').innerText = `${bmr} kcal`;
+            document.getElementById('sidebar-weight-display').innerText = `${profile.currentWeight} kg`;
+            document.getElementById('today-date-banner').innerText = todayDateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        function populateRecipeDayPicker() {
+            const picker = document.getElementById('recipe-day-picker');
+            if (!picker) return;
+            picker.innerHTML = '';
+            programDays.forEach((day, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                opt.selected = index === selectedDayIndex;
+                const formattedDate = day.dateObj.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+                opt.innerText = `J${index + 1} (${formattedDate}) - ${day.discipline}`;
+                picker.appendChild(opt);
+            });
+        }
+
+        function renderDayRecipes() {
+            const day = programDays[selectedDayIndex];
+            if (!day) return;
+            const rec = day.recipes;
+
+            const bmr = getBMR();
+            const targetKcal = Math.round(bmr + day.caloriesBurn - profile.deficit);
+            const targetProt = Math.round(profile.currentWeight * 1.8);
+            const targetFat = Math.round((targetKcal * 0.25) / 9);
+            const targetCarb = Math.round((targetKcal - (targetProt * 4) - (targetFat * 9)) / 4);
+
+            document.getElementById('recipe-target-kcal').innerHTML = `${targetKcal} <span class="text-xs font-normal text-slate-400">kcal</span>`;
+            document.getElementById('recipe-target-prot').innerHTML = `${targetProt} <span class="text-xs font-normal text-slate-400">g</span>`;
+            document.getElementById('recipe-target-carb').innerHTML = `${targetCarb} <span class="text-xs font-normal text-slate-400">g</span>`;
+            document.getElementById('recipe-target-fat').innerHTML = `${targetFat} <span class="text-xs font-normal text-slate-400">g</span>`;
+
+            const container = document.getElementById('recipes-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const meals = [
+                { type: 'Petit-déjeuner', data: rec.breakfast, icon: 'fa-mug-hot', color: 'text-amber-400' },
+                { type: 'Déjeuner', data: rec.lunch, icon: 'fa-sun', color: 'text-blue-400' },
+                { type: 'Collation / Avant-Séance', data: rec.snack, icon: 'fa-bolt', color: 'text-purple-400' },
+                { type: 'Dîner & Récupération', data: rec.dinner, icon: 'fa-moon', color: 'text-emerald-400' }
+            ];
+
+            meals.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-between space-y-4';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold uppercase tracking-wider ${m.color} flex items-center gap-2">
+                                <i class="fa-solid ${m.icon}"></i> ${m.type}
+                            </span>
+                            <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-lg text-slate-300 font-bold">${m.data.kcal} kcal</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mt-2">${m.data.name}</h4>
+                        <div class="flex gap-3 text-xs text-slate-400 mt-1">
+                            <span class="text-emerald-400 font-medium">P : ${m.data.p}g</span>
+                            <span class="text-amber-400 font-medium">G : ${m.data.c}g</span>
+                            <span class="text-rose-400 font-medium">L : ${m.data.f}g</span>
+                        </div>
+                    </div>
+                    <div class="border-t border-slate-700/60 pt-3">
+                        <span class="text-xs text-slate-400 font-bold block mb-1">Ingrédients :</span>
+                        <ul class="text-xs text-slate-300 space-y-1">
+                            ${m.data.items.map(item => `<li><i class="fa-solid fa-check text-blue-500 mr-1.5 text-[10px]"></i> ${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // --- ROBUST CSV PARSER ---
+        function parseCustomCSV(text) {
+            // Remove UTF-8 BOM if present
+            text = text.replace(/^\uFEFF/, '');
+            
+            const lines = text.split(/\r\n|\n/).filter(line => line.trim().length > 0);
+            if (lines.length < 2) return [];
+
+            // Determine delimiter (; or , or \t)
+            const firstLine = lines[0];
+            let delimiter = ';';
+            if ((firstLine.match(/,/g) || []).length > (firstLine.match(/;/g) || []).length) {
+                delimiter = ',';
+            } else if ((firstLine.match(/\t/g) || []).length > (firstLine.match(/;/g) || []).length) {
+                delimiter = '\t';
+            }
+
+            // CSV tokenizer with quotes support
+            function tokenize(line) {
+                const result = [];
+                let cell = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === delimiter && !inQuotes) {
+                        result.push(cell.trim().replace(/^"|"$/g, ''));
+                        cell = '';
+                    } else {
+                        cell += char;
+                    }
+                }
+                result.push(cell.trim().replace(/^"|"$/g, ''));
+                return result;
+            }
+
+            const headers = tokenize(lines[0]).map(h => normalizeHeader(h));
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const cols = tokenize(lines[i]);
+                if (cols.length === 0 || cols.every(c => c === '')) continue;
+                const rowObj = {};
+                headers.forEach((h, idx) => {
+                    rowObj[h] = cols[idx] !== undefined ? cols[idx] : '';
+                });
+                rows.push(rowObj);
+            }
+            return { headers, rows };
+        }
+
+        function normalizeHeader(str) {
+            return str
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
+                .replace(/[^a-z0-9]/g, ""); // keep alphanumeric only
+        }
+
+        function parseFlexibleDate(str) {
+            if (!str) return null;
+            str = str.trim().split(' ')[0]; // remove time if present
+            
+            // YYYY-MM-DD or YYYY/MM/DD
+            let m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
+            if (m) {
+                return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
+            }
+
+            // DD-MM-YYYY or DD/MM/YYYY
+            m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+            if (m) {
+                return `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
+            }
+
+            return null;
+        }
+
+        function parseFlexibleDuration(val) {
+            if (!val) return 0;
+            val = String(val).trim().toLowerCase();
+
+            // Format HH:MM:SS or HH:MM
+            if (val.includes(':')) {
+                const parts = val.split(':').map(p => parseInt(p, 10) || 0);
+                if (parts.length === 3) return (parts[0] * 60) + parts[1]; // hours + mins
+                if (parts.length === 2) return (parts[0] * 60) + parts[1];
+            }
+
+            // Extract trailing numeric
+            const num = parseInt(val.replace(/[^0-9]/g, ''), 10);
+            return isNaN(num) ? 0 : num;
+        }
+
+        function handleNolioCSVImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                parseAndApplyNolioCSV(e.target.result);
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // reset input
+        }
+
+        function parseAndApplyNolioCSV(csvText) {
+            const parsed = parseCustomCSV(csvText);
+            const headers = parsed.headers;
+            const rows = parsed.rows;
+
+            if (rows.length === 0) {
+                showNotification("Le fichier CSV semble vide ou corrompu.", true);
+                return;
+            }
+
+            // Find key column headers flexibly
+            const dateKey = headers.find(h => h.includes('date') || h.includes('debut') || h.includes('start'));
+            const titleKey = headers.find(h => h.includes('titre') || h.includes('title') || h.includes('sport') || h.includes('discipline') || h.includes('nom') || h.includes('activitytype') || h.includes('type'));
+            const durationKey = headers.find(h => h.includes('duree') || h.includes('duration') || h.includes('temps') || h.includes('time'));
+            const calorieKey = headers.find(h => h.includes('calorie') || h.includes('kcal') || h.includes('charge') || h.includes('burn'));
+            const descKey = headers.find(h => h.includes('description') || h.includes('note') || h.includes('detail') || h.includes('commentaire'));
+
+            if (!dateKey) {
+                showNotification("Impossible de trouver la colonne 'Date' dans votre CSV. Colonnes détectées: " + headers.join(', '), true);
+                return;
+            }
+
+            // Extract all parsed entries from CSV
+            const extractedEntries = [];
+            rows.forEach(r => {
+                const rawDate = r[dateKey];
+                const dateISO = parseFlexibleDate(rawDate);
+                if (dateISO) {
+                    extractedEntries.push({
+                        dateStr: dateISO,
+                        title: titleKey ? (r[titleKey] || 'Entraînement') : 'Entraînement',
+                        duration: durationKey ? parseFlexibleDuration(r[durationKey]) : 0,
+                        calories: calorieKey ? (parseInt(r[calorieKey], 10) || 0) : 0,
+                        description: descKey ? (r[descKey] || '') : ''
+                    });
+                }
+            });
+
+            if (extractedEntries.length === 0) {
+                showNotification("0 séance importée. Format de date non reconnu. Exexmples attendus : YYYY-MM-DD ou DD/MM/YYYY.", true);
+                return;
+            }
+
+            // Sort imported entries by date
+            extractedEntries.sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
+
+            // Adjust calendar start date if imported dates fall outside current 28-day window
+            const minImportDate = new Date(extractedEntries[0].dateStr);
+            const currentMinDate = programDays[0].dateObj;
+            const currentMaxDate = programDays[27].dateObj;
+
+            if (minImportDate < currentMinDate || minImportDate > currentMaxDate) {
+                // Re-align program to start from the earliest CSV date
+                initProgramDays(minImportDate);
+            }
+
+            // Match entries into calendar days
+            let importedCount = 0;
+            extractedEntries.forEach(entry => {
+                const targetDay = programDays.find(d => d.dateStr === entry.dateStr);
+                if (targetDay) {
+                    targetDay.discipline = entry.title;
+                    targetDay.duration = entry.duration;
+                    
+                    // Calcul d'estimation ajusté selon la discipline si la donnée est absente du CSV
+                    if (entry.calories > 0) {
+                        targetDay.caloriesBurn = entry.calories;
+                    } else {
+                        const discLower = entry.title.toLowerCase();
+                        let kcalPerMin = 7; // Valeur par défaut (ex: vélo modéré)
+                        if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('pied')) {
+                            kcalPerMin = 5.5; // ~330 kcal/h pour la course (ajusté plus réaliste)
+                        } else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gym')) {
+                            kcalPerMin = 4.5; // ~270 kcal/h pour le renforcement
+                        } else if (discLower.includes('natation') || discLower.includes('swim')) {
+                            kcalPerMin = 7; // ~420 kcal/h pour la natation
+                        }
+                        targetDay.caloriesBurn = Math.round(entry.duration * kcalPerMin);
+                    }
+
+                    targetDay.description = entry.description;
+                    importedCount++;
+                }
+            });
+
+            showNotification(`${importedCount} séance(s) importée(s) avec succès dans votre planning !`);
+            renderCalendar();
+            populateRecipeDayPicker();
+            renderDayRecipes();
+        }
+
+        function showNotification(msg, isError = false) {
+            const notif = document.getElementById('import-notification');
+            const notifText = document.getElementById('import-notification-text');
+            if (notif && notifText) {
+                notifText.innerText = msg;
+                if (isError) {
+                    notif.className = "p-4 bg-rose-900/40 border border-rose-500/50 rounded-xl text-rose-300 text-xs flex justify-between items-center";
+                } else {
+                    notif.className = "p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center";
+                }
+                notif.classList.remove('hidden');
+            }
+        }
+
+        function resetToDefaultProgram() {
+            // Effacer totalement toutes les séances (Remise à zéro / Repos)
+            programDays.forEach(day => {
+                day.discipline = 'Repos';
+                day.duration = 0;
+                day.caloriesBurn = 0;
+                day.description = 'Aucune séance planifiée';
+            });
+
+            renderCalendar();
+            renderDayRecipes();
+            showNotification(`Toutes les séances d'entraînement ont été effacées.`);
+        }
+
+        function saveProfile(e) {
+            e.preventDefault();
+            profile.sex = document.getElementById('prof-sex').value;
+            profile.age = parseInt(document.getElementById('prof-age').value) || 30;
+            profile.height = parseInt(document.getElementById('prof-height').value) || 175;
+            profile.currentWeight = parseFloat(document.getElementById('prof-current-weight').value) || 75;
+            profile.targetWeight = parseFloat(document.getElementById('prof-target-weight').value) || 70;
+            profile.deficit = parseInt(document.getElementById('prof-deficit').value) || 0;
+
+            updateSelectedDayDisplay();
+            renderDayRecipes();
+            showNotification(`Profil et métabolisme mis à jour !`);
+        }
+
+        function addWeightLog() {
+            const dateInput = document.getElementById('weight-date').value;
+            const valInput = parseFloat(document.getElementById('weight-value').value);
+            if (!dateInput || isNaN(valInput)) {
+                showNotification('Veuillez renseigner une date et un poids valide.', true);
+                return;
+            }
+            weightLogs.push({ date: dateInput, weight: valInput });
+            weightLogs.sort((a,b) => new Date(a.date) - new Date(b.date));
+            profile.currentWeight = valInput;
+            document.getElementById('sidebar-weight-display').innerText = `${valInput} kg`;
+            renderWeightChart();
+            updateSelectedDayDisplay();
+        }
+
+        function renderWeightChart() {
+            const ctx = document.getElementById('weightChart');
+            if (!ctx) return;
+            if (weightChart) weightChart.destroy();
+
+            weightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: weightLogs.map(l => l.date),
+                    datasets: [{
+                        label: 'Poids (kg)',
+                        data: weightLogs.map(l => l.weight),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderGroceryList() {
+            const container = document.getElementById('grocery-list-container');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="space-y-2">
+                    <h3 class="font-bold text-blue-400">Glucides & Féculents</h3>
+                    <ul class="text-xs text-slate-300 space-y-1">
+                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 2.5kg Flocons d'avoine</li>
+                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 2kg Riz basmati & complet</li>
+                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 1kg Patates douces</li>
+                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 1kg Quinoa & Boulgour</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h3 class="font-bold text-emerald-400">Protéines & Poissons</h3>
+                    <ul class="text-xs text-slate-300 space-y-1">
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 2kg Blanc de poulet & dinde</li>
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 1.2kg Saumon & Thon</li>
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 30 Œufs bio</li>
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 1kg Fromage blanc & Skyr</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h3 class="font-bold text-amber-400">Fruits, Légumes & Oléagineux</h3>
+                    <ul class="text-xs text-slate-300 space-y-1">
+                        <li><i class="fa-solid fa-check text-amber-500 mr-2"></i> Bananes, Pommes, Myrtilles</li>
+                        <li><i class="fa-solid fa-check text-amber-500 mr-2"></i> Courgettes, Brocolis, Épinards</li>
+                        <li><i class="fa-solid fa-check text-amber-500 mr-2"></i> Beurre de cacahuète & Amandes</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        function copyGroceryList() {
+            const text = "LISTE DE COURSES - NUTRIFIT TRIATHLON\n- 2.5kg Flocons d'avoine\n- 2kg Riz basmati & complet\n- 1kg Patates douces\n- 2kg Blanc de poulet & dinde\n- 1.2kg Saumon & Thon\n- 30 Œufs bio\n- Fruits, légumes & oléagineux";
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            showNotification(`Liste de courses copiée dans le presse-papier !`);
+        }
+
+        // --- EXPORT & MODAL FUNCTIONS ---
+        function openExportModal() {
+            const modal = document.getElementById('export-modal');
+            if (modal) {
+                updateTextSummary();
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeExportModal() {
+            const modal = document.getElementById('export-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function updateTextSummary() {
+            const textarea = document.getElementById('export-text-preview');
+            if (!textarea) return;
+
+            let text = `=== PROGRAMME NUTRIFIT TRIATHLON ===\n`;
+            text += `Objectif Poids: ${profile.targetWeight} kg | Poids Actuel: ${profile.currentWeight} kg\n\n`;
+
+            programDays.forEach((day, idx) => {
+                const bmr = getBMR();
+                const targetKcal = Math.round(bmr + day.caloriesBurn - profile.deficit);
+                text += `J${idx + 1} (${day.dateStr}) : ${day.discipline} - ${day.duration} min | Cible Nutri: ${targetKcal} kcal\n`;
+            });
+
+            textarea.value = text;
+        }
+
+        function copyTextSummary() {
+            const textarea = document.getElementById('export-text-preview');
+            if (textarea) {
+                textarea.select();
+                document.execCommand('copy');
+                showNotification("Résumé copié dans le presse-papier !");
+            }
+        }
+
+        function exportToICS() {
+            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//NutriFit Triathlon//FR\n";
+
+            programDays.forEach(day => {
+                if (day.duration > 0) {
+                    const cleanDate = day.dateStr.replace(/-/g, '');
+                    icsContent += "BEGIN:VEVENT\n";
+                    icsContent += `SUMMARY:Triathlon - ${day.discipline}\n`;
+                    icsContent += `DESCRIPTION:${day.description || 'Séance NutriFit'} - Dépense: ${day.caloriesBurn} kcal\n`;
+                    icsContent += `DTSTART;VALUE=DATE:${cleanDate}\n`;
+                    icsContent += `DTEND;VALUE=DATE:${cleanDate}\n`;
+                    icsContent += "END:VEVENT\n";
+                }
+            });
+
+            icsContent += "END:VCALENDAR";
+
+            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', 'nutrifit_programme.ics');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification("Calendrier .ics généré et téléchargé !");
+        }
+
+        function exportJSON() {
+            const data = {
+                profile,
+                programStartDateStr: formatDateISO(programStartDateObj),
+                weightLogs,
+                programDays: programDays.map(d => ({
+                    dayIndex: d.dayIndex,
+                    dateStr: d.dateStr,
+                    discipline: d.discipline,
+                    duration: d.duration,
+                    caloriesBurn: d.caloriesBurn,
+                    description: d.description
+                }))
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', 'nutrifit_backup.json');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showNotification("Sauvegarde JSON exportée !");
+        }
+
+        function importJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.profile) profile = data.profile;
+                    if (data.weightLogs) weightLogs = data.weightLogs;
+
+                    if (data.programStartDateStr) {
+                        initProgramDays(new Date(data.programStartDateStr));
+                    }
+
+                    if (data.programDays && Array.isArray(data.programDays)) {
+                        data.programDays.forEach(impDay => {
+                            const day = programDays.find(d => d.dayIndex === impDay.dayIndex || d.dateStr === impDay.dateStr);
+                            if (day) {
+                                day.discipline = impDay.discipline;
+                                day.duration = impDay.duration;
+                                day.caloriesBurn = impDay.caloriesBurn;
+                                day.description = impDay.description;
+                            }
+                        });
+                    }
+
+                    renderCalendar();
+                    renderDayRecipes();
+                    renderWeightChart();
+                    showNotification("Données restaurées depuis la sauvegarde !");
+                    closeExportModal();
+                } catch (err) {
+                    showNotification("Erreur lors de la lecture du fichier JSON.", true);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        window.onload = function() {
+            initProgramDays();
+            renderCalendar();
+            populateRecipeDayPicker();
+            renderDayRecipes();
+        };
+    </script>
+</body>
+</html>
