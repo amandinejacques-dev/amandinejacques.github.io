@@ -109,4 +109,25 @@
             <div class="bg-slate-800 p-6 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-slate-800 to-slate-900">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/60 pb-4">
                     <div>
-                        <span class="text-xs font-
+                        <span class="text-xs font-bold uppercase tracking-widest text-blue-400" id="selected-day-tag">Jour Sélectionné</span>
+                        <h3 class="text-xl font-extrabold text-white mt-0.5" id="selected-day-title">--</h3>
+                    </div>
+                    <button onclick="switchTab('recipes')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-utensils"></i> Voir les recettes de ce jour
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Discipline</span>
+                        <p class="text-lg font-bold text-blue-400 mt-1 flex items-center gap-2" id="selected-day-discipline">--</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Durée / Intensité</span>
+                        <p class="text-lg font-bold text-white mt-1" id="selected-day-duration">--</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 uppercase font-bold">Dépense Est. Séance</span>
+                        <p class="text-lg font-bold text-amber-400 mt-1" id="selected-day-workout-burn">--</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border
