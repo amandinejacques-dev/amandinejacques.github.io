@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutriFit Triathlon - Nutrition Adaptative Sur-Mesure</title>
+    <title>NutriFit Triathlon - Estimateur & Nutrition Adaptative</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -35,10 +35,10 @@
                     <i class="fa-solid fa-user-gear w-5"></i> Profil & Objectifs
                 </button>
                 <button onclick="switchTab('training')" id="btn-training" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-calendar-days w-5"></i> Planning & Nolio
+                    <i class="fa-solid fa-calculator w-5"></i> Estimateur & Planning
                 </button>
                 <button onclick="switchTab('recipes')" id="btn-recipes" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-utensils w-5"></i> Menus Mensuels (30J)
+                    <i class="fa-solid fa-utensils w-5"></i> Menus & Recettes
                 </button>
                 <button onclick="switchTab('progress')" id="btn-progress" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
                     <i class="fa-solid fa-weight-scale w-5"></i> Suivi & Poids
@@ -72,16 +72,4 @@
                     <p class="text-slate-400 text-sm">Entraînement prévu : <span id="dash-workout" class="text-white font-medium">Natation (45 min)</span></p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="switchTab('recipes')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center gap-2">
-                        <i class="fa-solid fa-utensils"></i> Voir le menu du jour
-                    </button>
-                </div>
-            </header>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Calories Cibles</p>
-                    <p class="text-2xl font-extrabold text-blue-400 mt-1" id="target-calories">2 150 <span class="text-xs text-slate-400 font-normal">kcal</span></p>
-                </div>
-                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Protéines
+                    <button onclick="switchTab('recipes')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font
