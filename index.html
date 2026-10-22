@@ -161,7 +161,7 @@
       </div>
     </section>
 
-    <!-- ==================== ONGLET 3: NOUVEAUTÉ RECORDS PERSONNELS (PR / PB) ==================== -->
+    <!-- ==================== ONGLET 3: RECORDS PERSONNELS (PR / PB) ==================== -->
     <section id="view-records" class="tab-view space-y-6 hidden">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
@@ -357,7 +357,7 @@
           </div>
         </div>
 
-        <!-- ==================== TEMPS INTERMÉDIAIRES TRIATHLON ==================== -->
+        <!-- TEMPS INTERMÉDIAIRES TRIATHLON -->
         <div id="triathlon-fields" class="space-y-3 bg-indigo-950/20 p-4 rounded-xl border border-indigo-800/40 hidden">
           <div class="flex justify-between items-center">
             <span class="text-xs font-bold text-sky-400 flex items-center gap-1.5">
@@ -366,7 +366,6 @@
             <span class="text-[10px] text-slate-400">Format : MM:SS ou HH:MM:SS</span>
           </div>
 
-          <!-- Format spécifique de natation pour les PRs -->
           <div>
             <label class="block text-[11px] text-slate-300 font-medium mb-1">Distance Natation (pour vos records) :</label>
             <select id="form-tri-swim-dist" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white">
@@ -402,7 +401,7 @@
           </div>
         </div>
 
-        <!-- ==================== NOUVEAUTÉ: EXTRACTION DE RECORDS INTERMÉDIAIRES ==================== -->
+        <!-- EXTRACTION DE RECORDS INTERMÉDIAIRES -->
         <div class="space-y-2 bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
           <div class="flex justify-between items-center">
             <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
@@ -537,7 +536,7 @@
 
   </main>
 
-  <!-- Navigation Mobile Inférieure (5 onglets natifs) -->
+  <!-- Navigation Mobile Inférieure -->
   <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass border-t border-slate-800 grid grid-cols-5 py-2 px-1 text-center shadow-2xl">
     <button onclick="switchTab('stats')" id="mob-tab-stats" class="mob-nav-btn text-slate-400 flex flex-col items-center gap-1">
       <i class="fas fa-chart-line text-base"></i>
@@ -561,9 +560,8 @@
     </button>
   </nav>
 
-  <!-- ==================== JAVASCRIPT COMPLET SANS DÉPENDANCE BLOQUANTE ==================== -->
+  <!-- ==================== SCRIPT APPLICATION ==================== -->
   <script>
-    // Jeu de données démo riche avec plusieurs éditions & triathlons
     var DEMO_RACES = [
       {
         id: "1",
@@ -628,42 +626,6 @@
           split5k: "21:30",
           split10k: "43:45"
         }
-      },
-      {
-        id: "2",
-        name: "Marathon de Paris",
-        sport: "running",
-        date: "2025-04-13",
-        distance: 42.195,
-        elevation: 150,
-        timeSeconds: 12180, // 3h 23m 00s (-12 min)
-        rank: "2150/48000",
-        location: "Paris, France",
-        notes: "Nouveau record sur le marathon, negative split !"
-      },
-      {
-        id: "3",
-        name: "10km de la Braderie",
-        sport: "running",
-        date: "2024-09-07",
-        distance: 10.0,
-        elevation: 20,
-        timeSeconds: 2460, // 41m 00s
-        rank: "88/1500",
-        location: "Lille",
-        notes: "Superbe allure constante."
-      },
-      {
-        id: "4",
-        name: "Semi-Marathon de Boulogne",
-        sport: "running",
-        date: "2024-11-17",
-        distance: 21.1,
-        elevation: 40,
-        timeSeconds: 5640, // 1h 34m 00s
-        rank: "450/7000",
-        location: "Boulogne-Billancourt",
-        notes: "Parcours plat et très rapide."
       },
       {
         id: "5",
@@ -780,7 +742,6 @@
       return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
     }
 
-    // Convertit "HH:MM:SS" ou "MM:SS" en secondes
     function parseTimeToSeconds(timeStr) {
       if (!timeStr) return 0;
       var parts = timeStr.toString().trim().split(':').map(Number);
@@ -891,7 +852,7 @@
       });
     }
 
-    // --- ONGLET 2: COMPARATEUR "MÊME COURSE" AVEC SPLITS TRIATHLON ---
+    // --- ONGLET 2: COMPARATEUR "MÊME COURSE" ---
     function setupCompareSelect() {
       var select = document.getElementById('compare-race-select');
       var names = [];
@@ -925,7 +886,6 @@
       resultsContainer.classList.remove('hidden');
       emptyState.classList.add('hidden');
 
-      // Filtrer et trier par ordre chronologique
       var editions = races.filter(function(r) { return r.name.trim().toLowerCase() === raceName.toLowerCase(); });
       editions.sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
 
@@ -935,7 +895,6 @@
       var labels = editions.map(function(e) { return new Date(e.date).getFullYear().toString(); });
       var timesMinutes = editions.map(function(e) { return (e.timeSeconds / 60).toFixed(1); });
 
-      // 1. Graphique d'évolution du temps total
       var ctx = document.getElementById('chart-race-comparison').getContext('2d');
       if (compareChart) compareChart.destroy();
       compareChart = new Chart(ctx, {
@@ -966,7 +925,6 @@
         }
       });
 
-      // 2. Si Triathlon : Graphique détaillé des segments (Natation, T1, Vélo, T2, CAP)
       if (isTriathlon) {
         triChartsBox.classList.remove('hidden');
         var swimData = editions.map(function(e) { return e.triDetails ? (parseTimeToSeconds(e.triDetails.swim) / 60).toFixed(1) : 0; });
@@ -1002,7 +960,6 @@
         triChartsBox.classList.add('hidden');
       }
 
-      // 3. Fiches comparatives détaillées avec comparaison des splits
       var listContainer = document.getElementById('compare-editions-list');
       var html = '';
       var bestEdition = editions.slice().sort(function(a, b) { return a.timeSeconds - b.timeSeconds; })[0];
@@ -1012,24 +969,22 @@
         var edition = reversed[i];
         var year = new Date(edition.date).getFullYear();
         var isBest = edition.id === bestEdition.id;
-        var previousEdition = reversed[i + 1]; // édition chronologiquement précédente
+        var previousEdition = reversed[i + 1];
         
         var globalDeltaHtml = '';
         var triDeltaHtml = '';
 
         if (previousEdition) {
-          // Delta Temps Global
           var diffSeconds = edition.timeSeconds - previousEdition.timeSeconds;
           var percent = ((Math.abs(diffSeconds) / previousEdition.timeSeconds) * 100).toFixed(1);
           if (diffSeconds < 0) {
-            globalDeltaHtml = '<span class="text-emerald-400 text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-arrow-down"></i> -' + formatTime(Math.abs(diffSeconds)) + ' (-' + percent + '%) sur le chrono global vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
+            globalDeltaHtml = '<span class="text-emerald-400 text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-arrow-down"></i> -' + formatTime(Math.abs(diffSeconds)) + ' (-' + percent + '%) vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
           } else if (diffSeconds > 0) {
-            globalDeltaHtml = '<span class="text-rose-400 text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-arrow-up"></i> +' + formatTime(diffSeconds) + ' (+' + percent + '%) sur le chrono global vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
+            globalDeltaHtml = '<span class="text-rose-400 text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-arrow-up"></i> +' + formatTime(diffSeconds) + ' (+' + percent + '%) vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
           } else {
             globalDeltaHtml = '<span class="text-slate-400 text-xs font-semibold">Temps global identique vs ' + new Date(previousEdition.date).getFullYear() + '</span>';
           }
 
-          // Si les deux éditions disposent de splits Triathlon, on compare chaque discipline
           if (edition.sport === 'triathlon' && edition.triDetails && previousEdition.triDetails) {
             function buildSplitDiff(currentVal, prevVal, label) {
               var cSec = parseTimeToSeconds(currentVal);
@@ -1076,7 +1031,6 @@
               '<div><div class="text-[10px] text-slate-400 uppercase">Classement</div><div class="text-xs font-semibold text-slate-200 mt-1">' + (edition.rank || 'N/C') + '</div></div>' +
             '</div>' +
 
-            // Si affichage des intermédiaires sans édition précédente
             (edition.sport === 'triathlon' && edition.triDetails && !triDeltaHtml ? 
               '<div class="pt-2 border-t border-slate-700/50">' +
                 '<span class="text-[10px] text-slate-400 uppercase font-semibold block mb-1.5">Temps des segments :</span>' +
@@ -1097,10 +1051,8 @@
       listContainer.innerHTML = html;
     }
 
-    // --- ONGLET 3: NOUVEAUTÉ RECORDS PERSONNELS (PR / PB) ---
+    // --- ONGLET 3: RECORDS PERSONNELS ---
     function calculateAndRenderPersonalRecords() {
-      // 1. Records Course à pied : 5k, 10k, Semi, Marathon
-      // Recherche à la fois dans les courses complètes ET dans les passages intermédiaires extraits
       var pr5k = findBestRunRecord('5k', 4.5, 5.5, 5.0);
       var pr10k = findBestRunRecord('10k', 9.5, 10.5, 10.0);
       var prSemi = findBestRunRecord('semi', 20.5, 21.5, 21.0975);
@@ -1111,7 +1063,6 @@
       updatePrCard('semi', prSemi);
       updatePrCard('marathon', prMarathon);
 
-      // 2. Records Natation : 750m, 1500m, 1900m, 3800m
       var prSwim750 = findBestSwim("750");
       var prSwim1500 = findBestSwim("1500");
       var prSwim1900 = findBestSwim("1900");
@@ -1123,14 +1074,12 @@
       updateSwimPrCard('swim-3800', prSwim3800, 3800);
     }
 
-    // Fonction recherchant la meilleure performance (course entière ou split extrait)
     function findBestRunRecord(splitKey, minDist, maxDist, targetDistKm) {
       var candidates = [];
 
       for (var i = 0; i < races.length; i++) {
         var r = races[i];
         
-        // Option A: La course elle-même est sur la distance cible
         if ((r.sport === 'running' || r.sport === 'trail') && r.distance >= minDist && r.distance <= maxDist && r.timeSeconds > 0) {
           candidates.push({
             race: r,
@@ -1141,7 +1090,6 @@
           });
         }
 
-        // Option B: Un temps intermédiaire (split) a été extrait d'une course plus longue
         var splitProp = 'split' + splitKey.charAt(0).toUpperCase() + splitKey.slice(1);
         if (r.splits && r.splits[splitProp]) {
           var splitSec = parseTimeToSeconds(r.splits[splitProp]);
@@ -1240,7 +1188,6 @@
       var location = document.getElementById('form-location').value.trim();
       var notes = document.getElementById('form-notes').value.trim();
 
-      // Extraction des records intermédiaires (splits)
       var split5k = document.getElementById('form-split-5k').value.trim();
       var split10k = document.getElementById('form-split-10k').value.trim();
       var splitSemi = document.getElementById('form-split-semi').value.trim();
@@ -1307,18 +1254,118 @@
     function editRace(id) {
       var race = null;
       for (var i = 0; i < races.length; i++) {
-    // --- IMPORT / EXPORT JSON COMPATIBLE MOBILE & DESKTOP ---
+        if (races[i].id === id) { race = races[i]; break; }
+      }
+      if (!race) return;
+
+      document.getElementById('race-id').value = race.id;
+      document.getElementById('form-name').value = race.name;
+      document.getElementById('form-sport').value = race.sport;
+      document.getElementById('form-date').value = race.date;
+      document.getElementById('form-distance').value = race.distance;
+      document.getElementById('form-elevation').value = race.elevation || '';
+
+      var h = Math.floor(race.timeSeconds / 3600);
+      var m = Math.floor((race.timeSeconds % 3600) / 60);
+      var s = race.timeSeconds % 60;
+      document.getElementById('form-time-h').value = h;
+      document.getElementById('form-time-m').value = m;
+      document.getElementById('form-time-s').value = s;
+
+      document.getElementById('form-rank').value = race.rank || '';
+      document.getElementById('form-location').value = race.location || '';
+      document.getElementById('form-notes').value = race.notes || '';
+
+      if (race.splits) {
+        document.getElementById('form-split-5k').value = race.splits.split5k || '';
+        document.getElementById('form-split-10k').value = race.splits.split10k || '';
+        document.getElementById('form-split-semi').value = race.splits.splitSemi || '';
+      } else {
+        document.getElementById('form-split-5k').value = '';
+        document.getElementById('form-split-10k').value = '';
+        document.getElementById('form-split-semi').value = '';
+      }
+
+      if (race.triDetails) {
+        document.getElementById('form-tri-swim-dist').value = race.triDetails.swimDist || 'none';
+        document.getElementById('form-tri-swim').value = race.triDetails.swim || '';
+        document.getElementById('form-tri-t1').value = race.triDetails.t1 || '';
+        document.getElementById('form-tri-bike').value = race.triDetails.bike || '';
+        document.getElementById('form-tri-t2').value = race.triDetails.t2 || '';
+        document.getElementById('form-tri-run').value = race.triDetails.run || '';
+      }
+
+      document.getElementById('form-title').innerText = "Modifier la Course";
+      toggleSportFields();
+      switchTab('add');
+    }
+
+    function deleteRace(id) {
+      if (confirm('Voulez-vous vraiment supprimer cette course ?')) {
+        races = races.filter(function(r) { return r.id !== id; });
+        saveLocalData();
+        renderJournal();
+      }
+    }
+
+    function renderJournal() {
+      var search = document.getElementById('journal-search').value.toLowerCase();
+      var sportFilter = document.getElementById('journal-filter-sport').value;
+      var container = document.getElementById('journal-list');
+
+      var filtered = races.filter(function(r) {
+        var matchesSearch = r.name.toLowerCase().indexOf(search) !== -1 || (r.location && r.location.toLowerCase().indexOf(search) !== -1);
+        var matchesSport = sportFilter === 'all' || r.sport === sportFilter;
+        return matchesSearch && matchesSport;
+      });
+
+      filtered.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center py-12 text-slate-500">Aucune course enregistrée.</div>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var race = filtered[i];
+        html += '<div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 space-y-3">' +
+            '<div class="flex justify-between items-start">' +
+              '<div>' +
+                '<h3 class="font-bold text-lg text-white">' + race.name + '</h3>' +
+                '<div class="text-xs text-slate-400">' + new Date(race.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + ' • ' + (race.location || 'Lieu non renseigné') + '</div>' +
+              '</div>' +
+              getSportBadge(race.sport) +
+            '</div>' +
+
+            '<div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-700/50">' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Temps</div><div class="text-sm font-bold text-white">' + formatTime(race.timeSeconds) + '</div></div>' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Distance / D+</div><div class="text-xs font-medium text-slate-200 mt-0.5">' + race.distance + ' km ' + (race.elevation ? '• ' + race.elevation + 'm' : '') + '</div></div>' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Allure</div><div class="text-xs font-medium text-slate-200 mt-0.5">' + calculatePace(race.distance, race.timeSeconds) + '</div></div>' +
+              '<div><div class="text-[10px] text-slate-400 uppercase">Rang</div><div class="text-xs font-medium text-slate-200 mt-0.5">' + (race.rank || 'N/C') + '</div></div>' +
+            '</div>' +
+
+            (race.notes ? '<p class="text-xs text-slate-300 italic bg-slate-900/40 p-2 rounded-lg border border-slate-800">"' + race.notes + '"</p>' : '') +
+
+            '<div class="flex justify-end gap-2 pt-2 border-t border-slate-700/40">' +
+              '<button onclick="editRace(\'' + race.id + '\')" class="text-xs text-indigo-400 hover:text-indigo-300 px-2 py-1"><i class="fas fa-edit mr-1"></i> Modifier</button>' +
+              '<button onclick="deleteRace(\'' + race.id + '\')" class="text-xs text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fas fa-trash mr-1"></i> Supprimer</button>' +
+            '</div>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    // --- IMPORT / EXPORT COMPATIBLE MOBILE & PC ---
     function exportData() {
       var jsonString = JSON.stringify(races, null, 2);
       var fileName = "racetracker_backup_" + new Date().toISOString().slice(0, 10) + ".json";
 
-      // Affiche aussi dans la zone de texte de secours
       var fallbackContainer = document.getElementById('export-fallback-container');
       var fallbackArea = document.getElementById('export-text-area');
       if (fallbackArea) fallbackArea.value = jsonString;
       if (fallbackContainer) fallbackContainer.classList.remove('hidden');
 
-      // 1. Tenter le partage natif mobile (iOS Safari / Android Chrome)
       try {
         var file = new File([jsonString], fileName, { type: "application/json" });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -1327,18 +1374,14 @@
             title: "Sauvegarde RaceTracker",
             text: "Fichier de sauvegarde de mes courses RaceTracker"
           }).catch(function(err) {
-            // L'utilisateur a simplement annulé le partage, ne rien faire
             if (err.name !== 'AbortError') {
               triggerDownloadBlob(jsonString, fileName);
             }
           });
           return;
         }
-      } catch(e) {
-        // En cas d'incompatibilité de File/canShare, continuer vers le téléchargement classique
-      }
+      } catch(e) {}
 
-      // 2. Méthode Blob standard pour mobile et desktop
       triggerDownloadBlob(jsonString, fileName);
     }
 
@@ -1358,7 +1401,6 @@
           URL.revokeObjectURL(url);
         }, 300);
       } catch(err) {
-        // 3. Dernier recours : data URL classique
         var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(content);
         var link = document.createElement('a');
         link.href = dataStr;
@@ -1381,7 +1423,7 @@
       if (fallbackArea) {
         fallbackArea.focus();
         fallbackArea.select();
-        fallbackArea.setSelectionRange(0, 99999); // Pour mobile
+        fallbackArea.setSelectionRange(0, 99999);
       }
 
       var success = false;
@@ -1413,14 +1455,9 @@
           saveLocalData();
           document.getElementById('manual-import-text').value = '';
           toggleManualImportBox();
-          alert("Données importées avec succès (" + races.length + " courses) !");
           switchTab('stats');
-        } else {
-          alert("Le texte collé ne correspond pas à une liste de courses valide.");
         }
-      } catch(err) {
-        alert("Format JSON invalide. Vérifiez que vous avez bien copié tout le texte.");
-      }
+      } catch(err) {}
     }
 
     function importData(e) {
@@ -1433,30 +1470,23 @@
           if (Array.isArray(imported)) {
             races = imported;
             saveLocalData();
-            alert("Vos données ont été importées avec succès ! (" + races.length + " courses)");
             switchTab('stats');
-          } else {
-            alert("Le fichier ne contient pas une liste valide de courses.");
           }
-        } catch(err) { alert("Format de fichier JSON invalide."); }
+        } catch(err) {}
       };
       reader.readAsText(file);
     }
 
     function loadDemoData() {
-      if (confirm("Recharger les données de démonstration ?")) {
-        races = DEMO_RACES;
-        saveLocalData();
-        switchTab('stats');
-      }
+      races = DEMO_RACES;
+      saveLocalData();
+      switchTab('stats');
     }
 
     function clearAllData() {
-      if (confirm("Attention : supprimer toutes vos données ?")) {
-        races = [];
-        saveLocalData();
-        switchTab('stats');
-      }
+      races = [];
+      saveLocalData();
+      switchTab('stats');
     }
 
     // --- INITIALISATION ---
