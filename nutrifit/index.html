@@ -27,7 +27,7 @@
                 <i class="fa-solid fa-person-triathlon text-3xl text-blue-500"></i>
                 <div>
                     <h1 class="font-bold text-lg tracking-wide text-white">NutriFit Tri</h1>
-                    <p class="text-xs text-blue-400 font-medium" id="side-objective-badge">Planning 28 Jours / Nolio</p>
+                    <p class="text-xs text-blue-400 font-medium">Planning 28 Jours / Nolio</p>
                 </div>
             </div>
 
@@ -67,7 +67,6 @@
 
         <!-- TAB CALENDRIER NOLIO -->
         <section id="tab-calendar" class="space-y-6">
-            <!-- Header & Import CSV -->
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
                 <div>
                     <h2 class="text-2xl font-bold text-white flex items-center gap-2">
@@ -86,13 +85,11 @@
                 </div>
             </div>
 
-            <!-- Notice Import -->
             <div id="import-notification" class="hidden p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center">
                 <span id="import-notification-text">CSV Nolio importé avec succès !</span>
                 <button onclick="this.parentElement.classList.add('hidden')" class="text-emerald-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
-            <!-- Grille Calendrier 28 Jours -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="font-bold text-lg text-white">Vue Calendrier Mensuelle</h3>
@@ -102,23 +99,18 @@
                     </div>
                 </div>
 
-                <!-- En-tête des jours de la semaine -->
                 <div class="grid grid-cols-7 gap-2 text-center font-bold text-xs text-slate-400 uppercase tracking-wider py-1 border-b border-slate-700">
                     <div>Lun</div><div>Mar</div><div>Mer</div><div>Jeu</div><div>Ven</div><div>Sam</div><div>Dim</div>
                 </div>
 
-                <!-- Grille des 28 jours -->
-                <div class="grid grid-cols-7 gap-2" id="calendar-grid">
-                    <!-- Rempli en JS -->
-                </div>
+                <div class="grid grid-cols-7 gap-2" id="calendar-grid"></div>
             </div>
 
-            <!-- Détails du Jour Sélectionné -->
             <div class="bg-slate-800 p-6 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-slate-800 to-slate-900">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/60 pb-4">
                     <div>
                         <span class="text-xs font-bold uppercase tracking-widest text-blue-400" id="selected-day-tag">Jour Sélectionné</span>
-                        <h3 class="text-xl font-extrabold text-white mt-0.5" id="selected-day-title">Lundi 12 Octobre</h3>
+                        <h3 class="text-xl font-extrabold text-white mt-0.5" id="selected-day-title">--</h3>
                     </div>
                     <button onclick="switchTab('recipes')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
                         <i class="fa-solid fa-utensils"></i> Voir les recettes de ce jour
@@ -128,66 +120,77 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
                         <span class="text-xs text-slate-400 uppercase font-bold">Discipline</span>
-                        <p class="text-lg font-bold text-blue-400 mt-1 flex items-center gap-2" id="selected-day-discipline">
-                            <i class="fa-solid fa-person-swimming"></i> Natation
-                        </p>
+                        <p class="text-lg font-bold text-blue-400 mt-1 flex items-center gap-2" id="selected-day-discipline">--</p>
                     </div>
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
                         <span class="text-xs text-slate-400 uppercase font-bold">Durée / Intensité</span>
-                        <p class="text-lg font-bold text-white mt-1" id="selected-day-duration">60 min (Modéré)</p>
+                        <p class="text-lg font-bold text-white mt-1" id="selected-day-duration">--</p>
                     </div>
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
                         <span class="text-xs text-slate-400 uppercase font-bold">Dépense Est. Séance</span>
-                        <p class="text-lg font-bold text-amber-400 mt-1" id="selected-day-workout-burn">550 kcal</p>
+                        <p class="text-lg font-bold text-amber-400 mt-1" id="selected-day-workout-burn">--</p>
                     </div>
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
                         <span class="text-xs text-slate-400 uppercase font-bold">Cible Total Jour</span>
-                        <p class="text-lg font-bold text-emerald-400 mt-1" id="selected-day-total-target">2 300 kcal</p>
+                        <p class="text-lg font-bold text-emerald-400 mt-1" id="selected-day-total-target">--</p>
                     </div>
                 </div>
-                <div class="mt-3 text-xs text-slate-400 italic" id="selected-day-description">
-                    Description / Séance Nolio : "400m échauffement, 10x100m éducatifs, 200m souple"
-                </div>
+                <div class="mt-3 text-xs text-slate-400 italic" id="selected-day-description">--</div>
             </div>
         </section>
 
-        <!-- TAB RECETTES & MENUS DU JOUR -->
+        <!-- TAB RECETTES -->
         <section id="tab-recipes" class="space-y-6 hidden">
             <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
                 <div>
                     <h2 class="text-2xl font-bold text-white">Menu du Jour & Recettes Adaptées</h2>
-                    <p class="text-slate-400 text-sm">Chaque jour du programme de 4 semaines dispose de recettes uniques et adaptées aux besoins du jour.</p>
+                    <p class="text-slate-400 text-sm">Chaque jour du programme dispose de recettes uniques adaptées à vos besoins.</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <label class="text-xs text-slate-400 font-medium">Sélectionner Date/Jour :</label>
-                    <select id="recipe-day-picker" onchange="selectDayFromPicker(parseInt(this.value))" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm font-bold focus:outline-none focus:border-blue-500">
-                        <!-- Rempli dynamiquement -->
-                    </select>
+                    <select id="recipe-day-picker" onchange="selectDayFromPicker(parseInt(this.value))" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm font-bold focus:outline-none focus:border-blue-500"></select>
                 </div>
             </header>
 
-            <!-- Résumé Macro Jour -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
                     <span class="text-xs text-slate-400 font-bold uppercase">Calories Cibles</span>
-                    <p class="text-2xl font-extrabold text-blue-400 mt-1" id="recipe-target-kcal">2 200 <span class="text-xs font-normal text-slate-400">kcal</span></p>
+                    <p class="text-2xl font-extrabold text-blue-400 mt-1" id="recipe-target-kcal">0</p>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
                     <span class="text-xs text-slate-400 font-bold uppercase">Protéines</span>
-                    <p class="text-2xl font-extrabold text-emerald-400 mt-1" id="recipe-target-prot">140 <span class="text-xs font-normal text-slate-400">g</span></p>
+                    <p class="text-2xl font-extrabold text-emerald-400 mt-1" id="recipe-target-prot">0</p>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
                     <span class="text-xs text-slate-400 font-bold uppercase">Glucides</span>
-                    <p class="text-2xl font-extrabold text-amber-400 mt-1" id="recipe-target-carb">240 <span class="text-xs font-normal text-slate-400">g</span></p>
+                    <p class="text-2xl font-extrabold text-amber-400 mt-1" id="recipe-target-carb">0</p>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
                     <span class="text-xs text-slate-400 font-bold uppercase">Lipides</span>
-                    <p class="text-2xl font-extrabold text-rose-400 mt-1" id="recipe-target-fat">65 <span class="text-xs font-normal text-slate-400">g</span></p>
+                    <p class="text-2xl font-extrabold text-rose-400 mt-1" id="recipe-target-fat">0</p>
                 </div>
             </div>
 
-            <!-- Grille des 4 Repas de la Journée -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="recipes-cards-container">
-                <!-- Rempli dynamiquement en JS -->
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="recipes-cards-container"></div>
         </section>
+
+        <!-- TAB PROFILE -->
+        <section id="tab-profile" class="space-y-6 hidden">
+            <header class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                <h2 class="text-2xl font-bold text-white">Profil Utilisateur & Calcul Métabolique</h2>
+                <p class="text-slate-400 text-sm">Calcul du métabolisme de base (Mifflin-St Jeor) et répartition ajustée.</p>
+            </header>
+
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 max-w-2xl">
+                <form id="profile-form" onsubmit="saveProfile(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Sexe</label>
+                            <select id="prof-sex" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                                <option value="M">Homme</option>
+                                <option value="F">Femme</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Âge</label>
+                            <input type="number" id
