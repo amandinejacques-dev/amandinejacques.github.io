@@ -765,13 +765,13 @@
             }
 
             const defaultWorkouts = [
-                { disc: 'Natation', dur: 50, cal: 400, desc: 'Technique & Allure Z2/Z3' },
-                { disc: 'Vélo', dur: 90, cal: 700, desc: 'Endurance fondamentale + rappel Seuil' },
-                { disc: 'Course à pied', dur: 45, cal: 330, desc: 'Footing avec 5x2 min VMA' },
+                { disc: 'Natation', dur: 50, cal: 380, desc: 'Technique & Allure Z2/Z3' },
+                { disc: 'Vélo', dur: 90, cal: 650, desc: 'Endurance fondamentale + rappel Seuil' },
+                { disc: 'Course à pied', dur: 45, cal: 270, desc: 'Footing avec 5x2 min VMA' },
                 { disc: 'Repos', dur: 0, cal: 0, desc: 'Récupération active & Stretching' },
-                { disc: 'Natation', dur: 60, cal: 480, desc: 'Séries VMA 10x100m' },
-                { disc: 'Enchaînement Tri', dur: 120, cal: 850, desc: 'Brick : 2h Vélo + 30m Cap' },
-                { disc: 'Renforcement', dur: 45, cal: 210, desc: 'Gainage, PPG & Mobilité' }
+                { disc: 'Natation', dur: 60, cal: 450, desc: 'Séries VMA 10x100m' },
+                { disc: 'Enchaînement Tri', dur: 120, cal: 800, desc: 'Brick : 2h Vélo + 30m Cap' },
+                { disc: 'Renforcement', dur: 45, cal: 140, desc: 'Gainage, PPG & Mobilité' }
             ];
 
             programDays = [];
@@ -1428,23 +1428,104 @@
 
         function parseFlexibleDate(str) {
             if (!str) return null;
-            str = str.trim().split(' ')[0];
-            let m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
-            if (m) return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
-            m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
-            if (m) return `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
+            str = str.trim();
+
+            // Gestion des formats ISO avec heure (ex: 2026-10-27T08:00:00 ou 2026-10-27 14:30:00)
+            // On extrait d'abord la partie date pure
+            const datePart = str.split(/[T ]/)[0].trim();
+
+            // Format YYYY-MM-DD, YYYY/MM/DD ou YYYY.MM.DD
+            let m = datePart.match(/^(\d{4})[-/. ](\d{1,2})[-/. ](\d{1,2})$/);
+            if (m) {
+                const year = m[1];
+                const month = String(m[2]).padStart(2, '0');
+                const day = String(m[3]).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            // Format français DD-MM-YYYY, DD/MM/YYYY ou DD.MM.YYYY (ex: 27.10.2026 ou 28/10/2026)
+            m = datePart.match(/^(\d{1,2})[-/. ](\d{1,2})[-/. ](\d{4})$/);
+            if (m) {
+                const day = String(m[1]).padStart(2, '0');
+                const month = String(m[2]).padStart(2, '0');
+                const year = m[3];
+                return `${year}-${month}-${day}`;
+            }
+
+            // Format court DD.MM ou DD/MM avec année courante implicite (ex: 27.10 ou 28.10)
+            m = datePart.match(/^(\d{1,2})[-/. ](\d{1,2})$/);
+            if (m) {
+                const day = String(m[1]).padStart(2, '0');
+                const month = String(m[2]).padStart(2, '0');
+                const year = todayDateObj.getFullYear();
+                return `${year}-${month}-${day}`;
+            }
+
+            // Format court avec année à 2 chiffres DD.MM.YY (ex: 27.10.26)
+            m = datePart.match(/^(\d{1,2})[-/. ](\d{1,2})[-/. ](\d{2})$/);
+            if (m) {
+                const day = String(m[1]).padStart(2, '0');
+                const month = String(m[2]).padStart(2, '0');
+                const year = `20${m[3]}`;
+                return `${year}-${month}-${day}`;
+            }
+
             return null;
         }
 
         function parseFlexibleDuration(val) {
-            if (!val) return 0;
-            val = String(val).trim().toLowerCase();
-            if (val.includes(':')) {
-                const parts = val.split(':').map(p => parseInt(p, 10) || 0);
-                if (parts.length >= 2) return (parts[0] * 60) + parts[1];
+            if (val === undefined || val === null) return 0;
+            let s = String(val).trim().toLowerCase().replace(',', '.');
+            if (!s || s === '0' || s === 'null' || s === 'undefined') return 0;
+
+            // 1. Format textuel avec unités : ex: "1h30", "1h 15min", "45min", "50m", "45 mins", "1h", "90s"
+            if (s.includes('h') || s.includes('m') || s.includes('s')) {
+                let totalMinutes = 0;
+                const hoursMatch = s.match(/(\d+(?:\.\d+)?)\s*h(?:eures?|rs?)?/);
+                const minsMatch = s.match(/(\d+(?:\.\d+)?)\s*m(?:in(?:utes?)?)?(?!s)/);
+                const secsMatch = s.match(/(\d+(?:\.\d+)?)\s*s(?:ec(?:ondes?)?)?/);
+
+                if (hoursMatch) totalMinutes += parseFloat(hoursMatch[1]) * 60;
+                if (minsMatch) totalMinutes += parseFloat(minsMatch[1]);
+                if (secsMatch) totalMinutes += parseFloat(secsMatch[1]) / 60;
+
+                if (totalMinutes > 0) return Math.round(totalMinutes);
             }
-            const num = parseInt(val.replace(/[^0-9]/g, ''), 10);
-            return isNaN(num) ? 0 : num;
+
+            // 2. Format horodatage : "HH:MM:SS" ou "MM:SS"
+            if (s.includes(':')) {
+                const parts = s.split(':').map(p => parseFloat(p) || 0);
+                if (parts.length === 3) {
+                    // HH:MM:SS -> Heures * 60 + Minutes + Secondes / 60
+                    return Math.round((parts[0] * 60) + parts[1] + (parts[2] / 60));
+                } else if (parts.length === 2) {
+                    // Ambiguïté : si parts[0] > 10, c'est très probablement MM:SS (ex: 45:00 = 45 min)
+                    // Sinon, si parts[0] <= 10 et que parts[1] < 60, il s'agit souvent de HH:MM (ex: 01:30 = 90 min)
+                    if (parts[0] > 10) {
+                        return Math.round(parts[0] + (parts[1] / 60));
+                    } else {
+                        return Math.round((parts[0] * 60) + parts[1]);
+                    }
+                }
+            }
+
+            // 3. Valeur purement numérique (seconde, minute ou heure décimale)
+            const num = parseFloat(s);
+            if (!isNaN(num)) {
+                // Dans Nolio, la colonne durée brute est très fréquemment exportée en SECONDES (ex: 2700 = 45 min, 3600 = 1h)
+                // Si la valeur est supérieure à 360 (ce qui ferait > 6 heures si c'était des minutes), c'est quasi-certainement des secondes
+                if (num > 360) {
+                    return Math.round(num / 60);
+                }
+                // Si c'est un petit nombre décimal (ex: 0.75 ou 1.5), c'est une durée en heures
+                if (num > 0 && num < 12 && s.includes('.')) {
+                    return Math.round(num * 60);
+                }
+                // Sinon c'est directement des minutes
+                return Math.round(num);
+            }
+
+            return 0;
         }
 
         // Moteur d'estimation de la dépense calorique basée sur le MET & poids réel de l'athlète
@@ -1454,22 +1535,31 @@
             const w = athleteWeight || 75;
 
             // Formule standard : Kcal = MET * Poids (kg) * (Durée en min / 60)
-            let met = 7.0; // défaut
+            let met = 6.0; // défaut modéré
 
             if (discLower.includes('repos') || discLower.includes('rest')) {
                 return 0;
             } else if (discLower.includes('natation') || discLower.includes('swim') || discLower.includes('bassin')) {
-                met = 8.5; // ~600-700 kcal/h
+                met = 7.5; // ~500-580 kcal/h pour 75kg
             } else if (discLower.includes('vélo') || discLower.includes('velo') || discLower.includes('bike') || discLower.includes('cycl')) {
-                if (discLower.includes('seuil') || discLower.includes('pma') || discLower.includes('interval')) met = 9.5;
-                else met = 8.0; // ~600-750 kcal/h
-            } else if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('vma') || discLower.includes('footing')) {
-                if (discLower.includes('vma') || discLower.includes('fractionné') || discLower.includes('tempo')) met = 10.5;
-                else met = 9.0; // ~700-800 kcal/h
+                if (discLower.includes('seuil') || discLower.includes('pma') || discLower.includes('interval')) met = 8.5;
+                else met = 6.8; // ~510 kcal/h
+            } else if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('pied') || discLower.includes('footing') || discLower.includes('jogging')) {
+                // Calibrage réaliste de la course à pied en triathlon (inclut échauffement, récupérations trottinées)
+                if (discLower.includes('vma') || discLower.includes('fractionné') || discLower.includes('seuil') || discLower.includes('tempo')) {
+                    met = 8.0; // ~600 kcal/h pour 75kg
+                } else {
+                    met = 6.8; // ~510 kcal/h pour 75kg (ex: ~380 kcal pour 45 min)
+                }
             } else if (discLower.includes('enchaîn') || discLower.includes('brick') || discLower.includes('triathlon')) {
-                met = 9.5; // Multi-enchaînement
-            } else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gainage')) {
-                met = 5.0; // ~350-400 kcal/h
+                met = 8.0;
+            } else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gainage') || discLower.includes('mobilite') || discLower.includes('stretching') || discLower.includes('yoga')) {
+                // Calibrage réaliste PPG / Gainage / Mobilité (avec temps de repos et travail postural statique)
+                if (discLower.includes('stretching') || discLower.includes('yoga') || discLower.includes('mobilite')) {
+                    met = 2.5; // ~180 kcal/h
+                } else {
+                    met = 3.8; // ~280 kcal/h pour 75kg (ex: ~140 kcal pour 30 min, ~210 kcal pour 45 min)
+                }
             }
 
             return Math.round(met * w * (durationMins / 60));
@@ -1491,8 +1581,17 @@
                 return;
             }
 
-            const dateKey = headers.find(h => h.includes('date') || h.includes('debut') || h.includes('start'));
-            const titleKey = headers.find(h => h.includes('titre') || h.includes('title') || h.includes('sport') || h.includes('discipline') || h.includes('nom') || h.includes('type'));
+            // Priorité absolue sur les colonnes de planification Nolio
+            // 1. Colonne Date : privilégier date_prevue / date_debut / date / date_seance
+            const dateKey = 
+                headers.find(h => h === 'dateprevue' || h === 'dateplanifiee' || h === 'datedebut' || h === 'startdate') ||
+                headers.find(h => h.startsWith('date') && !h.includes('crea') && !h.includes('modif')) ||
+                headers.find(h => h.includes('date') || h.includes('debut') || h.includes('start'));
+
+            // 2. Colonne Sport / Titre : privilégier la discipline réelle (sport, type_sport, activite) avant le titre
+            const sportKey = headers.find(h => h === 'sport' || h === 'typesport' || h === 'sporttype' || h === 'activite' || h === 'discipline');
+            const titleKey = headers.find(h => h === 'titre' || h === 'title' || h === 'nom' || h === 'names' || h === 'seance');
+
             const durKey = headers.find(h => h.includes('duree') || h.includes('duration') || h.includes('temps') || h.includes('time'));
             const calKey = headers.find(h => h.includes('calorie') || h.includes('kcal') || h.includes('charge') || h.includes('burn'));
             const descKey = headers.find(h => h.includes('description') || h.includes('note') || h.includes('detail') || h.includes('commentaire'));
@@ -1502,18 +1601,34 @@
                 return;
             }
 
-            const entries = [];
+            const rawEntries = [];
             rows.forEach(r => {
-                const titleVal = titleKey ? (r[titleKey] || 'Entraînement') : 'Entraînement';
-                const descVal = descKey ? (r[descKey] || '') : '';
-                
+                const dateISO = parseFlexibleDate(r[dateKey]);
+                if (!dateISO) return;
+
+                const sportVal = sportKey ? (r[sportKey] || '').trim() : '';
+                const titleVal = titleKey ? (r[titleKey] || '').trim() : '';
+                const descVal = descKey ? (r[descKey] || '').trim() : '';
+
+                // Résolution précise du nom de discipline affiché
+                let resolvedDiscipline = '';
+                if (sportVal && titleVal) {
+                    // Si le sport est explicite (ex: Course à pied) et le titre apporte un détail (ex: Footing Z2)
+                    resolvedDiscipline = sportVal;
+                } else if (sportVal) {
+                    resolvedDiscipline = sportVal;
+                } else if (titleVal) {
+                    resolvedDiscipline = titleVal;
+                } else {
+                    resolvedDiscipline = 'Entraînement';
+                }
+
                 // Normalisation pour détecter les séances d'introduction / notes de semaine
-                const normalizedText = (titleVal + ' ' + descVal)
+                const normalizedText = (resolvedDiscipline + ' ' + titleVal + ' ' + descVal)
                     .toLowerCase()
                     .normalize("NFD")
                     .replace(/[\u0300-\u036f]/g, "");
 
-                // Ignorer les séances de type introduction / mot de la semaine
                 const isIntroSession = 
                     normalizedText.includes("introduction de la semaine") ||
                     normalizedText.includes("introduction de de le semaine") ||
@@ -1526,41 +1641,63 @@
                     return; // Ignore cette entrée informative
                 }
 
-                const dateISO = parseFlexibleDate(r[dateKey]);
-                if (dateISO) {
-                    entries.push({
-                        dateStr: dateISO,
-                        title: titleVal,
-                        duration: durKey ? parseFlexibleDuration(r[durKey]) : 0,
-                        calories: calKey ? (parseInt(r[calKey], 10) || 0) : 0,
-                        description: descVal
-                    });
+                const durationMins = durKey ? parseFlexibleDuration(r[durKey]) : 0;
+                const explicitCal = calKey ? (parseInt(String(r[calKey]).replace(/[^0-9]/g, ''), 10) || 0) : 0;
+                
+                // Estimation de dépense calorique
+                let calBurn = explicitCal;
+                if (calBurn <= 0 && durationMins > 0) {
+                    calBurn = estimateCalorieBurn(resolvedDiscipline + ' ' + titleVal, durationMins, profile.currentWeight);
                 }
+
+                rawEntries.push({
+                    dateStr: dateISO,
+                    discipline: resolvedDiscipline,
+                    subTitle: (titleVal && titleVal !== resolvedDiscipline) ? titleVal : '',
+                    duration: durationMins,
+                    caloriesBurn: calBurn,
+                    description: descVal || titleVal
+                });
             });
 
-            if (entries.length === 0) {
+            if (rawEntries.length === 0) {
                 showNotification("Aucune séance valide détectée dans le fichier.", true);
                 return;
             }
 
-            entries.sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
-            initProgramDays(new Date(entries[0].dateStr));
+            // Tri chronologique strict par date ISO (YYYY-MM-DD)
+            rawEntries.sort((a,b) => a.dateStr.localeCompare(b.dateStr));
+
+            // Ré-alignement du calendrier sur la date de début du CSV si nécessaire
+            const firstDateParts = rawEntries[0].dateStr.split('-');
+            const firstDateObj = new Date(parseInt(firstDateParts[0], 10), parseInt(firstDateParts[1], 10) - 1, parseInt(firstDateParts[2], 10));
+            initProgramDays(firstDateObj);
+
+            // Remise à zéro propre de tous les jours du cycle avant application des entrées importées
+            programDays.forEach(d => {
+                d.discipline = 'Repos';
+                d.duration = 0;
+                d.caloriesBurn = 0;
+                d.description = 'Aucune séance planifiée (Jour de repos)';
+            });
 
             let count = 0;
-            entries.forEach(ent => {
+            rawEntries.forEach(ent => {
                 const target = programDays.find(d => d.dateStr === ent.dateStr);
                 if (target) {
-                    target.discipline = ent.title;
-                    target.duration = ent.duration;
-
-                    // Si les calories sont spécifiées dans le CSV on les prend, sinon calcul précis MET
-                    if (ent.calories > 0) {
-                        target.caloriesBurn = ent.calories;
+                    if (target.duration === 0 && target.discipline === 'Repos') {
+                        // Première séance affectée sur ce jour
+                        target.discipline = ent.discipline;
+                        target.duration = ent.duration;
+                        target.caloriesBurn = ent.caloriesBurn;
+                        target.description = ent.subTitle ? `${ent.subTitle} - ${ent.description}` : ent.description;
                     } else {
-                        target.caloriesBurn = estimateCalorieBurn(ent.title, ent.duration, profile.currentWeight);
+                        // Cumul si plusieurs séances le même jour (ex: Vélo + PPG)
+                        target.discipline = `${target.discipline} + ${ent.discipline}`;
+                        target.duration += ent.duration;
+                        target.caloriesBurn += ent.caloriesBurn;
+                        target.description += ` | ${ent.subTitle ? ent.subTitle + ' - ' : ''}${ent.description}`;
                     }
-
-                    target.description = ent.description;
                     count++;
                 }
             });
@@ -1569,7 +1706,7 @@
             renderCalendar();
             populateRecipeDayPicker();
             renderDayRecipes();
-            showNotification(`${count} séance(s) Nolio importée(s) ! Dépenses estimées et menus adaptés.`);
+            showNotification(`${count} séance(s) Nolio importée(s) sans inversion ! Dates & disciplines synchronisées.`);
         }
 
         // --- NOTIFICATIONS UTILISATEUR ---
