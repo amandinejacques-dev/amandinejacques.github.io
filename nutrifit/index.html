@@ -16,88 +16,102 @@
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
         .calendar-day-today { border: 2px solid #3b82f6 !important; background-color: rgba(59, 130, 246, 0.15); }
+        .strike-item { text-decoration: line-through; opacity: 0.5; }
     </style>
 </head>
-<body class="h-full font-sans antialiased bg-slate-900 text-slate-100 flex flex-col md:flex-row pb-16 md:pb-0">
+<body class="h-full font-sans antialiased bg-slate-900 text-slate-100 flex flex-col md:flex-row pb-16 md:pb-0 select-none">
 
     <!-- Navigation Latérale (Desktop) -->
     <aside class="w-full md:w-64 bg-slate-800 border-r border-slate-700 flex-shrink-0 flex flex-col justify-between p-4 hidden md:flex">
         <div>
             <div class="flex items-center gap-3 px-2 py-4 mb-6 border-b border-slate-700">
-                <i class="fa-solid fa-person-triathlon text-3xl text-blue-500"></i>
+                <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center">
+                    <i class="fa-solid fa-person-triathlon text-2xl text-blue-400"></i>
+                </div>
                 <div>
                     <h1 class="font-bold text-lg tracking-wide text-white">NutriFit Tri</h1>
-                    <p class="text-xs text-blue-400 font-medium" id="side-objective-badge">Planning 28 Jours / Nolio</p>
+                    <p class="text-xs text-blue-400 font-medium" id="side-objective-badge">Cycle 28 Jours &middot; Nolio</p>
                 </div>
             </div>
 
             <nav class="space-y-1">
                 <button onclick="switchTab('calendar')" id="btn-calendar" class="nav-btn active-tab w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-calendar-days w-5"></i> Calendrier Nolio
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i> Calendrier Nolio
                 </button>
                 <button onclick="switchTab('recipes')" id="btn-recipes" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-utensils w-5"></i> Menus du Jour
+                    <i class="fa-solid fa-utensils w-5 text-center"></i> Menus & Macros
                 </button>
                 <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-user-gear w-5"></i> Profil & Métabolisme
+                    <i class="fa-solid fa-user-gear w-5 text-center"></i> Profil & Métabolisme
                 </button>
                 <button onclick="switchTab('progress')" id="btn-progress" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-weight-scale w-5"></i> Suivi & Poids
+                    <i class="fa-solid fa-weight-scale w-5 text-center"></i> Suivi & Poids
                 </button>
                 <button onclick="switchTab('groceries')" id="btn-groceries" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-slate-300 hover:bg-slate-700">
-                    <i class="fa-solid fa-cart-shopping w-5"></i> Liste de Courses
+                    <i class="fa-solid fa-cart-shopping w-5 text-center"></i> Liste de Courses
                 </button>
                 <button onclick="openExportModal()" id="btn-export-sync" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition text-left text-blue-400 hover:bg-slate-700 hover:text-blue-300">
-                    <i class="fa-solid fa-arrows-rotate w-5"></i> Synchro & Export
+                    <i class="fa-solid fa-arrows-rotate w-5 text-center"></i> Synchro & Export
                 </button>
             </nav>
         </div>
 
-        <div class="p-3 bg-slate-900/60 rounded-xl border border-slate-700/50 text-xs text-slate-400 space-y-1">
+        <div class="p-3 bg-slate-900/70 rounded-xl border border-slate-700/60 text-xs text-slate-400 space-y-1.5 shadow-inner">
             <div class="flex justify-between">
-                <span>Poids Actuel :</span>
-                <span class="text-white font-medium" id="sidebar-weight-display">78.5 kg</span>
+                <span>Poids actuel :</span>
+                <span class="text-white font-semibold" id="sidebar-weight-display">78.5 kg</span>
             </div>
             <div class="flex justify-between">
-                <span>Métabolisme de Base :</span>
-                <span class="text-blue-400 font-medium" id="sidebar-bmr-display">1750 kcal</span>
+                <span>Métabolisme basal :</span>
+                <span class="text-blue-400 font-semibold" id="sidebar-bmr-display">1750 kcal</span>
+            </div>
+            <div class="flex justify-between">
+                <span>Objectif déficit :</span>
+                <span class="text-emerald-400 font-semibold" id="sidebar-deficit-display">-400 kcal</span>
             </div>
         </div>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Contenu Principal -->
     <main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6">
 
-        <!-- TAB CALENDRIER NOLIO -->
+        <!-- Notification Banner -->
+        <div id="import-notification" class="hidden p-4 rounded-xl text-xs flex justify-between items-center transition-all duration-300 shadow-lg border">
+            <span id="import-notification-text">Message</span>
+            <button onclick="document.getElementById('import-notification').classList.add('hidden')" class="hover:text-white p-1">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- ================= TAB CALENDRIER NOLIO ================= -->
         <section id="tab-calendar" class="space-y-6">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-md">
                 <div>
-                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-calendar-check text-blue-500"></i> Planning Entraînement (4 Semaines)
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                        <i class="fa-solid fa-calendar-check text-blue-500"></i> Plan d'Entraînement Triathlon
                     </h2>
-                    <p class="text-slate-400 text-sm mt-1">Aujourd'hui : <span id="today-date-banner" class="text-blue-400 font-bold">--</span></p>
+                    <p class="text-slate-400 text-sm mt-1">
+                        Aujourd'hui : <span id="today-date-banner" class="text-blue-400 font-semibold">--</span>
+                    </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <label class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition cursor-pointer flex items-center gap-2 shadow-lg">
+                <div class="flex flex-wrap items-center gap-2">
+                    <label class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font-medium text-xs transition cursor-pointer flex items-center gap-2 shadow">
                         <i class="fa-solid fa-file-csv"></i> Importer CSV Nolio
                         <input type="file" id="nolio-csv-input" accept=".csv,.txt" class="hidden" onchange="handleNolioCSVImport(event)">
                     </label>
-                    <button onclick="resetToDefaultProgram()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2.5 rounded-xl text-xs font-medium transition">
-                        Réinitialiser
+                    <button onclick="openEditWorkoutModal(selectedDayIndex)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-pen-to-square"></i> Modifier la séance
+                    </button>
+                    <button onclick="openResetModal()" class="bg-rose-900/30 hover:bg-rose-900/60 border border-rose-700/50 text-rose-300 px-3 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-rotate-left"></i> Réinitialiser
                     </button>
                 </div>
             </div>
 
-            <!-- Notice Import & Diagnostics -->
-            <div id="import-notification" class="hidden p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center">
-                <span id="import-notification-text">CSV Nolio importé avec succès !</span>
-                <button onclick="document.getElementById('import-notification').classList.add('hidden')" class="text-emerald-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
             <!-- Grille Calendrier 28 Jours -->
-            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4 shadow-md">
                 <div class="flex justify-between items-center">
-                    <h3 class="font-bold text-lg text-white">Vue Calendrier Mensuelle</h3>
+                    <h3 class="font-bold text-lg text-white">Cycle 4 Semaines (28 Jours)</h3>
                     <div class="flex items-center gap-4 text-xs">
                         <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> Aujourd'hui</span>
                         <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span> Sélectionné</span>
@@ -109,57 +123,62 @@
                 </div>
 
                 <div class="grid grid-cols-7 gap-2" id="calendar-grid">
-                    <!-- Dynamic Grid -->
+                    <!-- Dynamic Grid Generated by JS -->
                 </div>
             </div>
 
             <!-- Détails du Jour Sélectionné -->
-            <div class="bg-slate-800 p-6 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-slate-800 to-slate-900">
+            <div class="bg-slate-800 p-6 rounded-2xl border border-blue-500/30 bg-gradient-to-r from-slate-800 to-slate-900 shadow-md">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/60 pb-4">
                     <div>
                         <span class="text-xs font-bold uppercase tracking-widest text-blue-400" id="selected-day-tag">Jour Sélectionné</span>
                         <h3 class="text-xl font-extrabold text-white mt-0.5" id="selected-day-title">--</h3>
                     </div>
-                    <button onclick="switchTab('recipes')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2">
-                        <i class="fa-solid fa-utensils"></i> Voir les recettes de ce jour
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openEditWorkoutModal(selectedDayIndex)" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-pen"></i> Modifier séance
+                        </button>
+                        <button onclick="switchTab('recipes')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                            <i class="fa-solid fa-utensils"></i> Menus & Recettes
+                        </button>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
                         <span class="text-xs text-slate-400 uppercase font-bold">Discipline</span>
-                        <p class="text-lg font-bold text-blue-400 mt-1 flex items-center gap-2" id="selected-day-discipline">
-                            <i class="fa-solid fa-person-swimming"></i> Repos
+                        <p class="text-base md:text-lg font-bold text-blue-400 mt-1 truncate" id="selected-day-discipline">
+                            Repos
                         </p>
                     </div>
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Durée / Intensité</span>
-                        <p class="text-lg font-bold text-white mt-1" id="selected-day-duration">0 min</p>
+                        <span class="text-xs text-slate-400 uppercase font-bold">Durée de séance</span>
+                        <p class="text-base md:text-lg font-bold text-white mt-1" id="selected-day-duration">0 min</p>
                     </div>
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Dépense Est. Séance</span>
-                        <p class="text-lg font-bold text-amber-400 mt-1" id="selected-day-workout-burn">0 kcal</p>
+                        <span class="text-xs text-slate-400 uppercase font-bold">Dépense Séance</span>
+                        <p class="text-base md:text-lg font-bold text-amber-400 mt-1" id="selected-day-workout-burn">0 kcal</p>
                     </div>
                     <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60">
-                        <span class="text-xs text-slate-400 uppercase font-bold">Cible Total Jour</span>
-                        <p class="text-lg font-bold text-emerald-400 mt-1" id="selected-day-total-target">0 kcal</p>
+                        <span class="text-xs text-slate-400 uppercase font-bold">Cible Nutri Jour</span>
+                        <p class="text-base md:text-lg font-bold text-emerald-400 mt-1" id="selected-day-total-target">0 kcal</p>
                     </div>
                 </div>
-                <div class="mt-3 text-xs text-slate-400 italic" id="selected-day-description">
-                    Description / Séance Nolio : "Aucune séance"
+                <div class="mt-3 text-xs text-slate-400 italic bg-slate-900/40 p-3 rounded-lg border border-slate-800" id="selected-day-description">
+                    Description : Aucune séance
                 </div>
             </div>
         </section>
 
-        <!-- TAB RECETTES & MENUS DU JOUR -->
+        <!-- ================= TAB RECETTES & MENUS ================= -->
         <section id="tab-recipes" class="space-y-6 hidden">
             <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
                 <div>
-                    <h2 class="text-2xl font-bold text-white">Menu du Jour & Recettes Adaptées</h2>
-                    <p class="text-slate-400 text-sm">Chaque jour du programme dispose de recettes adaptées aux besoins métaboliques.</p>
+                    <h2 class="text-2xl font-bold text-white">Menus du Jour & Macros Proportionnels</h2>
+                    <p class="text-slate-400 text-sm">Les portions s'adaptent dynamiquement à la dépense de la séance du jour.</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <label class="text-xs text-slate-400 font-medium">Sélectionner Jour :</label>
+                    <label class="text-xs text-slate-400 font-medium">Jour :</label>
                     <select id="recipe-day-picker" onchange="selectDayFromPicker(parseInt(this.value))" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white text-sm font-bold focus:outline-none focus:border-blue-500">
                     </select>
                 </div>
@@ -167,77 +186,82 @@
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Calories Cibles</span>
+                    <span class="text-xs text-slate-400 font-bold uppercase">Objectif Calories</span>
                     <p class="text-2xl font-extrabold text-blue-400 mt-1" id="recipe-target-kcal">0 <span class="text-xs font-normal text-slate-400">kcal</span></p>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Protéines</span>
+                    <span class="text-xs text-slate-400 font-bold uppercase">Protéines (1.8g/kg)</span>
                     <p class="text-2xl font-extrabold text-emerald-400 mt-1" id="recipe-target-prot">0 <span class="text-xs font-normal text-slate-400">g</span></p>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Glucides</span>
+                    <span class="text-xs text-slate-400 font-bold uppercase">Glucides (Modulé)</span>
                     <p class="text-2xl font-extrabold text-amber-400 mt-1" id="recipe-target-carb">0 <span class="text-xs font-normal text-slate-400">g</span></p>
                 </div>
                 <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-center">
-                    <span class="text-xs text-slate-400 font-bold uppercase">Lipides</span>
+                    <span class="text-xs text-slate-400 font-bold uppercase">Lipides (25%)</span>
                     <p class="text-2xl font-extrabold text-rose-400 mt-1" id="recipe-target-fat">0 <span class="text-xs font-normal text-slate-400">g</span></p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="recipes-cards-container">
+                <!-- Meal cards injected dynamically -->
             </div>
         </section>
 
-        <!-- TAB PROFILE -->
+        <!-- ================= TAB PROFILE ================= -->
         <section id="tab-profile" class="space-y-6 hidden">
             <header class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                <h2 class="text-2xl font-bold text-white">Profil Utilisateur & Calcul Métabolique</h2>
-                <p class="text-slate-400 text-sm">Calcul du métabolisme de base (Mifflin-St Jeor) et répartition ajustée.</p>
+                <h2 class="text-2xl font-bold text-white">Profil & Équation Métabolique</h2>
+                <p class="text-slate-400 text-sm">Formule Mifflin-St Jeor avec calcul précis du besoin de base et ajustement du déficit calorique.</p>
             </header>
 
-            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 max-w-2xl">
-                <form id="profile-form" onsubmit="saveProfile(event)" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 max-w-3xl">
+                <form id="profile-form" onsubmit="saveProfile(event)" class="space-y-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">Sexe</label>
-                            <select id="prof-sex" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <label class="block text-xs text-slate-400 mb-1">Sexe biologique</label>
+                            <select id="prof-sex" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:border-blue-500">
                                 <option value="M">Homme</option>
                                 <option value="F">Femme</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">Âge</label>
-                            <input type="number" id="prof-age" value="32" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <label class="block text-xs text-slate-400 mb-1">Âge (années)</label>
+                            <input type="number" id="prof-age" value="32" min="15" max="100" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:border-blue-500">
                         </div>
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">Taille (cm)</label>
-                            <input type="number" id="prof-height" value="178" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <input type="number" id="prof-height" value="178" min="120" max="230" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:border-blue-500">
                         </div>
                         <div>
                             <label class="block text-xs text-slate-400 mb-1">Poids Actuel (kg)</label>
-                            <input type="number" step="0.1" id="prof-current-weight" value="78.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <input type="number" step="0.1" id="prof-current-weight" value="78.5" min="30" max="200" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:border-blue-500">
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">Poids Cible (kg)</label>
-                            <input type="number" step="0.1" id="prof-target-weight" value="70.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <label class="block text-xs text-slate-400 mb-1">Poids Cible de Course (kg)</label>
+                            <input type="number" step="0.1" id="prof-target-weight" value="70.0" min="30" max="200" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:border-blue-500">
                         </div>
                         <div>
-                            <label class="block text-xs text-slate-400 mb-1">Objectif Déficit / Jour (kcal)</label>
-                            <input type="number" id="prof-deficit" value="400" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                            <label class="block text-xs text-slate-400 mb-1">Objectif Déficit Quotidien (kcal)</label>
+                            <input type="number" id="prof-deficit" value="400" min="0" max="1200" step="50" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm focus:border-blue-500">
+                            <span class="text-[10px] text-slate-400">Recommandé : 300 à 500 kcal pour préserver l'endurance.</span>
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded-xl transition">
-                        Enregistrer et Mettre à jour
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition shadow">
+                        Enregistrer et recalculer le plan
                     </button>
                 </form>
             </div>
         </section>
 
-        <!-- TAB PROGRESS -->
+        <!-- ================= TAB SUIVI & PROGRESS ================= -->
         <section id="tab-progress" class="space-y-6 hidden">
             <header class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                <h2 class="text-2xl font-bold text-white">Suivi du Poids</h2>
+                <h2 class="text-2xl font-bold text-white">Suivi du Poids & Évolution</h2>
+                <p class="text-slate-400 text-sm">Visualisation des pesées et tendance vers l'objectif de compétition.</p>
             </header>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">
                     <h3 class="font-bold text-lg text-white">Ajouter une pesée</h3>
@@ -247,34 +271,54 @@
                     </div>
                     <div>
                         <label class="block text-xs text-slate-400 mb-1">Poids (kg)</label>
-                        <input type="number" step="0.1" id="weight-value" placeholder="ex: 78.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
+                        <input type="number" step="0.1" id="weight-value" placeholder="ex: 78.2" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white text-sm">
                     </div>
                     <button onclick="addWeightLog()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-medium text-sm transition">
-                        Enregistrer
+                        Ajouter la mesure
                     </button>
+
+                    <div class="pt-4 border-t border-slate-700">
+                        <span class="text-xs font-bold text-slate-400 block mb-2 uppercase">Historique récent :</span>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1" id="weight-history-list">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 md:col-span-2">
-                    <h3 class="font-bold text-lg text-white mb-4">Évolution du Poids</h3>
-                    <div class="h-64">
-                        <canvas id="weightChart"></canvas>
+
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 md:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg text-white">Courbe d'Évolution</h3>
+                            <span class="text-xs text-slate-400" id="weight-stats-summary">--</span>
+                        </div>
+                        <div class="h-72">
+                            <canvas id="weightChart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- TAB GROCERIES -->
+        <!-- ================= TAB COURSES ================= -->
         <section id="tab-groceries" class="space-y-6 hidden">
-            <header class="flex justify-between items-center bg-slate-800 p-6 rounded-2xl border border-slate-700">
+            <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-800 p-6 rounded-2xl border border-slate-700">
                 <div>
                     <h2 class="text-2xl font-bold text-white">Liste de Courses Automatique</h2>
-                    <p class="text-slate-400 text-sm">Calculée pour le programme de 4 semaines.</p>
+                    <p class="text-slate-400 text-sm">Agrégée directement à partir des ingrédients des 4 semaines de menus.</p>
                 </div>
-                <button onclick="copyGroceryList()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-xl font-medium text-sm transition flex items-center gap-2">
-                    <i class="fa-regular fa-copy"></i> Copier
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="copyGroceryList()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-xl font-medium text-xs transition flex items-center gap-2">
+                        <i class="fa-regular fa-copy"></i> Copier
+                    </button>
+                    <button onclick="renderGroceryList()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl font-medium text-xs transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate"></i> Actualiser
+                    </button>
+                </div>
             </header>
+
             <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="grocery-list-container">
+                    <!-- Dynamic Grocery categories injected -->
                 </div>
             </div>
         </section>
@@ -282,28 +326,76 @@
     </main>
 
     <!-- Navigation Mobile Basse -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 flex justify-around p-2 z-50">
-        <button onclick="switchTab('calendar')" id="btn-mob-calendar" class="mob-nav-btn flex flex-col items-center gap-1 text-blue-400 text-xs py-1">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 flex justify-around p-2 z-40 backdrop-blur-md bg-opacity-95">
+        <button onclick="switchTab('calendar')" id="btn-mob-calendar" class="mob-nav-btn flex flex-col items-center gap-1 text-blue-400 text-[10px] py-1">
             <i class="fa-solid fa-calendar-days text-base"></i> Planning
         </button>
-        <button onclick="switchTab('recipes')" id="btn-mob-recipes" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
-            <i class="fa-solid fa-utensils text-base"></i> Recettes
+        <button onclick="switchTab('recipes')" id="btn-mob-recipes" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] py-1">
+            <i class="fa-solid fa-utensils text-base"></i> Menus
         </button>
-        <button onclick="switchTab('profile')" id="btn-mob-profile" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
+        <button onclick="switchTab('profile')" id="btn-mob-profile" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] py-1">
             <i class="fa-solid fa-user-gear text-base"></i> Profil
         </button>
-        <button onclick="switchTab('progress')" id="btn-mob-progress" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
+        <button onclick="switchTab('progress')" id="btn-mob-progress" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] py-1">
             <i class="fa-solid fa-weight-scale text-base"></i> Poids
         </button>
-        <button onclick="switchTab('groceries')" id="btn-mob-groceries" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-xs py-1">
+        <button onclick="switchTab('groceries')" id="btn-mob-groceries" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] py-1">
             <i class="fa-solid fa-cart-shopping text-base"></i> Courses
         </button>
-        <button onclick="openExportModal()" id="btn-mob-export" class="mob-nav-btn flex flex-col items-center gap-1 text-blue-400 text-xs py-1">
+        <button onclick="openExportModal()" id="btn-mob-export" class="mob-nav-btn flex flex-col items-center gap-1 text-slate-400 text-[10px] py-1">
             <i class="fa-solid fa-arrows-rotate text-base"></i> Export
         </button>
     </nav>
 
-    <!-- Modal d'Exportation & Synchronisation -->
+    <!-- MODAL MODIFIER SEANCE WORKOUT -->
+    <div id="workout-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-dumbbell text-blue-400"></i> Modifier la séance du jour
+                </h3>
+                <button onclick="closeEditWorkoutModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+    <!-- MODAL REINITIALISATION DU CALENDRIER -->
+    <div id="reset-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Réinitialiser le calendrier
+                </h3>
+                <button onclick="closeResetModal()" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-300">
+                Choisissez comment vous souhaitez réinitialiser votre planning d'entraînement de 28 jours :
+            </p>
+            <div class="space-y-3 pt-1">
+                <button onclick="executeReset('clear')" class="w-full text-left bg-slate-900/80 hover:bg-slate-900 border border-slate-700 p-3.5 rounded-xl transition group">
+                    <div class="font-bold text-sm text-rose-400 group-hover:text-rose-300 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-xmark"></i> Vider tout le planning (100% Repos)
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">Met toutes les séances à 0 min / 0 kcal pour reconstruire ou réimporter un CSV vierge.</div>
+                </button>
+                <button onclick="executeReset('default')" class="w-full text-left bg-slate-900/80 hover:bg-slate-900 border border-slate-700 p-3.5 rounded-xl transition group">
+                    <div class="font-bold text-sm text-blue-400 group-hover:text-blue-300 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days"></i> Rétablir le cycle Triathlon type (4 semaines)
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">Réinitialise le plan d'entraînement équilibré (Natation, Vélo, Course, Brick, PPG).</div>
+                </button>
+            </div>
+            <div class="pt-2 text-right">
+                <button type="button" onclick="closeResetModal()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-4 py-2 rounded-xl transition">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SYNCHRO & EXPORT -->
     <div id="export-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 space-y-6 shadow-2xl overflow-y-auto max-h-[90vh]">
             <div class="flex justify-between items-center border-b border-slate-700 pb-4">
@@ -316,26 +408,24 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Export iCal/ICS -->
                 <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3 flex flex-col justify-between">
                     <div>
                         <span class="text-xs font-bold text-blue-400 uppercase tracking-wide flex items-center gap-2">
-                            <i class="fa-regular fa-calendar-check"></i> Calendrier (.ics)
+                            <i class="fa-regular fa-calendar-check"></i> Calendrier iCal (.ics)
                         </span>
-                        <p class="text-xs text-slate-300 mt-1">Exportez le programme complet d'entraînements et de nutrition vers Google Calendar, Apple Calendar ou Outlook.</p>
+                        <p class="text-xs text-slate-300 mt-1">Exportez les entraînements et calories cibles vers Google Calendar ou Apple Calendar.</p>
                     </div>
                     <button onclick="exportToICS()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
                         <i class="fa-solid fa-download"></i> Télécharger l'Agenda (.ics)
                     </button>
                 </div>
 
-                <!-- Export/Import JSON -->
                 <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3 flex flex-col justify-between">
                     <div>
                         <span class="text-xs font-bold text-emerald-400 uppercase tracking-wide flex items-center gap-2">
-                            <i class="fa-solid fa-database"></i> Sauvegarde JSON
+                            <i class="fa-solid fa-database"></i> Sauvegarde Intégrale (JSON)
                         </span>
-                        <p class="text-xs text-slate-300 mt-1">Sauvegardez l'ensemble de vos données (profil, poids, programme) pour restaurer votre session sur smartphone.</p>
+                        <p class="text-xs text-slate-300 mt-1">Sauvegardez vos données et vos séances personnalisées pour les transférer sur un autre appareil.</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="exportJSON()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1">
@@ -349,22 +439,202 @@
                 </div>
             </div>
 
-            <!-- Export Liste Texte Keep/Notes -->
             <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700/60 space-y-3">
                 <div class="flex justify-between items-center">
                     <span class="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center gap-2">
-                        <i class="fa-regular fa-note-sticky"></i> Résumé Texte (Google Keep / Notes)
+                        <i class="fa-regular fa-note-sticky"></i> Résumé Texte (Notes / Keep)
                     </span>
                     <button onclick="copyTextSummary()" class="text-xs bg-amber-600 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1">
                         <i class="fa-regular fa-copy"></i> Copier
                     </button>
                 </div>
-                <textarea id="export-text-preview" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 h-32 focus:outline-none focus:border-amber-500/50"></textarea>
+                <textarea id="export-text-preview" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-300 h-28 focus:outline-none"></textarea>
             </div>
         </div>
     </div>
 
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
     <script>
+        // --- BASE DE DONNÉES COMPLÈTE : 28 JOURNÉES UNIQUES DE RECETTES ---
+        const MEALS_DATABASE_28 = [
+            // SEMAINE 1
+            {
+                breakfast: { name: "Porridge Avoine, Banane & Beurre de Cacahuète", kcal: 460, p: 18, c: 68, f: 14, items: [{ ing: "Flocons d'avoine", qty: 75, unit: "g", cat: "carb" }, { ing: "Lait végétal", qty: 200, unit: "ml", cat: "other" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Beurre de cacahuète", qty: 15, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Poulet Basmati & Courgettes Grillées", kcal: 620, p: 42, c: 70, f: 15, items: [{ ing: "Blanc de poulet", qty: 150, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 80, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 200, unit: "g", cat: "fresh" }, { ing: "Huile d'olive", qty: 10, unit: "ml", cat: "other" }] },
+                snack: { name: "Shaker Whey Isolate & Pomme Croquante", kcal: 240, p: 25, c: 24, f: 4, items: [{ ing: "Whey protéine", qty: 30, unit: "g", cat: "prot" }, { ing: "Pomme", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Amandes", qty: 10, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Pavé de Saumon, Quinoa & Brocolis Vapeur", kcal: 580, p: 36, c: 54, f: 20, items: [{ ing: "Pavé de saumon", qty: 140, unit: "g", cat: "prot" }, { ing: "Quinoa cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Brocolis", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Omelette Sucrée Flocons d'Avoine & Myrtilles", kcal: 430, p: 24, c: 48, f: 14, items: [{ ing: "Œufs entiers", qty: 3, unit: "pièce", cat: "prot" }, { ing: "Flocons d'avoine", qty: 50, unit: "g", cat: "carb" }, { ing: "Myrtilles", qty: 80, unit: "g", cat: "fresh" }, { ing: "Miel d'acacia", qty: 10, unit: "g", cat: "other" }] },
+                lunch: { name: "Salade de Thon, Patate Douce & Maïs Doux", kcal: 590, p: 40, c: 68, f: 14, items: [{ ing: "Thon au naturel", qty: 140, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 220, unit: "g", cat: "carb" }, { ing: "Maïs doux", qty: 90, unit: "g", cat: "carb" }, { ing: "Mâche / Vinaigrette", qty: 50, unit: "g", cat: "fresh" }] },
+                snack: { name: "Fromage Blanc 0%, Graines de Chia & Framboises", kcal: 230, p: 20, c: 20, f: 6, items: [{ ing: "Fromage blanc 0%", qty: 200, unit: "g", cat: "prot" }, { ing: "Graines de chia", qty: 15, unit: "g", cat: "fresh" }, { ing: "Framboises", qty: 90, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Filet de Dinde Rôti, Lentilles Vertes & Carottes", kcal: 520, p: 42, c: 56, f: 10, items: [{ ing: "Filet de dinde", qty: 150, unit: "g", cat: "prot" }, { ing: "Lentilles vertes crues", qty: 80, unit: "g", cat: "carb" }, { ing: "Carottes fraîches", qty: 160, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Pancakes Protéinés Banane & Sirop d'Érable", kcal: 480, p: 26, c: 68, f: 10, items: [{ ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Farine d'avoine", qty: 45, unit: "g", cat: "carb" }, { ing: "Sirop d'érable", qty: 15, unit: "ml", cat: "other" }] },
+                lunch: { name: "Bœuf Émincé 5%, Riz Complet & Poivrons Doux", kcal: 640, p: 44, c: 72, f: 16, items: [{ ing: "Bœuf haché 5%", qty: 150, unit: "g", cat: "prot" }, { ing: "Riz complet", qty: 80, unit: "g", cat: "carb" }, { ing: "Poivrons tricolores", qty: 200, unit: "g", cat: "fresh" }] },
+                snack: { name: "Toast Pain Complet & Purée d'Amande Complète", kcal: 260, p: 10, c: 30, f: 11, items: [{ ing: "Pain complet", qty: 60, unit: "g", cat: "carb" }, { ing: "Purée d'amande", qty: 20, unit: "g", cat: "fresh" }, { ing: "Miel", qty: 5, unit: "g", cat: "other" }] },
+                dinner: { name: "Dos de Cabillaud en Papillote, Boulgour & Épinards", kcal: 500, p: 38, c: 52, f: 11, items: [{ ing: "Cabillaud", qty: 160, unit: "g", cat: "prot" }, { ing: "Boulgour cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Épinards frais", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Bowl Cake Cacao Brut & Cœur Banane Fondante", kcal: 440, p: 20, c: 62, f: 12, items: [{ ing: "Flocons d'avoine", qty: 60, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 1, unit: "pièce", cat: "prot" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Cacao pur dégraissé", qty: 10, unit: "g", cat: "other" }] },
+                lunch: { name: "Wraps Épeautre, Poulet Grillé, Avocat & Roquette", kcal: 610, p: 39, c: 60, f: 20, items: [{ ing: "Tortillas complètes", qty: 2, unit: "pièce", cat: "carb" }, { ing: "Blanc de poulet", qty: 130, unit: "g", cat: "prot" }, { ing: "Avocat", qty: 0.5, unit: "pièce", cat: "fresh" }, { ing: "Tomates cerises", qty: 150, unit: "g", cat: "fresh" }] },
+                snack: { name: "Smoothie Récupération Banane & Beurre de Cacahuète", kcal: 280, p: 22, c: 34, f: 8, items: [{ ing: "Whey protéine", qty: 25, unit: "g", cat: "prot" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Lait d'amande", qty: 200, unit: "ml", cat: "other" }, { ing: "Beurre de cacahuète", qty: 10, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Omelette Poêlée aux Champignons & Semoule Complète", kcal: 530, p: 32, c: 55, f: 18, items: [{ ing: "Œufs entiers", qty: 3, unit: "pièce", cat: "prot" }, { ing: "Champignons de Paris", qty: 160, unit: "g", cat: "fresh" }, { ing: "Semoule complète", qty: 65, unit: "g", cat: "carb" }] }
+            },
+            {
+                breakfast: { name: "Tartines Seigle, Avocat Écrasé & Œufs Pochés", kcal: 460, p: 22, c: 45, f: 20, items: [{ ing: "Œufs pochés", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Pain complet", qty: 65, unit: "g", cat: "carb" }, { ing: "Avocat", qty: 0.5, unit: "pièce", cat: "fresh" }] },
+                lunch: { name: "Pâtes Complètes aux Crevettes & Coulis Basilic", kcal: 600, p: 38, c: 78, f: 11, items: [{ ing: "Pâtes complètes crues", qty: 90, unit: "g", cat: "carb" }, { ing: "Crevettes fraîches", qty: 150, unit: "g", cat: "prot" }, { ing: "Coulis de tomate", qty: 150, unit: "ml", cat: "other" }] },
+                snack: { name: "Compote Sans Sucre Ajouté & Noix du Périgord", kcal: 220, p: 5, c: 26, f: 12, items: [{ ing: "Compote pomme sans sucre", qty: 150, unit: "g", cat: "fresh" }, { ing: "Noix de Grenoble", qty: 20, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Pavé de Tofu Mariné Tamari, Riz Jasmin & Wok Brocolis", kcal: 510, p: 30, c: 62, f: 14, items: [{ ing: "Tofu ferme", qty: 160, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Brocolis", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Muesli Croustillant Avoine, Yaourt Grec & Poire", kcal: 470, p: 20, c: 64, f: 15, items: [{ ing: "Flocons d'avoine", qty: 60, unit: "g", cat: "carb" }, { ing: "Fromage blanc 0%", qty: 160, unit: "g", cat: "prot" }, { ing: "Poire fraîche", qty: 1, unit: "pièce", cat: "fresh" }] },
+                lunch: { name: "Filet Mignon de Porc, Nouilles Soba & Légumes Sautés", kcal: 650, p: 44, c: 75, f: 15, items: [{ ing: "Filet de porc", qty: 150, unit: "g", cat: "prot" }, { ing: "Nouilles Soba sarrasin", qty: 80, unit: "g", cat: "carb" }, { ing: "Mélange légumes wok", qty: 200, unit: "g", cat: "fresh" }] },
+                snack: { name: "Dattes Medjool Fourrées Amandes & Cacao", kcal: 240, p: 7, c: 40, f: 7, items: [{ ing: "Dattes Medjool", qty: 2, unit: "pièce", cat: "fresh" }, { ing: "Flocons d'avoine", qty: 25, unit: "g", cat: "carb" }, { ing: "Amandes", qty: 12, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Steak de Thon Snacké & Écrasé de Patate Douce", kcal: 540, p: 42, c: 54, f: 13, items: [{ ing: "Thon frais", qty: 140, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 220, unit: "g", cat: "carb" }, { ing: "Haricots verts", qty: 150, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Skyr d'Islande, Kiwis Mûrs & Graines de Courge", kcal: 390, p: 26, c: 48, f: 9, items: [{ ing: "Skyr / Fromage blanc", qty: 200, unit: "g", cat: "prot" }, { ing: "Kiwis", qty: 2, unit: "pièce", cat: "fresh" }, { ing: "Graines de courge", qty: 15, unit: "g", cat: "fresh" }, { ing: "Miel", qty: 10, unit: "g", cat: "other" }] },
+                lunch: { name: "Chili Con Carne Lean au Bœuf & Haricots Rouges", kcal: 660, p: 46, c: 78, f: 14, items: [{ ing: "Bœuf haché 5%", qty: 140, unit: "g", cat: "prot" }, { ing: "Haricots rouges égouttés", qty: 120, unit: "g", cat: "carb" }, { ing: "Riz basmati cru", qty: 55, unit: "g", cat: "carb" }] },
+                snack: { name: "Bol Fromage Blanc & Raisins Secs Dorés", kcal: 210, p: 19, c: 26, f: 3, items: [{ ing: "Fromage blanc 0%", qty: 200, unit: "g", cat: "prot" }, { ing: "Raisins secs", qty: 22, unit: "g", cat: "carb" }] },
+                dinner: { name: "Lieu Noir au Four, Petit Épeautre & Courgettes", kcal: 490, p: 36, c: 56, f: 10, items: [{ ing: "Lieu noir", qty: 160, unit: "g", cat: "prot" }, { ing: "Petit épeautre", qty: 65, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+
+            // SEMAINE 2
+            {
+                breakfast: { name: "Muesli Bircher Suisse aux Pommes Râpées & Noisettes", kcal: 450, p: 17, c: 66, f: 14, items: [{ ing: "Flocons d'avoine", qty: 70, unit: "g", cat: "carb" }, { ing: "Pomme", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Noix de Grenoble", qty: 15, unit: "g", cat: "fresh" }, { ing: "Lait d'amande", qty: 150, unit: "ml", cat: "other" }] },
+                lunch: { name: "Dinde Grillée aux Herbes de Provence & Quinoa Rouge", kcal: 610, p: 42, c: 68, f: 15, items: [{ ing: "Filet de dinde", qty: 150, unit: "g", cat: "prot" }, { ing: "Quinoa cru", qty: 80, unit: "g", cat: "carb" }, { ing: "Haricots verts", qty: 180, unit: "g", cat: "fresh" }] },
+                snack: { name: "Galettes de Riz Complet, Beurre de Cacahuète & Banane", kcal: 250, p: 7, c: 36, f: 9, items: [{ ing: "Tortillas complètes", qty: 1, unit: "pièce", cat: "carb" }, { ing: "Beurre de cacahuète", qty: 15, unit: "g", cat: "fresh" }, { ing: "Banane", qty: 0.5, unit: "pièce", cat: "fresh" }] },
+                dinner: { name: "Colin Lieu Doré à la Poêle, Riz Complet & Poireaux Fondants", kcal: 510, p: 37, c: 58, f: 12, items: [{ ing: "Cabillaud", qty: 160, unit: "g", cat: "prot" }, { ing: "Riz complet", qty: 70, unit: "g", cat: "carb" }, { ing: "Carottes fraîches", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Crêpes Légères Farine de Sarrasin & Compote Maison", kcal: 440, p: 20, c: 62, f: 11, items: [{ ing: "Farine d'avoine", qty: 60, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Compote pomme sans sucre", qty: 100, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Pavé de Saumon Teriyaki & Riz Basmati aux Fèves", kcal: 630, p: 38, c: 66, f: 22, items: [{ ing: "Pavé de saumon", qty: 140, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 75, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 180, unit: "g", cat: "fresh" }] },
+                snack: { name: "Skyr aux Myrtilles & Éclats d'Amandes", kcal: 220, p: 22, c: 18, f: 6, items: [{ ing: "Skyr / Fromage blanc", qty: 180, unit: "g", cat: "prot" }, { ing: "Myrtilles", qty: 70, unit: "g", cat: "fresh" }, { ing: "Amandes", qty: 10, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Poêlée Paysanne : Bœuf 5%, Patate Douce & Oignons Rouges", kcal: 550, p: 40, c: 60, f: 14, items: [{ ing: "Bœuf haché 5%", qty: 140, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 200, unit: "g", cat: "carb" }, { ing: "Champignons de Paris", qty: 150, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Smoothie Bowl Avoine, Fruits Rouges & Graines de Chia", kcal: 430, p: 21, c: 63, f: 10, items: [{ ing: "Flocons d'avoine", qty: 55, unit: "g", cat: "carb" }, { ing: "Whey protéine", qty: 25, unit: "g", cat: "prot" }, { ing: "Framboises", qty: 100, unit: "g", cat: "fresh" }, { ing: "Graines de chia", qty: 12, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Escalope de Veau / Poulet, Polenta Crémeuse & Tomates Confites", kcal: 610, p: 43, c: 65, f: 16, items: [{ ing: "Blanc de poulet", qty: 150, unit: "g", cat: "prot" }, { ing: "Semoule complète", qty: 75, unit: "g", cat: "carb" }, { ing: "Tomates cerises", qty: 180, unit: "g", cat: "fresh" }] },
+                snack: { name: "Pain aux Graines Toasté & Tranches de Blanc de Poulet", kcal: 230, p: 18, c: 24, f: 5, items: [{ ing: "Pain complet", qty: 60, unit: "g", cat: "carb" }, { ing: "Blanc de poulet", qty: 60, unit: "g", cat: "prot" }] },
+                dinner: { name: "Curry Doux de Cabillaud, Lait de Coco Léger & Riz Jasmin", kcal: 530, p: 37, c: 58, f: 15, items: [{ ing: "Cabillaud", qty: 160, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Brocolis", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "French Toast (Pain Perdu) Léger à la Cannelle & Fraises", kcal: 450, p: 23, c: 62, f: 12, items: [{ ing: "Pain complet", qty: 70, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Sirop d'érable", qty: 10, unit: "ml", cat: "other" }, { ing: "Framboises", qty: 80, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Poke Bowl Maison : Saumon Frais, Riz Vinaigré, Edamame & Concombre", kcal: 660, p: 39, c: 75, f: 20, items: [{ ing: "Pavé de saumon", qty: 130, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 85, unit: "g", cat: "carb" }, { ing: "Avocat", qty: 0.4, unit: "pièce", cat: "fresh" }] },
+                snack: { name: "Barre Endurance Céréales Avoine & Pépites Noires", kcal: 260, p: 9, c: 37, f: 8, items: [{ ing: "Flocons d'avoine", qty: 40, unit: "g", cat: "carb" }, { ing: "Miel", qty: 12, unit: "g", cat: "other" }, { ing: "Amandes", qty: 12, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Dahl Onctueux de Lentilles Corail, Épinards & Galette Complète", kcal: 540, p: 29, c: 74, f: 12, items: [{ ing: "Lentilles vertes crues", qty: 85, unit: "g", cat: "carb" }, { ing: "Épinards frais", qty: 200, unit: "g", cat: "fresh" }, { ing: "Coulis de tomate", qty: 120, unit: "ml", cat: "other" }] }
+            },
+            {
+                breakfast: { name: "Porridge Chaud Cacao Délicat, Banane & Noisettes", kcal: 460, p: 17, c: 68, f: 14, items: [{ ing: "Flocons d'avoine", qty: 75, unit: "g", cat: "carb" }, { ing: "Cacao pur dégraissé", qty: 10, unit: "g", cat: "other" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Noix de Grenoble", qty: 12, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Filet de Dinde Paprika, Boulgour & Courgettes Rissolées", kcal: 590, p: 41, c: 68, f: 13, items: [{ ing: "Filet de dinde", qty: 150, unit: "g", cat: "prot" }, { ing: "Boulgour cru", qty: 80, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 200, unit: "g", cat: "fresh" }] },
+                snack: { name: "Fromage Blanc Vanillé & Pomme Cuite Cannelle", kcal: 210, p: 18, c: 28, f: 2, items: [{ ing: "Fromage blanc 0%", qty: 200, unit: "g", cat: "prot" }, { ing: "Pomme", qty: 1, unit: "pièce", cat: "fresh" }] },
+                dinner: { name: "Crevettes Sautées à l'Ail, Nouilles Soba & Brocolis", kcal: 520, p: 38, c: 62, f: 11, items: [{ ing: "Crevettes fraîches", qty: 160, unit: "g", cat: "prot" }, { ing: "Nouilles Soba sarrasin", qty: 75, unit: "g", cat: "carb" }, { ing: "Brocolis", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Omelette Norvégienne Salée : 3 Œufs & 40g Saumon Fumé", kcal: 440, p: 29, c: 32, f: 20, items: [{ ing: "Œufs entiers", qty: 3, unit: "pièce", cat: "prot" }, { ing: "Pavé de saumon", qty: 50, unit: "g", cat: "prot" }, { ing: "Pain complet", qty: 45, unit: "g", cat: "carb" }] },
+                lunch: { name: "Tagliatelles Complètes au Bœuf Haché & Coulis Maison", kcal: 650, p: 45, c: 76, f: 15, items: [{ ing: "Pâtes complètes crues", qty: 85, unit: "g", cat: "carb" }, { ing: "Bœuf haché 5%", qty: 140, unit: "g", cat: "prot" }, { ing: "Coulis de tomate", qty: 150, unit: "ml", cat: "other" }] },
+                snack: { name: "Shaker Whey Vanille & Banane Énergétique", kcal: 250, p: 25, c: 30, f: 3, items: [{ ing: "Whey protéine", qty: 30, unit: "g", cat: "prot" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }] },
+                dinner: { name: "Filet de Colin au Four, Purée de Patate Douce & Haricots Verts", kcal: 490, p: 37, c: 54, f: 10, items: [{ ing: "Cabillaud", qty: 160, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 200, unit: "g", cat: "carb" }, { ing: "Haricots verts", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Pudding de Chia Gourmand au Lait d'Amande, Banane & Miel", kcal: 420, p: 15, c: 58, f: 15, items: [{ ing: "Graines de chia", qty: 25, unit: "g", cat: "fresh" }, { ing: "Lait d'amande", qty: 200, unit: "ml", cat: "other" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Miel", qty: 12, unit: "g", cat: "other" }] },
+                lunch: { name: "Wok Poulet Curry Coco Léger, Riz Jasmin & Julienne de Légumes", kcal: 640, p: 42, c: 74, f: 16, items: [{ ing: "Blanc de poulet", qty: 150, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 80, unit: "g", cat: "carb" }, { ing: "Mélange légumes wok", qty: 200, unit: "g", cat: "fresh" }] },
+                snack: { name: "Poignée d'Amandes & Raisins Secs d'Énergie", kcal: 230, p: 6, c: 26, f: 12, items: [{ ing: "Amandes", qty: 20, unit: "g", cat: "fresh" }, { ing: "Raisins secs", qty: 20, unit: "g", cat: "carb" }] },
+                dinner: { name: "Omelette Moelleuse au Thon, Salade Verte & Quinoa", kcal: 520, p: 40, c: 48, f: 16, items: [{ ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Thon au naturel", qty: 100, unit: "g", cat: "prot" }, { ing: "Quinoa cru", qty: 60, unit: "g", cat: "carb" }] }
+            },
+
+            // SEMAINE 3
+            {
+                breakfast: { name: "Porridge Épeautre, Poire Fraîche & Beurre d'Amande", kcal: 460, p: 18, c: 67, f: 14, items: [{ ing: "Flocons d'avoine", qty: 75, unit: "g", cat: "carb" }, { ing: "Poire fraîche", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Purée d'amande", qty: 15, unit: "g", cat: "fresh" }, { ing: "Lait d'amande", qty: 200, unit: "ml", cat: "other" }] },
+                lunch: { name: "Filet de Merlu Poêlé, Ébly / Blé Tendre & Ratatouille", kcal: 580, p: 38, c: 68, f: 13, items: [{ ing: "Lieu noir", qty: 160, unit: "g", cat: "prot" }, { ing: "Boulgour cru", qty: 75, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 200, unit: "g", cat: "fresh" }] },
+                snack: { name: "Skyr aux Graines de Courge & Miel Sauvage", kcal: 220, p: 21, c: 19, f: 6, items: [{ ing: "Skyr / Fromage blanc", qty: 180, unit: "g", cat: "prot" }, { ing: "Graines de courge", qty: 15, unit: "g", cat: "fresh" }, { ing: "Miel", qty: 8, unit: "g", cat: "other" }] },
+                dinner: { name: "Wok de Tofu Croustillant, Nouilles de Riz & Champignons Noirs", kcal: 520, p: 28, c: 64, f: 15, items: [{ ing: "Tofu ferme", qty: 160, unit: "g", cat: "prot" }, { ing: "Nouilles Soba sarrasin", qty: 70, unit: "g", cat: "carb" }, { ing: "Champignons de Paris", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Pancakes Moelleux à la Patate Douce & Sirop d'Érable", kcal: 450, p: 18, c: 72, f: 9, items: [{ ing: "Patate douce", qty: 100, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Farine d'avoine", qty: 45, unit: "g", cat: "carb" }, { ing: "Sirop d'érable", qty: 12, unit: "ml", cat: "other" }] },
+                lunch: { name: "Bavette Maigre Poêlée, Pommes de Terre Vapeur & Haricots Verts", kcal: 620, p: 45, c: 62, f: 17, items: [{ ing: "Bœuf haché 5%", qty: 150, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 220, unit: "g", cat: "carb" }, { ing: "Haricots verts", qty: 180, unit: "g", cat: "fresh" }] },
+                snack: { name: "Compote Pomme / Châtaigne & Poignée de Noix", kcal: 240, p: 5, c: 32, f: 11, items: [{ ing: "Compote pomme sans sucre", qty: 150, unit: "g", cat: "fresh" }, { ing: "Noix de Grenoble", qty: 18, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Dos de Saumon Rôti au Four, Lentilles Vertes & Citron Vert", kcal: 570, p: 40, c: 48, f: 21, items: [{ ing: "Pavé de saumon", qty: 140, unit: "g", cat: "prot" }, { ing: "Lentilles vertes crues", qty: 70, unit: "g", cat: "carb" }, { ing: "Carottes fraîches", qty: 150, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Sandwich Matinal Toasté : Blanc de Poulet, Œuf au Plat & Seigle", kcal: 460, p: 28, c: 46, f: 16, items: [{ ing: "Pain complet", qty: 65, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Blanc de poulet", qty: 50, unit: "g", cat: "prot" }] },
+                lunch: { name: "Curry de Pois Chiches, Épinards Frais & Riz Basmati", kcal: 600, p: 26, c: 84, f: 14, items: [{ ing: "Haricots rouges égouttés", qty: 150, unit: "g", cat: "carb" }, { ing: "Riz basmati cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Épinards frais", qty: 180, unit: "g", cat: "fresh" }] },
+                snack: { name: "Whey Cacao & Deux Kiwis Pleins de Vitamines", kcal: 220, p: 25, c: 22, f: 3, items: [{ ing: "Whey protéine", qty: 30, unit: "g", cat: "prot" }, { ing: "Kiwis", qty: 2, unit: "pièce", cat: "fresh" }] },
+                dinner: { name: "Filet de Dinde Mariné Paprika, Quinoa & Courgettes Vapeur", kcal: 510, p: 41, c: 56, f: 11, items: [{ ing: "Filet de dinde", qty: 150, unit: "g", cat: "prot" }, { ing: "Quinoa cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Bowlcake Flocons d'Avoine, Myrtilles & Éclats de Noisettes", kcal: 450, p: 19, c: 63, f: 13, items: [{ ing: "Flocons d'avoine", qty: 65, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 1, unit: "pièce", cat: "prot" }, { ing: "Myrtilles", qty: 80, unit: "g", cat: "fresh" }, { ing: "Amandes", qty: 12, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Pâtes Complètes au Thon Émietté, Câpres & Tomates Poêlées", kcal: 620, p: 42, c: 78, f: 12, items: [{ ing: "Pâtes complètes crues", qty: 85, unit: "g", cat: "carb" }, { ing: "Thon au naturel", qty: 140, unit: "g", cat: "prot" }, { ing: "Coulis de tomate", qty: 140, unit: "ml", cat: "other" }] },
+                snack: { name: "Fromage Blanc Onctueux & Muesli Croustillant", kcal: 240, p: 18, c: 30, f: 5, items: [{ ing: "Fromage blanc 0%", qty: 180, unit: "g", cat: "prot" }, { ing: "Flocons d'avoine", qty: 35, unit: "g", cat: "carb" }, { ing: "Miel", qty: 8, unit: "g", cat: "other" }] },
+                dinner: { name: "Omelette Gourmande aux Épinards, Fêta & Semoule Complète", kcal: 530, p: 31, c: 52, f: 20, items: [{ ing: "Œufs entiers", qty: 3, unit: "pièce", cat: "prot" }, { ing: "Épinards frais", qty: 180, unit: "g", cat: "fresh" }, { ing: "Semoule complète", qty: 60, unit: "g", cat: "carb" }] }
+            },
+            {
+                breakfast: { name: "Porridge Chaud Pomme Rôtie à la Cannelle & Amandes Effilées", kcal: 460, p: 17, c: 68, f: 14, items: [{ ing: "Flocons d'avoine", qty: 75, unit: "g", cat: "carb" }, { ing: "Pomme", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Amandes", qty: 15, unit: "g", cat: "fresh" }, { ing: "Lait végétal", qty: 200, unit: "ml", cat: "other" }] },
+                lunch: { name: "Sauté de Poulet Coco, Poivrons & Nouilles Soba", kcal: 640, p: 43, c: 72, f: 17, items: [{ ing: "Blanc de poulet", qty: 150, unit: "g", cat: "prot" }, { ing: "Nouilles Soba sarrasin", qty: 80, unit: "g", cat: "carb" }, { ing: "Poivrons tricolores", qty: 200, unit: "g", cat: "fresh" }] },
+                snack: { name: "Pain d'Épices Traditionnel & Fromage Blanc 0%", kcal: 230, p: 16, c: 34, f: 3, items: [{ ing: "Fromage blanc 0%", qty: 160, unit: "g", cat: "prot" }, { ing: "Pain complet", qty: 45, unit: "g", cat: "carb" }, { ing: "Miel", qty: 8, unit: "g", cat: "other" }] },
+                dinner: { name: "Dos de Cabillaud Braisé, Boulgour & Brocolis Vapeur", kcal: 500, p: 37, c: 54, f: 11, items: [{ ing: "Cabillaud", qty: 160, unit: "g", cat: "prot" }, { ing: "Boulgour cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Brocolis", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Tartines Seigle, Fromage Frais, Avocat & Tranches de Tomates", kcal: 430, p: 16, c: 50, f: 18, items: [{ ing: "Pain complet", qty: 75, unit: "g", cat: "carb" }, { ing: "Avocat", qty: 0.5, unit: "pièce", cat: "fresh" }, { ing: "Tomates cerises", qty: 120, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Filet de Canard Maigre / Steak Haché 5%, Patate Douce Rôtie & Asperges", kcal: 630, p: 44, c: 64, f: 17, items: [{ ing: "Bœuf haché 5%", qty: 150, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 220, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 180, unit: "g", cat: "fresh" }] },
+                snack: { name: "Smoothie Antioxydant Whey & Fruits Rouges", kcal: 250, p: 25, c: 27, f: 4, items: [{ ing: "Whey protéine", qty: 30, unit: "g", cat: "prot" }, { ing: "Framboises", qty: 120, unit: "g", cat: "fresh" }, { ing: "Lait d'amande", qty: 180, unit: "ml", cat: "other" }] },
+                dinner: { name: "Lieu Noir Émietté en Risotto de Petit Épeautre & Champignons", kcal: 520, p: 38, c: 58, f: 12, items: [{ ing: "Lieu noir", qty: 160, unit: "g", cat: "prot" }, { ing: "Petit épeautre", qty: 70, unit: "g", cat: "carb" }, { ing: "Champignons de Paris", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Skyr aux Noix de Pécan, Banane Tranchée & Sirop d'Agave", kcal: 430, p: 24, c: 54, f: 12, items: [{ ing: "Skyr / Fromage blanc", qty: 200, unit: "g", cat: "prot" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Noix de Grenoble", qty: 15, unit: "g", cat: "fresh" }, { ing: "Miel", qty: 8, unit: "g", cat: "other" }] },
+                lunch: { name: "Wrap Mexicain Haricots Noirs, Dinde Émincée & Maïs", kcal: 650, p: 44, c: 76, f: 16, items: [{ ing: "Tortillas complètes", qty: 2, unit: "pièce", cat: "carb" }, { ing: "Filet de dinde", qty: 130, unit: "g", cat: "prot" }, { ing: "Haricots rouges égouttés", qty: 100, unit: "g", cat: "carb" }, { ing: "Tomates cerises", qty: 100, unit: "g", cat: "fresh" }] },
+                snack: { name: "Pomme Granny Smith & Beurre de Cacahuète Léger", kcal: 220, p: 6, c: 26, f: 10, items: [{ ing: "Pomme", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Beurre de cacahuète", qty: 15, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Pavé de Thon Gratiné Sésame, Riz Thaï & Haricots Verts", kcal: 540, p: 42, c: 54, f: 14, items: [{ ing: "Thon frais", qty: 140, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 65, unit: "g", cat: "carb" }, { ing: "Haricots verts", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+
+            // SEMAINE 4
+            {
+                breakfast: { name: "Porridge Avoine Chocolat Noir & Éclats de Banane Séchée", kcal: 460, p: 18, c: 68, f: 14, items: [{ ing: "Flocons d'avoine", qty: 75, unit: "g", cat: "carb" }, { ing: "Cacao pur dégraissé", qty: 10, unit: "g", cat: "other" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Amandes", qty: 12, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Aiguillettes de Poulet Rôties, Trio de Riz & Poivrons Doux", kcal: 620, p: 43, c: 70, f: 14, items: [{ ing: "Blanc de poulet", qty: 150, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 80, unit: "g", cat: "carb" }, { ing: "Poivrons tricolores", qty: 200, unit: "g", cat: "fresh" }] },
+                snack: { name: "Shaker Isolate Vanille & Poire Confite Maison", kcal: 230, p: 25, c: 24, f: 3, items: [{ ing: "Whey protéine", qty: 30, unit: "g", cat: "prot" }, { ing: "Poire fraîche", qty: 1, unit: "pièce", cat: "fresh" }] },
+                dinner: { name: "Filet de Truite / Saumon Vapeur, Quinoa & Courgettes Grillées", kcal: 560, p: 38, c: 50, f: 20, items: [{ ing: "Pavé de saumon", qty: 140, unit: "g", cat: "prot" }, { ing: "Quinoa cru", qty: 65, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Gaufres Protéinées Légères à la Farine d'Avoine & Miel", kcal: 450, p: 22, c: 64, f: 10, items: [{ ing: "Farine d'avoine", qty: 55, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Miel", qty: 12, unit: "g", cat: "other" }] },
+                lunch: { name: "Chili Végétarien Protéiné aux Haricots Rouges, Quinoa & Cumin", kcal: 610, p: 28, c: 84, f: 14, items: [{ ing: "Haricots rouges égouttés", qty: 160, unit: "g", cat: "carb" }, { ing: "Quinoa cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Coulis de tomate", qty: 140, unit: "ml", cat: "other" }] },
+                snack: { name: "Fromage Blanc 0%, Graines de Courge & Myrtilles", kcal: 220, p: 20, c: 20, f: 6, items: [{ ing: "Fromage blanc 0%", qty: 180, unit: "g", cat: "prot" }, { ing: "Graines de courge", qty: 12, unit: "g", cat: "fresh" }, { ing: "Myrtilles", qty: 70, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Brochettes de Dinde au Romarin, Épeautre & Brocolis", kcal: 510, p: 41, c: 56, f: 11, items: [{ ing: "Filet de dinde", qty: 150, unit: "g", cat: "prot" }, { ing: "Petit épeautre", qty: 70, unit: "g", cat: "carb" }, { ing: "Brocolis", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Omelette Avoine Banane Écrasée & Cannelle Douce", kcal: 440, p: 22, c: 56, f: 14, items: [{ ing: "Œufs entiers", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Flocons d'avoine", qty: 50, unit: "g", cat: "carb" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }] },
+                lunch: { name: "Pavé de Cabillaud Rôti au Four, Purée de Patate Douce & Haricots", kcal: 590, p: 39, c: 68, f: 13, items: [{ ing: "Cabillaud", qty: 160, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 240, unit: "g", cat: "carb" }, { ing: "Haricots verts", qty: 160, unit: "g", cat: "fresh" }] },
+                snack: { name: "Pain Complet Grillé & Purée d'Oléagineux", kcal: 240, p: 9, c: 28, f: 11, items: [{ ing: "Pain complet", qty: 55, unit: "g", cat: "carb" }, { ing: "Purée d'amande", qty: 18, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Bœuf Lean 5% Émincé, Riz Jasmin & Wok de Légumes Croquants", kcal: 540, p: 41, c: 58, f: 14, items: [{ ing: "Bœuf haché 5%", qty: 140, unit: "g", cat: "prot" }, { ing: "Riz basmati cru", qty: 70, unit: "g", cat: "carb" }, { ing: "Mélange légumes wok", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Bowlcake Énergétique Avoine, Noix & Pépites Noires", kcal: 470, p: 20, c: 60, f: 16, items: [{ ing: "Flocons d'avoine", qty: 65, unit: "g", cat: "carb" }, { ing: "Œufs entiers", qty: 1, unit: "pièce", cat: "prot" }, { ing: "Noix de Grenoble", qty: 15, unit: "g", cat: "fresh" }, { ing: "Miel", qty: 10, unit: "g", cat: "other" }] },
+                lunch: { name: "Salade Complète : Thon, Quinoa, Tomates, Avocat & Citron", kcal: 620, p: 40, c: 64, f: 20, items: [{ ing: "Thon au naturel", qty: 140, unit: "g", cat: "prot" }, { ing: "Quinoa cru", qty: 75, unit: "g", cat: "carb" }, { ing: "Avocat", qty: 0.5, unit: "pièce", cat: "fresh" }, { ing: "Tomates cerises", qty: 150, unit: "g", cat: "fresh" }] },
+                snack: { name: "Skyr Crémeux & Pomme Granny Découpée", kcal: 210, p: 19, c: 26, f: 3, items: [{ ing: "Skyr / Fromage blanc", qty: 180, unit: "g", cat: "prot" }, { ing: "Pomme", qty: 1, unit: "pièce", cat: "fresh" }] },
+                dinner: { name: "Omelette Fine aux Herbes, Semoule Complète & Épinards", kcal: 510, p: 30, c: 54, f: 17, items: [{ ing: "Œufs entiers", qty: 3, unit: "pièce", cat: "prot" }, { ing: "Semoule complète", qty: 65, unit: "g", cat: "carb" }, { ing: "Épinards frais", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Tartines Multicéréales, Avocat Tranché & Deux Œufs Pochés", kcal: 460, p: 22, c: 44, f: 20, items: [{ ing: "Pain complet", qty: 65, unit: "g", cat: "carb" }, { ing: "Œufs pochés", qty: 2, unit: "pièce", cat: "prot" }, { ing: "Avocat", qty: 0.5, unit: "pièce", cat: "fresh" }] },
+                lunch: { name: "Pâtes Complètes au Poulet Émincé, Courgettes & Huile d'Olive", kcal: 640, p: 44, c: 74, f: 16, items: [{ ing: "Pâtes complètes crues", qty: 85, unit: "g", cat: "carb" }, { ing: "Blanc de poulet", qty: 150, unit: "g", cat: "prot" }, { ing: "Courgettes", qty: 180, unit: "g", cat: "fresh" }, { ing: "Huile d'olive", qty: 10, unit: "ml", cat: "other" }] },
+                snack: { name: "Barre aux Amandes & Figues Sèches Récupération", kcal: 240, p: 7, c: 36, f: 8, items: [{ ing: "Flocons d'avoine", qty: 35, unit: "g", cat: "carb" }, { ing: "Amandes", qty: 15, unit: "g", cat: "fresh" }, { ing: "Miel", qty: 8, unit: "g", cat: "other" }] },
+                dinner: { name: "Dos de Colin en Papillote, Riz Complet & Brocolis", kcal: 490, p: 36, c: 56, f: 10, items: [{ ing: "Cabillaud", qty: 160, unit: "g", cat: "prot" }, { ing: "Riz complet", qty: 70, unit: "g", cat: "carb" }, { ing: "Brocolis", qty: 200, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Muesli Bircher Fruits Rouges, Skyr & Graines de Chia", kcal: 440, p: 24, c: 58, f: 11, items: [{ ing: "Flocons d'avoine", qty: 60, unit: "g", cat: "carb" }, { ing: "Skyr / Fromage blanc", qty: 160, unit: "g", cat: "prot" }, { ing: "Framboises", qty: 80, unit: "g", cat: "fresh" }, { ing: "Graines de chia", qty: 12, unit: "g", cat: "fresh" }] },
+                lunch: { name: "Filet Mignon de Porc Grillé, Nouilles Soba & Champignons", kcal: 630, p: 43, c: 72, f: 15, items: [{ ing: "Filet de porc", qty: 150, unit: "g", cat: "prot" }, { ing: "Nouilles Soba sarrasin", qty: 80, unit: "g", cat: "carb" }, { ing: "Champignons de Paris", qty: 180, unit: "g", cat: "fresh" }] },
+                snack: { name: "Whey Protéine Banane & Noix de Grenoble", kcal: 260, p: 26, c: 26, f: 7, items: [{ ing: "Whey protéine", qty: 30, unit: "g", cat: "prot" }, { ing: "Banane", qty: 1, unit: "pièce", cat: "fresh" }, { ing: "Noix de Grenoble", qty: 10, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Steak de Thon Frais, Purée de Patate Douce & Haricots Verts", kcal: 530, p: 41, c: 52, f: 13, items: [{ ing: "Thon frais", qty: 140, unit: "g", cat: "prot" }, { ing: "Patate douce", qty: 210, unit: "g", cat: "carb" }, { ing: "Haricots verts", qty: 180, unit: "g", cat: "fresh" }] }
+            },
+            {
+                breakfast: { name: "Brunch Triathlon Équilibré : Œufs Brouillés, Pain Seigle & Kiwi", kcal: 450, p: 23, c: 48, f: 17, items: [{ ing: "Œufs entiers", qty: 3, unit: "pièce", cat: "prot" }, { ing: "Pain complet", qty: 65, unit: "g", cat: "carb" }, { ing: "Kiwis", qty: 1, unit: "pièce", cat: "fresh" }] },
+                lunch: { name: "Riz Sauté Façon Paella : Crevettes, Dinde & Poivrons", kcal: 640, p: 44, c: 74, f: 15, items: [{ ing: "Riz basmati cru", qty: 80, unit: "g", cat: "carb" }, { ing: "Crevettes fraîches", qty: 100, unit: "g", cat: "prot" }, { ing: "Blanc de poulet", qty: 80, unit: "g", cat: "prot" }, { ing: "Poivrons tricolores", qty: 160, unit: "g", cat: "fresh" }] },
+                snack: { name: "Fromage Blanc Vanille, Miel Sauvage & Amandes", kcal: 220, p: 19, c: 22, f: 6, items: [{ ing: "Fromage blanc 0%", qty: 180, unit: "g", cat: "prot" }, { ing: "Miel", qty: 10, unit: "g", cat: "other" }, { ing: "Amandes", qty: 10, unit: "g", cat: "fresh" }] },
+                dinner: { name: "Pavé de Saumon Cuit Vapeur, Boulgour & Courgettes Douces", kcal: 560, p: 37, c: 52, f: 21, items: [{ ing: "Pavé de saumon", qty: 140, unit: "g", cat: "prot" }, { ing: "Boulgour cru", qty: 65, unit: "g", cat: "carb" }, { ing: "Courgettes", qty: 200, unit: "g", cat: "fresh" }] }
+            }
+        ];
+
+        // --- ÉTAT GLOBAL DE L'APPLICATION ---
         let profile = {
             sex: 'M',
             age: 32,
@@ -376,7 +646,7 @@
 
         let todayDateObj = new Date();
         let programStartDateObj = new Date(todayDateObj);
-        programStartDateObj.setDate(todayDateObj.getDate() - 3); // Start 3 days prior by default
+        programStartDateObj.setDate(todayDateObj.getDate() - 3);
 
         let selectedDayIndex = 0;
         let weightChart = null;
@@ -387,88 +657,57 @@
             { date: '2026-10-15', weight: 78.5 }
         ];
 
-        const recipeDatabase = [
-            {
-                breakfast: { name: "Porridge Avoine, Banane & Beurre de Cacahuète", kcal: 450, p: 18, c: 65, f: 14, items: ["80g Flocons d'avoine", "200ml Lait d'amande", "1 Banane", "15g Beurre de cacahuète"] },
-                lunch: { name: "Poulet Basmati & Courgettes Grillées", kcal: 620, p: 42, c: 70, f: 15, items: ["150g Blanc de poulet", "80g Riz basmati cru", "200g Courgettes", "10ml Huile d'olive"] },
-                snack: { name: "Shaker Whey & Pomme", kcal: 250, p: 25, c: 22, f: 5, items: ["30g Whey protéine", "1 Pomme", "15g Amandes"] },
-                dinner: { name: "Pavé de Saumon, Quinoa & Brocolis", kcal: 580, p: 35, c: 55, f: 20, items: ["140g Pavé de saumon", "70g Quinoa cru", "200g Brocolis à la vapeur"] }
-            },
-            {
-                breakfast: { name: "Omelette Sucrée Avoine & Myrtilles", kcal: 430, p: 22, c: 50, f: 14, items: ["3 Œufs", "50g Flocons d'avoine", "80g Myrtilles fraiches", "10g Miel"] },
-                lunch: { name: "Salade de Thon, Patate Douce & Maïs", kcal: 590, p: 38, c: 68, f: 14, items: ["130g Thon au naturel", "200g Patate douce rôtie", "100g Maïs", "Mâche & Vinaigrette"] },
-                snack: { name: "Fromage Blanc, Graines de Chia & Fruits Rouges", kcal: 230, p: 20, c: 20, f: 6, items: ["200g Fromage blanc 0%", "15g Graines de chia", "100g Fruits rouges"] },
-                dinner: { name: "Filet de Dinde, Lentilles & Carottes", kcal: 520, p: 40, c: 58, f: 10, items: ["150g Filet de dinde", "80g Lentilles vertes crues", "150g Carottes vapeur"] }
-            },
-            {
-                breakfast: { name: "Pancakes Protéinés Banane & Sirop d'Érable", kcal: 480, p: 26, c: 68, f: 10, items: ["1 Banane", "2 Œufs", "40g Farine d'avoine", "15ml Sirop d'érable"] },
-                lunch: { name: "Bœuf Haché 5%, Riz Complet & Poivrons", kcal: 640, p: 44, c: 72, f: 16, items: ["150g Bœuf 5%", "80g Riz complet cru", "200g Poivrons poêlés"] },
-                snack: { name: "Toast Pain Complet & Purée d'Amande", kcal: 260, p: 10, c: 30, f: 11, items: ["2 Tranches pain complet", "20g Purée d'amande", "1 C.à.c Miel"] },
-                dinner: { name: "Dos de Cabillaud, Bulgur & Épinards", kcal: 500, p: 36, c: 52, f: 11, items: ["160g Cabillaud", "70g Boulgour cru", "200g Épinards frais"] }
-            },
-            {
-                breakfast: { name: "Bowl Cake Choco-Banane Express", kcal: 440, p: 20, c: 62, f: 12, items: ["60g Flocons d'avoine", "1 Œuf", "1 Banane", "10g Cacao en poudre 100%"] },
-                lunch: { name: "Wrap Poulet, Avocat & Crudités", kcal: 610, p: 38, c: 60, f: 20, items: ["2 Wraps blé complet", "130g Poulet effiloché", "1/2 Avocat", "Tomates & Salade"] },
-                snack: { name: "Smoothie Protéiné Banane & Beurre de Peanut", kcal: 280, p: 22, c: 32, f: 8, items: ["25g Whey", "1 Banane", "200ml Lait végétal", "10g Beurre de cacahuète"] },
-                dinner: { name: "Omelette aux Champignons & Semoule Complète", kcal: 530, p: 30, c: 55, f: 18, items: ["3 Œufs bio", "150g Champignons", "60g Semoule complète", "Salade verte"] }
-            },
-            {
-                breakfast: { name: "Eggs & Toasts Avocat", kcal: 460, p: 22, c: 45, f: 20, items: ["2 Œufs pochés", "2 Tranches pain de seigle", "1/2 Avocat écrasé"] },
-                lunch: { name: "Pâtes Complètes, Crevettes & Sauce Tomate Basilic", kcal: 600, p: 36, c: 78, f: 11, items: ["90g Pâtes complètes crues", "150g Crevettes", "150g Coulis de tomate", "Basilic"] },
-                snack: { name: "Compote Sans Sucre & Poignée de Noix", kcal: 220, p: 5, c: 25, f: 12, items: ["1 Big pot compote pomme", "20g Noix de Grenoble"] },
-                dinner: { name: "Tofu Mariné Soja, Riz Thaï & Brocolis", kcal: 510, p: 28, c: 62, f: 14, items: ["150g Tofu ferme", "70g Riz thaï cru", "200g Brocolis", "Sauce soja & Huile séricine"] }
-            },
-            {
-                breakfast: { name: "Muesli Croustillant Maison, Yaourt Grec & Poire", kcal: 470, p: 18, c: 64, f: 15, items: ["60g Muesli flocon/graines", "150g Yaourt grec 0%", "1 Poire fraîche"] },
-                lunch: { name: "Sauté de Porc Émincé, Nouilles de Sarrasin & Wok Légumes", kcal: 650, p: 42, c: 75, f: 15, items: ["150g Filet de porc", "80g Nouilles Soba", "200g Légumes wok"] },
-                snack: { name: "Barre Énergétique Avoine/Dattes Maison", kcal: 240, p: 8, c: 38, f: 7, items: ["2 Dattes Medjool", "30g Flocons d'avoine", "10g Amandes"] },
-                dinner: { name: "Pavé de Thon Grillé, Purée de Patate Douce", kcal: 540, p: 40, c: 54, f: 13, items: ["140g Thon frais", "220g Patate douce", "Haricots verts"] }
-            },
-            {
-                breakfast: { name: "Skyr, Kiwi, Miel & Graines de Courge", kcal: 390, p: 25, c: 48, f: 9, items: ["200g Skyr", "2 Kiwis", "15g Miel", "15g Graines de courge"] },
-                lunch: { name: "Chili Con Carne Allégé au Bœuf & Haricots Rouges", kcal: 660, p: 45, c: 78, f: 14, items: ["140g Bœuf haché 5%", "100g Haricots rouges", "60g Riz cru", "Tomates"] },
-                snack: { name: "Formage Blanc & Fruits Séchés", kcal: 210, p: 18, c: 26, f: 3, items: ["200g Formage blanc", "20g Raisins secs"] },
-                dinner: { name: "Lieu Noir au Four, Risotto d'Épeautre & Courgettes", kcal: 490, p: 34, c: 56, f: 10, items: ["160g Lieu noir", "60g Petit épeautre", "200g Courgettes"] }
-            }
-        ];
-
-        for (let i = 7; i < 28; i++) {
-            const base = JSON.parse(JSON.stringify(recipeDatabase[i % 7]));
-            base.breakfast.name += ` (Var. J${i+1})`;
-            recipeDatabase.push(base);
-        }
-
-        function switchTab(tabId) {
-            const sections = document.querySelectorAll('main > section');
-            sections.forEach(sec => sec.classList.add('hidden'));
-
-            const targetSection = document.getElementById(`tab-${tabId}`);
-            if (targetSection) targetSection.classList.remove('hidden');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab'));
-            const activeBtn = document.getElementById(`btn-${tabId}`);
-            if (activeBtn) activeBtn.classList.add('active-tab');
-
-            document.querySelectorAll('.mob-nav-btn').forEach(btn => {
-                btn.classList.remove('text-blue-400');
-                btn.classList.add('text-slate-400');
-            });
-            const activeMobBtn = document.getElementById(`btn-mob-${tabId}`);
-            if (activeMobBtn) {
-                activeMobBtn.classList.remove('text-slate-400');
-                activeMobBtn.classList.add('text-blue-400');
-            }
-
-            if (tabId === 'progress') renderWeightChart();
-            if (tabId === 'recipes') {
-                populateRecipeDayPicker();
-                renderDayRecipes();
-            }
-            if (tabId === 'groceries') {
-                renderGroceryList();
+        // --- PERSISTENCE LOCALSTORAGE ---
+        function saveToStorage() {
+            try {
+                const data = {
+                    profile,
+                    programStartDateStr: formatDateISO(programStartDateObj),
+                    weightLogs,
+                    programDays: programDays.map(d => ({
+                        dayIndex: d.dayIndex,
+                        dateStr: d.dateStr,
+                        discipline: d.discipline,
+                        duration: d.duration,
+                        caloriesBurn: d.caloriesBurn,
+                        description: d.description
+                    }))
+                };
+                localStorage.setItem('nutrifit_triathlon_data', JSON.stringify(data));
+            } catch (e) {
+                console.warn("Storage not available:", e);
             }
         }
 
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('nutrifit_triathlon_data');
+                if (!saved) return false;
+                const data = JSON.parse(saved);
+                if (data.profile) profile = data.profile;
+                if (data.weightLogs) weightLogs = data.weightLogs;
+                if (data.programStartDateStr) {
+                    programStartDateObj = new Date(data.programStartDateStr);
+                }
+                initProgramDays(programStartDateObj);
+                if (data.programDays && Array.isArray(data.programDays)) {
+                    data.programDays.forEach(imp => {
+                        const target = programDays.find(p => p.dayIndex === imp.dayIndex || p.dateStr === imp.dateStr);
+                        if (target) {
+                            target.discipline = imp.discipline;
+                            target.duration = imp.duration;
+                            target.caloriesBurn = imp.caloriesBurn;
+                            target.description = imp.description;
+                        }
+                    });
+                }
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // --- CALCULS METABOLIQUES ---
         function getBMR() {
             if (profile.sex === 'M') {
                 return Math.round((10 * profile.currentWeight) + (6.25 * profile.height) - (5 * profile.age) + 5);
@@ -477,6 +716,16 @@
             }
         }
 
+        function getDayTargets(day) {
+            const bmr = getBMR();
+            const targetKcal = Math.max(1300, Math.round(bmr + day.caloriesBurn - profile.deficit));
+            const targetProt = Math.round(profile.currentWeight * 1.8);
+            const targetFat = Math.round((targetKcal * 0.25) / 9);
+            const targetCarb = Math.max(80, Math.round((targetKcal - (targetProt * 4) - (targetFat * 9)) / 4));
+            return { targetKcal, targetProt, targetCarb, targetFat };
+        }
+
+        // --- INITIALISATION DU PROGRAMME ---
         function initProgramDays(startFromDate = null) {
             if (startFromDate) {
                 programStartDateObj = new Date(startFromDate);
@@ -485,11 +734,10 @@
                 programStartDateObj.setDate(todayDateObj.getDate() - 3);
             }
 
-            // Valeurs ajustées et réalistes des dépenses caloriens par séance (Course ajustée autour de 5.5 kcal/min soit ~330 kcal pour 45 min)
             const defaultWorkouts = [
                 { disc: 'Natation', dur: 50, cal: 400, desc: 'Technique & Allure Z2/Z3' },
                 { disc: 'Vélo', dur: 90, cal: 700, desc: 'Endurance fondamentale + rappel Seuil' },
-                { disc: 'Course à pied', dur: 45, cal: 250, desc: 'Footing avec 5x2 min VMA' },
+                { disc: 'Course à pied', dur: 45, cal: 330, desc: 'Footing avec 5x2 min VMA' },
                 { disc: 'Repos', dur: 0, cal: 0, desc: 'Récupération active & Stretching' },
                 { disc: 'Natation', dur: 60, cal: 480, desc: 'Séries VMA 10x100m' },
                 { disc: 'Enchaînement Tri', dur: 120, cal: 850, desc: 'Brick : 2h Vélo + 30m Cap' },
@@ -501,16 +749,16 @@
                 const d = new Date(programStartDateObj);
                 d.setDate(programStartDateObj.getDate() + i);
 
-                const template = defaultWorkouts[i % 7];
+                const tpl = defaultWorkouts[i % 7];
                 programDays.push({
                     dayIndex: i,
                     dateStr: formatDateISO(d),
                     dateObj: d,
-                    discipline: template.disc,
-                    duration: template.dur,
-                    caloriesBurn: template.cal,
-                    description: template.desc,
-                    recipes: recipeDatabase[i]
+                    discipline: tpl.disc,
+                    duration: tpl.dur,
+                    caloriesBurn: tpl.cal,
+                    description: tpl.desc,
+                    recipeBaseIndex: i // 0 à 27 (28 jours uniques)
                 });
             }
 
@@ -526,6 +774,40 @@
             return `${y}-${m}-${d}`;
         }
 
+        // --- NAVIGATION ONGLETS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab'));
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) activeBtn.classList.add('active-tab');
+
+            document.querySelectorAll('.mob-nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-400');
+                btn.classList.add('text-slate-400');
+            });
+            const activeMobBtn = document.getElementById(`btn-mob-${tabId}`);
+            if (activeMobBtn) {
+                activeMobBtn.classList.remove('text-slate-400');
+                activeMobBtn.classList.add('text-blue-400');
+            }
+
+            if (tabId === 'progress') {
+                renderWeightChart();
+                renderWeightHistory();
+            }
+            if (tabId === 'recipes') {
+                populateRecipeDayPicker();
+                renderDayRecipes();
+            }
+            if (tabId === 'groceries') {
+                renderGroceryList();
+            }
+        }
+
+        // --- AFFICHAGE DU CALENDRIER ---
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             if (!grid) return;
@@ -540,12 +822,12 @@
                 let discIcon = 'fa-bed';
                 let discColor = 'text-slate-400';
                 const discLower = day.discipline.toLowerCase();
-                
+
                 if (discLower.includes('natation') || discLower.includes('swim')) { discIcon = 'fa-person-swimming'; discColor = 'text-cyan-400'; }
-                else if (discLower.includes('vélo') || discLower.includes('velo') || discLower.includes('bike') || discLower.includes('cyclisme')) { discIcon = 'fa-person-biking'; discColor = 'text-emerald-400'; }
+                else if (discLower.includes('vélo') || discLower.includes('velo') || discLower.includes('bike') || discLower.includes('cycl')) { discIcon = 'fa-person-biking'; discColor = 'text-emerald-400'; }
                 else if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('pied')) { discIcon = 'fa-person-running'; discColor = 'text-amber-400'; }
-                else if (discLower.includes('tri') || discLower.includes('brick')) { discIcon = 'fa-person-triathlon'; discColor = 'text-purple-400'; }
-                else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gym')) { discIcon = 'fa-dumbbell'; discColor = 'text-rose-400'; }
+                else if (discLower.includes('tri') || discLower.includes('brick') || discLower.includes('enchaîn')) { discIcon = 'fa-person-triathlon'; discColor = 'text-purple-400'; }
+                else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('force')) { discIcon = 'fa-dumbbell'; discColor = 'text-rose-400'; }
 
                 const dayCard = document.createElement('div');
                 dayCard.className = `p-2 rounded-xl border text-left cursor-pointer transition flex flex-col justify-between h-24 sm:h-28 relative ${
@@ -595,20 +877,23 @@
             if (!day) return;
 
             const bmr = getBMR();
-            const targetCalories = Math.round(bmr + day.caloriesBurn - profile.deficit);
+            const { targetKcal } = getDayTargets(day);
 
             document.getElementById('selected-day-tag').innerText = `Jour ${day.dayIndex + 1}`;
             document.getElementById('selected-day-title').innerText = day.dateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
             document.getElementById('selected-day-discipline').innerText = day.discipline;
             document.getElementById('selected-day-duration').innerText = day.duration > 0 ? `${day.duration} min` : '0 min (Repos)';
             document.getElementById('selected-day-workout-burn').innerText = `${day.caloriesBurn} kcal`;
-            document.getElementById('selected-day-total-target').innerText = `${targetCalories} kcal`;
-            document.getElementById('selected-day-description').innerText = day.description || "Aucune description de séance";
+            document.getElementById('selected-day-total-target').innerText = `${targetKcal} kcal`;
+            document.getElementById('selected-day-description').innerText = `Description : ${day.description || 'Séance habituelle'}`;
+
             document.getElementById('sidebar-bmr-display').innerText = `${bmr} kcal`;
             document.getElementById('sidebar-weight-display').innerText = `${profile.currentWeight} kg`;
+            document.getElementById('sidebar-deficit-display').innerText = `-${profile.deficit} kcal`;
             document.getElementById('today-date-banner').innerText = todayDateObj.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         }
 
+        // --- AFFICHAGE RECETTES AVEC ADAPTATION PROPORTIONNELLE & 28 JOURS ---
         function populateRecipeDayPicker() {
             const picker = document.getElementById('recipe-day-picker');
             if (!picker) return;
@@ -626,13 +911,8 @@
         function renderDayRecipes() {
             const day = programDays[selectedDayIndex];
             if (!day) return;
-            const rec = day.recipes;
 
-            const bmr = getBMR();
-            const targetKcal = Math.round(bmr + day.caloriesBurn - profile.deficit);
-            const targetProt = Math.round(profile.currentWeight * 1.8);
-            const targetFat = Math.round((targetKcal * 0.25) / 9);
-            const targetCarb = Math.round((targetKcal - (targetProt * 4) - (targetFat * 9)) / 4);
+            const { targetKcal, targetProt, targetCarb, targetFat } = getDayTargets(day);
 
             document.getElementById('recipe-target-kcal').innerHTML = `${targetKcal} <span class="text-xs font-normal text-slate-400">kcal</span>`;
             document.getElementById('recipe-target-prot').innerHTML = `${targetProt} <span class="text-xs font-normal text-slate-400">g</span>`;
@@ -643,35 +923,82 @@
             if (!container) return;
             container.innerHTML = '';
 
-            const meals = [
-                { type: 'Petit-déjeuner', data: rec.breakfast, icon: 'fa-mug-hot', color: 'text-amber-400' },
-                { type: 'Déjeuner', data: rec.lunch, icon: 'fa-sun', color: 'text-blue-400' },
-                { type: 'Collation / Avant-Séance', data: rec.snack, icon: 'fa-bolt', color: 'text-purple-400' },
-                { type: 'Dîner & Récupération', data: rec.dinner, icon: 'fa-moon', color: 'text-emerald-400' }
+            // Sélection de la recette unique du jour (0 à 27)
+            const recipeIdx = (day.recipeBaseIndex !== undefined) ? day.recipeBaseIndex : (day.dayIndex % 28);
+            const baseMenu = MEALS_DATABASE_28[recipeIdx] || MEALS_DATABASE_28[0];
+
+            // Si jour de repos complet, la collation est allégée ou facultative, adaptée au déficit
+            const isRestDay = (day.duration === 0 || day.discipline.toLowerCase().includes('repos'));
+
+            const baseTotalKcal = baseMenu.breakfast.kcal + baseMenu.lunch.kcal + (isRestDay ? (baseMenu.snack.kcal * 0.7) : baseMenu.snack.kcal) + baseMenu.dinner.kcal;
+            const ratio = targetKcal / baseTotalKcal;
+
+            const mealConfigs = [
+                {
+                    type: 'Petit-déjeuner Énergétique',
+                    raw: baseMenu.breakfast,
+                    icon: 'fa-mug-hot',
+                    color: 'text-amber-400',
+                    factor: 1.0
+                },
+                {
+                    type: 'Déjeuner Équilibré',
+                    raw: baseMenu.lunch,
+                    icon: 'fa-sun',
+                    color: 'text-blue-400',
+                    factor: 1.0
+                },
+                {
+                    type: isRestDay ? 'Collation Légère / Récupération' : 'Collation de Soutien (Effort / Récup)',
+                    raw: baseMenu.snack,
+                    icon: isRestDay ? 'fa-apple-whole' : 'fa-bolt',
+                    color: 'text-purple-400',
+                    factor: isRestDay ? 0.7 : 1.0,
+                    badge: isRestDay ? 'Optionnelle (Jour de repos)' : `Adaptée : ${day.discipline}`
+                },
+                {
+                    type: 'Dîner & Réparation Musculaire',
+                    raw: baseMenu.dinner,
+                    icon: 'fa-moon',
+                    color: 'text-emerald-400',
+                    factor: 1.0
+                }
             ];
 
-            meals.forEach(m => {
+            mealConfigs.forEach(m => {
+                const effectiveRatio = ratio * m.factor;
+                const scaledKcal = Math.round(m.raw.kcal * effectiveRatio);
+                const scaledP = Math.round(m.raw.p * effectiveRatio);
+                const scaledC = Math.round(m.raw.c * effectiveRatio);
+                const scaledF = Math.round(m.raw.f * effectiveRatio);
+
                 const card = document.createElement('div');
-                card.className = 'bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-between space-y-4';
+                card.className = 'bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-between space-y-4 shadow';
                 card.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-bold uppercase tracking-wider ${m.color} flex items-center gap-2">
                                 <i class="fa-solid ${m.icon}"></i> ${m.type}
                             </span>
-                            <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-lg text-slate-300 font-bold">${m.data.kcal} kcal</span>
+                            <div class="flex items-center gap-2">
+                                ${m.badge ? `<span class="text-[10px] bg-slate-900/90 text-purple-300 px-2 py-0.5 rounded border border-purple-500/30">${m.badge}</span>` : ''}
+                                <span class="text-xs bg-slate-900 px-2.5 py-1 rounded-lg text-slate-300 font-bold border border-slate-700/50">${scaledKcal} kcal</span>
+                            </div>
                         </div>
-                        <h4 class="text-lg font-bold text-white mt-2">${m.data.name}</h4>
+                        <h4 class="text-base md:text-lg font-bold text-white mt-2">${m.raw.name}</h4>
                         <div class="flex gap-3 text-xs text-slate-400 mt-1">
-                            <span class="text-emerald-400 font-medium">P : ${m.data.p}g</span>
-                            <span class="text-amber-400 font-medium">G : ${m.data.c}g</span>
-                            <span class="text-rose-400 font-medium">L : ${m.data.f}g</span>
+                            <span class="text-emerald-400 font-medium">P : ${scaledP}g</span>
+                            <span class="text-amber-400 font-medium">G : ${scaledC}g</span>
+                            <span class="text-rose-400 font-medium">L : ${scaledF}g</span>
                         </div>
                     </div>
                     <div class="border-t border-slate-700/60 pt-3">
-                        <span class="text-xs text-slate-400 font-bold block mb-1">Ingrédients :</span>
+                        <span class="text-xs text-slate-400 font-bold block mb-1">Portions précises ajustées :</span>
                         <ul class="text-xs text-slate-300 space-y-1">
-                            ${m.data.items.map(item => `<li><i class="fa-solid fa-check text-blue-500 mr-1.5 text-[10px]"></i> ${item}</li>`).join('')}
+                            ${m.raw.items.map(it => {
+                                const scaledQty = (it.unit === 'pièce') ? (Math.round(it.qty * effectiveRatio * 10) / 10) : Math.round(it.qty * effectiveRatio);
+                                return `<li><i class="fa-solid fa-check text-blue-500 mr-1.5 text-[10px]"></i> <strong>${scaledQty} ${it.unit}</strong> ${it.ing}</li>`;
+                            }).join('')}
                         </ul>
                     </div>
                 `;
@@ -679,38 +1006,373 @@
             });
         }
 
-        // --- ROBUST CSV PARSER ---
-        function parseCustomCSV(text) {
-            // Remove UTF-8 BOM if present
-            text = text.replace(/^\uFEFF/, '');
-            
-            const lines = text.split(/\r\n|\n/).filter(line => line.trim().length > 0);
-            if (lines.length < 2) return [];
+        // --- GESTION DU MODAL DE RÉINITIALISATION ---
+        function openResetModal() {
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
 
-            // Determine delimiter (; or , or \t)
-            const firstLine = lines[0];
-            let delimiter = ';';
-            if ((firstLine.match(/,/g) || []).length > (firstLine.match(/;/g) || []).length) {
-                delimiter = ',';
-            } else if ((firstLine.match(/\t/g) || []).length > (firstLine.match(/;/g) || []).length) {
-                delimiter = '\t';
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function executeReset(mode) {
+            if (mode === 'clear') {
+                // Remise à zéro totale de toutes les séances
+                programDays.forEach(day => {
+                    day.discipline = 'Repos';
+                    day.duration = 0;
+                    day.caloriesBurn = 0;
+                    day.description = 'Aucune séance planifiée (Jour de repos)';
+                });
+                saveToStorage();
+                renderCalendar();
+                populateRecipeDayPicker();
+                renderDayRecipes();
+                closeResetModal();
+                showNotification("Toutes les séances ont été effacées. Le calendrier est réinitialisé à 0 kcal.");
+            } else if (mode === 'default') {
+                // Rétablissement du programme type équilibré 28 jours
+                localStorage.removeItem('nutrifit_triathlon_data');
+                initProgramDays();
+                saveToStorage();
+                renderCalendar();
+                populateRecipeDayPicker();
+                renderDayRecipes();
+                closeResetModal();
+                showNotification("Le cycle type de 28 jours (Triathlon) a été réinitialisé avec succès !");
+            }
+        }
+
+        // --- GESTION WORKOUT MODAL ---
+        let editingDayIndex = 0;
+
+        function openEditWorkoutModal(index) {
+            editingDayIndex = index;
+            const day = programDays[index];
+            if (!day) return;
+
+            document.getElementById('modal-workout-disc').value = day.discipline;
+            document.getElementById('modal-workout-dur').value = day.duration;
+            document.getElementById('modal-workout-cal').value = day.caloriesBurn;
+            document.getElementById('modal-workout-desc').value = day.description || '';
+
+            document.getElementById('workout-modal').classList.remove('hidden');
+        }
+
+        function closeEditWorkoutModal() {
+            document.getElementById('workout-modal').classList.add('hidden');
+        }
+
+        function saveWorkoutModal(e) {
+            e.preventDefault();
+            const day = programDays[editingDayIndex];
+            if (!day) return;
+
+            day.discipline = document.getElementById('modal-workout-disc').value;
+            day.duration = parseInt(document.getElementById('modal-workout-dur').value, 10) || 0;
+            day.caloriesBurn = parseInt(document.getElementById('modal-workout-cal').value, 10) || 0;
+            day.description = document.getElementById('modal-workout-desc').value;
+
+            closeEditWorkoutModal();
+            renderCalendar();
+            renderDayRecipes();
+            saveToStorage();
+            showNotification(`Séance du ${day.dateStr} mise à jour avec succès !`);
+        }
+
+        // --- PROFIL UTILISATEUR ---
+        function saveProfile(e) {
+            e.preventDefault();
+            profile.sex = document.getElementById('prof-sex').value;
+            profile.age = parseInt(document.getElementById('prof-age').value, 10) || 30;
+            profile.height = parseInt(document.getElementById('prof-height').value, 10) || 175;
+            profile.currentWeight = parseFloat(document.getElementById('prof-current-weight').value) || 75;
+            profile.targetWeight = parseFloat(document.getElementById('prof-target-weight').value) || 70;
+            profile.deficit = parseInt(document.getElementById('prof-deficit').value, 10) || 0;
+
+            updateSelectedDayDisplay();
+            renderDayRecipes();
+            saveToStorage();
+            showNotification(`Profil et métabolisme enregistrés !`);
+        }
+
+        function syncProfileFormFields() {
+            document.getElementById('prof-sex').value = profile.sex;
+            document.getElementById('prof-age').value = profile.age;
+            document.getElementById('prof-height').value = profile.height;
+            document.getElementById('prof-current-weight').value = profile.currentWeight;
+            document.getElementById('prof-target-weight').value = profile.targetWeight;
+            document.getElementById('prof-deficit').value = profile.deficit;
+        }
+
+        // --- SUIVI DU POIDS ---
+        function addWeightLog() {
+            const dateInput = document.getElementById('weight-date').value;
+            const valInput = parseFloat(document.getElementById('weight-value').value);
+            if (!dateInput || isNaN(valInput) || valInput <= 0) {
+                showNotification('Veuillez spécifier une date et un poids valide.', true);
+                return;
             }
 
-            // CSV tokenizer with quotes support
+            const existingIdx = weightLogs.findIndex(w => w.date === dateInput);
+            if (existingIdx !== -1) {
+                weightLogs[existingIdx].weight = valInput;
+            } else {
+                weightLogs.push({ date: dateInput, weight: valInput });
+            }
+            weightLogs.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+            profile.currentWeight = valInput;
+            document.getElementById('prof-current-weight').value = valInput;
+            document.getElementById('sidebar-weight-display').innerText = `${valInput} kg`;
+
+            saveToStorage();
+            renderWeightChart();
+            renderWeightHistory();
+            updateSelectedDayDisplay();
+            renderDayRecipes();
+            showNotification(`Pesée enregistrée (${valInput} kg).`);
+        }
+
+        function deleteWeightLog(idx) {
+            weightLogs.splice(idx, 1);
+            if (weightLogs.length > 0) {
+                profile.currentWeight = weightLogs[weightLogs.length - 1].weight;
+                document.getElementById('sidebar-weight-display').innerText = `${profile.currentWeight} kg`;
+            }
+            saveToStorage();
+            renderWeightChart();
+            renderWeightHistory();
+            updateSelectedDayDisplay();
+        }
+
+        function renderWeightHistory() {
+            const list = document.getElementById('weight-history-list');
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (weightLogs.length === 0) {
+                list.innerHTML = '<span class="text-xs text-slate-500 italic">Aucune pesée renseignée</span>';
+                return;
+            }
+
+            [...weightLogs].reverse().forEach((log, reversedIndex) => {
+                const realIndex = weightLogs.length - 1 - reversedIndex;
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center text-xs bg-slate-900/60 p-2 rounded border border-slate-700/50';
+                row.innerHTML = `
+                    <span class="text-slate-300">${log.date}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-white">${log.weight} kg</span>
+                        <button onclick="deleteWeightLog(${realIndex})" class="text-rose-400 hover:text-rose-200">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function renderWeightChart() {
+            const ctx = document.getElementById('weightChart');
+            if (!ctx) return;
+            if (weightChart) weightChart.destroy();
+
+            const summaryEl = document.getElementById('weight-stats-summary');
+            if (weightLogs.length > 0 && summaryEl) {
+                const diff = (weightLogs[weightLogs.length - 1].weight - profile.targetWeight).toFixed(1);
+                summaryEl.innerText = `Reste : ${diff > 0 ? diff : 0} kg avant objectif (${profile.targetWeight} kg)`;
+            }
+
+            weightChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: weightLogs.map(l => l.date),
+                    datasets: [
+                        {
+                            label: 'Poids (kg)',
+                            data: weightLogs.map(l => l.weight),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.2,
+                            pointBackgroundColor: '#60a5fa'
+                        },
+                        {
+                            label: 'Objectif (kg)',
+                            data: weightLogs.map(() => profile.targetWeight),
+                            borderColor: '#10b981',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            grid: { color: '#334155' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1', font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- LISTE DE COURSES AUTOMATIQUE (CALCUL DYNAMIQUE SUR LES 28 JOURS) ---
+        function renderGroceryList() {
+            const container = document.getElementById('grocery-list-container');
+            if (!container) return;
+
+            const totals = {};
+
+            programDays.forEach(day => {
+                const recipeIdx = (day.recipeBaseIndex !== undefined) ? day.recipeBaseIndex : (day.dayIndex % 28);
+                const baseMenu = MEALS_DATABASE_28[recipeIdx] || MEALS_DATABASE_28[0];
+                const isRestDay = (day.duration === 0 || day.discipline.toLowerCase().includes('repos'));
+
+                const baseTotalKcal = baseMenu.breakfast.kcal + baseMenu.lunch.kcal + (isRestDay ? (baseMenu.snack.kcal * 0.7) : baseMenu.snack.kcal) + baseMenu.dinner.kcal;
+                const { targetKcal } = getDayTargets(day);
+                const ratio = targetKcal / baseTotalKcal;
+
+                [
+                    { meal: baseMenu.breakfast, factor: 1.0 },
+                    { meal: baseMenu.lunch, factor: 1.0 },
+                    { meal: baseMenu.snack, factor: isRestDay ? 0.7 : 1.0 },
+                    { meal: baseMenu.dinner, factor: 1.0 }
+                ].forEach(({ meal, factor }) => {
+                    const effectiveRatio = ratio * factor;
+                    meal.items.forEach(it => {
+                        const key = `${it.ing}|${it.unit}|${it.cat}`;
+                        const qty = (it.unit === 'pièce') ? (it.qty * effectiveRatio) : (it.qty * effectiveRatio);
+                        totals[key] = (totals[key] || 0) + qty;
+                    });
+                });
+            });
+
+            const categorized = { carb: [], prot: [], fresh: [] };
+
+            Object.entries(totals).forEach(([key, totalQty]) => {
+                const [ing, unit, cat] = key.split('|');
+                let displayQty = '';
+
+                if (unit === 'g' && totalQty >= 1000) {
+                    displayQty = `${(totalQty / 1000).toFixed(1)} kg`;
+                } else if (unit === 'ml' && totalQty >= 1000) {
+                    displayQty = `${(totalQty / 1000).toFixed(1)} L`;
+                } else if (unit === 'pièce') {
+                    displayQty = `${Math.ceil(totalQty)} pièces`;
+                } else {
+                    displayQty = `${Math.round(totalQty)} ${unit}`;
+                }
+
+                const itemObj = { ing, displayQty };
+                if (cat === 'carb') categorized.carb.push(itemObj);
+                else if (cat === 'prot') categorized.prot.push(itemObj);
+                else categorized.fresh.push(itemObj);
+            });
+
+            container.innerHTML = `
+                <div class="space-y-3">
+                    <h3 class="font-bold text-blue-400 flex items-center gap-2">
+                        <i class="fa-solid fa-wheat-awn"></i> Féculents & Glucides (28 Jours)
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-1.5" id="grocery-sub-carb">
+                        ${categorized.carb.map(item => `
+                            <li class="cursor-pointer flex items-center gap-2 p-1.5 rounded hover:bg-slate-700/50" onclick="toggleGroceryCheck(this)">
+                                <i class="fa-regular fa-square text-blue-500"></i>
+                                <span><strong>${item.displayQty}</strong> ${item.ing}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                <div class="space-y-3">
+                    <h3 class="font-bold text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-drumstick-bite"></i> Protéines & Frais (28 Jours)
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-1.5" id="grocery-sub-prot">
+                        ${categorized.prot.map(item => `
+                            <li class="cursor-pointer flex items-center gap-2 p-1.5 rounded hover:bg-slate-700/50" onclick="toggleGroceryCheck(this)">
+                                <i class="fa-regular fa-square text-emerald-500"></i>
+                                <span><strong>${item.displayQty}</strong> ${item.ing}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+                <div class="space-y-3">
+                    <h3 class="font-bold text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-apple-whole"></i> Fruits, Légumes & Oléagineux (28 Jours)
+                    </h3>
+                    <ul class="text-xs text-slate-300 space-y-1.5" id="grocery-sub-fresh">
+                        ${categorized.fresh.map(item => `
+                            <li class="cursor-pointer flex items-center gap-2 p-1.5 rounded hover:bg-slate-700/50" onclick="toggleGroceryCheck(this)">
+                                <i class="fa-regular fa-square text-amber-500"></i>
+                                <span><strong>${item.displayQty}</strong> ${item.ing}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        function toggleGroceryCheck(li) {
+            const icon = li.querySelector('i');
+            if (li.classList.contains('strike-item')) {
+                li.classList.remove('strike-item');
+                icon.className = icon.className.replace('fa-square-check', 'fa-square');
+            } else {
+                li.classList.add('strike-item');
+                icon.className = icon.className.replace('fa-square', 'fa-square-check');
+            }
+        }
+
+        function copyGroceryList() {
+            let text = "=== LISTE DE COURSES - NUTRIFIT TRIATHLON (CYCLE 28 JOURS) ===\n\n";
+            document.querySelectorAll('#grocery-list-container li').forEach(li => {
+                text += `- ${li.innerText.trim()}\n`;
+            });
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification("Liste de courses copiée dans le presse-papier !");
+            }).catch(() => {
+                showNotification("Erreur lors de la copie.", true);
+            });
+        }
+
+        // --- IMPORT CSV NOLIO & MOTEUR D'ESTIMATION CALORIQUE PRÉCIS ---
+        function parseCustomCSV(text) {
+            text = text.replace(/^\uFEFF/, '');
+            const lines = text.split(/\r\n|\n/).filter(line => line.trim().length > 0);
+            if (lines.length < 2) return { headers: [], rows: [] };
+
+            const firstLine = lines[0];
+            let delimiter = ';';
+            if ((firstLine.match(/,/g) || []).length > (firstLine.match(/;/g) || []).length) delimiter = ',';
+            if ((firstLine.match(/\t/g) || []).length > (firstLine.match(/;/g) || []).length) delimiter = '\t';
+
             function tokenize(line) {
                 const result = [];
                 let cell = '';
                 let inQuotes = false;
                 for (let i = 0; i < line.length; i++) {
                     const char = line[i];
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === delimiter && !inQuotes) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === delimiter && !inQuotes) {
                         result.push(cell.trim().replace(/^"|"$/g, ''));
                         cell = '';
-                    } else {
-                        cell += char;
-                    }
+                    } else cell += char;
                 }
                 result.push(cell.trim().replace(/^"|"$/g, ''));
                 return result;
@@ -718,7 +1380,6 @@
 
             const headers = tokenize(lines[0]).map(h => normalizeHeader(h));
             const rows = [];
-
             for (let i = 1; i < lines.length; i++) {
                 const cols = tokenize(lines[i]);
                 if (cols.length === 0 || cols.every(c => c === '')) continue;
@@ -732,350 +1393,202 @@
         }
 
         function normalizeHeader(str) {
-            return str
-                .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // remove accents
-                .replace(/[^a-z0-9]/g, ""); // keep alphanumeric only
+            return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
         }
 
         function parseFlexibleDate(str) {
             if (!str) return null;
-            str = str.trim().split(' ')[0]; // remove time if present
-            
-            // YYYY-MM-DD or YYYY/MM/DD
+            str = str.trim().split(' ')[0];
             let m = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/);
-            if (m) {
-                return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
-            }
-
-            // DD-MM-YYYY or DD/MM/YYYY
+            if (m) return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
             m = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
-            if (m) {
-                return `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
-            }
-
+            if (m) return `${m[3]}-${String(m[2]).padStart(2, '0')}-${String(m[1]).padStart(2, '0')}`;
             return null;
         }
 
         function parseFlexibleDuration(val) {
             if (!val) return 0;
             val = String(val).trim().toLowerCase();
-
-            // Format HH:MM:SS or HH:MM
             if (val.includes(':')) {
                 const parts = val.split(':').map(p => parseInt(p, 10) || 0);
-                if (parts.length === 3) return (parts[0] * 60) + parts[1]; // hours + mins
-                if (parts.length === 2) return (parts[0] * 60) + parts[1];
+                if (parts.length >= 2) return (parts[0] * 60) + parts[1];
             }
-
-            // Extract trailing numeric
             const num = parseInt(val.replace(/[^0-9]/g, ''), 10);
             return isNaN(num) ? 0 : num;
+        }
+
+        // Moteur d'estimation de la dépense calorique basée sur le MET & poids réel de l'athlète
+        function estimateCalorieBurn(discipline, durationMins, athleteWeight) {
+            if (!durationMins || durationMins <= 0) return 0;
+            const discLower = (discipline || '').toLowerCase();
+            const w = athleteWeight || 75;
+
+            // Formule standard : Kcal = MET * Poids (kg) * (Durée en min / 60)
+            let met = 7.0; // défaut
+
+            if (discLower.includes('repos') || discLower.includes('rest')) {
+                return 0;
+            } else if (discLower.includes('natation') || discLower.includes('swim') || discLower.includes('bassin')) {
+                met = 8.5; // ~600-700 kcal/h
+            } else if (discLower.includes('vélo') || discLower.includes('velo') || discLower.includes('bike') || discLower.includes('cycl')) {
+                if (discLower.includes('seuil') || discLower.includes('pma') || discLower.includes('interval')) met = 9.5;
+                else met = 8.0; // ~600-750 kcal/h
+            } else if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('vma') || discLower.includes('footing')) {
+                if (discLower.includes('vma') || discLower.includes('fractionné') || discLower.includes('tempo')) met = 10.5;
+                else met = 9.0; // ~700-800 kcal/h
+            } else if (discLower.includes('enchaîn') || discLower.includes('brick') || discLower.includes('triathlon')) {
+                met = 9.5; // Multi-enchaînement
+            } else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gainage')) {
+                met = 5.0; // ~350-400 kcal/h
+            }
+
+            return Math.round(met * w * (durationMins / 60));
         }
 
         function handleNolioCSVImport(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(e) {
-                parseAndApplyNolioCSV(e.target.result);
-            };
+            reader.onload = e => parseAndApplyNolioCSV(e.target.result);
             reader.readAsText(file);
-            event.target.value = ''; // reset input
+            event.target.value = '';
         }
 
         function parseAndApplyNolioCSV(csvText) {
-            const parsed = parseCustomCSV(csvText);
-            const headers = parsed.headers;
-            const rows = parsed.rows;
-
+            const { headers, rows } = parseCustomCSV(csvText);
             if (rows.length === 0) {
-                showNotification("Le fichier CSV semble vide ou corrompu.", true);
+                showNotification("Le fichier CSV est vide ou illisible.", true);
                 return;
             }
 
-            // Find key column headers flexibly
             const dateKey = headers.find(h => h.includes('date') || h.includes('debut') || h.includes('start'));
-            const titleKey = headers.find(h => h.includes('titre') || h.includes('title') || h.includes('sport') || h.includes('discipline') || h.includes('nom') || h.includes('activitytype') || h.includes('type'));
-            const durationKey = headers.find(h => h.includes('duree') || h.includes('duration') || h.includes('temps') || h.includes('time'));
-            const calorieKey = headers.find(h => h.includes('calorie') || h.includes('kcal') || h.includes('charge') || h.includes('burn'));
+            const titleKey = headers.find(h => h.includes('titre') || h.includes('title') || h.includes('sport') || h.includes('discipline') || h.includes('nom') || h.includes('type'));
+            const durKey = headers.find(h => h.includes('duree') || h.includes('duration') || h.includes('temps') || h.includes('time'));
+            const calKey = headers.find(h => h.includes('calorie') || h.includes('kcal') || h.includes('charge') || h.includes('burn'));
             const descKey = headers.find(h => h.includes('description') || h.includes('note') || h.includes('detail') || h.includes('commentaire'));
 
             if (!dateKey) {
-                showNotification("Impossible de trouver la colonne 'Date' dans votre CSV. Colonnes détectées: " + headers.join(', '), true);
+                showNotification("Colonne 'Date' introuvable dans le CSV Nolio.", true);
                 return;
             }
 
-            // Extract all parsed entries from CSV
-            const extractedEntries = [];
+            const entries = [];
             rows.forEach(r => {
-                const rawDate = r[dateKey];
-                const dateISO = parseFlexibleDate(rawDate);
+                const dateISO = parseFlexibleDate(r[dateKey]);
                 if (dateISO) {
-                    extractedEntries.push({
+                    entries.push({
                         dateStr: dateISO,
                         title: titleKey ? (r[titleKey] || 'Entraînement') : 'Entraînement',
-                        duration: durationKey ? parseFlexibleDuration(r[durationKey]) : 0,
-                        calories: calorieKey ? (parseInt(r[calorieKey], 10) || 0) : 0,
+                        duration: durKey ? parseFlexibleDuration(r[durKey]) : 0,
+                        calories: calKey ? (parseInt(r[calKey], 10) || 0) : 0,
                         description: descKey ? (r[descKey] || '') : ''
                     });
                 }
             });
 
-            if (extractedEntries.length === 0) {
-                showNotification("0 séance importée. Format de date non reconnu. Exexmples attendus : YYYY-MM-DD ou DD/MM/YYYY.", true);
+            if (entries.length === 0) {
+                showNotification("Aucune séance valide détectée dans le fichier.", true);
                 return;
             }
 
-            // Sort imported entries by date
-            extractedEntries.sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
+            entries.sort((a,b) => new Date(a.dateStr) - new Date(b.dateStr));
+            initProgramDays(new Date(entries[0].dateStr));
 
-            // Adjust calendar start date if imported dates fall outside current 28-day window
-            const minImportDate = new Date(extractedEntries[0].dateStr);
-            const currentMinDate = programDays[0].dateObj;
-            const currentMaxDate = programDays[27].dateObj;
+            let count = 0;
+            entries.forEach(ent => {
+                const target = programDays.find(d => d.dateStr === ent.dateStr);
+                if (target) {
+                    target.discipline = ent.title;
+                    target.duration = ent.duration;
 
-            if (minImportDate < currentMinDate || minImportDate > currentMaxDate) {
-                // Re-align program to start from the earliest CSV date
-                initProgramDays(minImportDate);
-            }
-
-            // Match entries into calendar days
-            let importedCount = 0;
-            extractedEntries.forEach(entry => {
-                const targetDay = programDays.find(d => d.dateStr === entry.dateStr);
-                if (targetDay) {
-                    targetDay.discipline = entry.title;
-                    targetDay.duration = entry.duration;
-                    
-                    // Calcul d'estimation ajusté selon la discipline si la donnée est absente du CSV
-                    if (entry.calories > 0) {
-                        targetDay.caloriesBurn = entry.calories;
+                    // Si les calories sont spécifiées dans le CSV on les prend, sinon calcul précis MET
+                    if (ent.calories > 0) {
+                        target.caloriesBurn = ent.calories;
                     } else {
-                        const discLower = entry.title.toLowerCase();
-                        let kcalPerMin = 7; // Valeur par défaut (ex: vélo modéré)
-                        if (discLower.includes('course') || discLower.includes('cap') || discLower.includes('run') || discLower.includes('pied')) {
-                            kcalPerMin = 5.5; // ~330 kcal/h pour la course (ajusté plus réaliste)
-                        } else if (discLower.includes('renforcement') || discLower.includes('muscu') || discLower.includes('ppg') || discLower.includes('gym')) {
-                            kcalPerMin = 4.5; // ~270 kcal/h pour le renforcement
-                        } else if (discLower.includes('natation') || discLower.includes('swim')) {
-                            kcalPerMin = 7; // ~420 kcal/h pour la natation
-                        }
-                        targetDay.caloriesBurn = Math.round(entry.duration * kcalPerMin);
+                        target.caloriesBurn = estimateCalorieBurn(ent.title, ent.duration, profile.currentWeight);
                     }
 
-                    targetDay.description = entry.description;
-                    importedCount++;
+                    target.description = ent.description;
+                    count++;
                 }
             });
 
-            showNotification(`${importedCount} séance(s) importée(s) avec succès dans votre planning !`);
+            saveToStorage();
             renderCalendar();
             populateRecipeDayPicker();
             renderDayRecipes();
+            showNotification(`${count} séance(s) Nolio importée(s) ! Dépenses estimées et menus adaptés.`);
         }
 
+        // --- NOTIFICATIONS UTILISATEUR ---
         function showNotification(msg, isError = false) {
             const notif = document.getElementById('import-notification');
             const notifText = document.getElementById('import-notification-text');
             if (notif && notifText) {
                 notifText.innerText = msg;
                 if (isError) {
-                    notif.className = "p-4 bg-rose-900/40 border border-rose-500/50 rounded-xl text-rose-300 text-xs flex justify-between items-center";
+                    notif.className = "p-4 bg-rose-900/60 border border-rose-500 rounded-xl text-rose-200 text-xs flex justify-between items-center shadow-lg";
                 } else {
-                    notif.className = "p-4 bg-emerald-900/40 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs flex justify-between items-center";
+                    notif.className = "p-4 bg-emerald-900/60 border border-emerald-500 rounded-xl text-emerald-200 text-xs flex justify-between items-center shadow-lg";
                 }
                 notif.classList.remove('hidden');
+                setTimeout(() => notif.classList.add('hidden'), 5000);
             }
         }
 
-        function resetToDefaultProgram() {
-            // Effacer totalement toutes les séances (Remise à zéro / Repos)
-            programDays.forEach(day => {
-                day.discipline = 'Repos';
-                day.duration = 0;
-                day.caloriesBurn = 0;
-                day.description = 'Aucune séance planifiée';
-            });
-
-            renderCalendar();
-            renderDayRecipes();
-            showNotification(`Toutes les séances d'entraînement ont été effacées.`);
-        }
-
-        function saveProfile(e) {
-            e.preventDefault();
-            profile.sex = document.getElementById('prof-sex').value;
-            profile.age = parseInt(document.getElementById('prof-age').value) || 30;
-            profile.height = parseInt(document.getElementById('prof-height').value) || 175;
-            profile.currentWeight = parseFloat(document.getElementById('prof-current-weight').value) || 75;
-            profile.targetWeight = parseFloat(document.getElementById('prof-target-weight').value) || 70;
-            profile.deficit = parseInt(document.getElementById('prof-deficit').value) || 0;
-
-            updateSelectedDayDisplay();
-            renderDayRecipes();
-            showNotification(`Profil et métabolisme mis à jour !`);
-        }
-
-        function addWeightLog() {
-            const dateInput = document.getElementById('weight-date').value;
-            const valInput = parseFloat(document.getElementById('weight-value').value);
-            if (!dateInput || isNaN(valInput)) {
-                showNotification('Veuillez renseigner une date et un poids valide.', true);
-                return;
-            }
-            weightLogs.push({ date: dateInput, weight: valInput });
-            weightLogs.sort((a,b) => new Date(a.date) - new Date(b.date));
-            profile.currentWeight = valInput;
-            document.getElementById('sidebar-weight-display').innerText = `${valInput} kg`;
-            renderWeightChart();
-            updateSelectedDayDisplay();
-        }
-
-        function renderWeightChart() {
-            const ctx = document.getElementById('weightChart');
-            if (!ctx) return;
-            if (weightChart) weightChart.destroy();
-
-            weightChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: weightLogs.map(l => l.date),
-                    datasets: [{
-                        label: 'Poids (kg)',
-                        data: weightLogs.map(l => l.weight),
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        function renderGroceryList() {
-            const container = document.getElementById('grocery-list-container');
-            if (!container) return;
-            container.innerHTML = `
-                <div class="space-y-2">
-                    <h3 class="font-bold text-blue-400">Glucides & Féculents</h3>
-                    <ul class="text-xs text-slate-300 space-y-1">
-                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 2.5kg Flocons d'avoine</li>
-                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 2kg Riz basmati & complet</li>
-                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 1kg Patates douces</li>
-                        <li><i class="fa-solid fa-check text-blue-500 mr-2"></i> 1kg Quinoa & Boulgour</li>
-                    </ul>
-                </div>
-                <div class="space-y-2">
-                    <h3 class="font-bold text-emerald-400">Protéines & Poissons</h3>
-                    <ul class="text-xs text-slate-300 space-y-1">
-                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 2kg Blanc de poulet & dinde</li>
-                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 1.2kg Saumon & Thon</li>
-                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 30 Œufs bio</li>
-                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> 1kg Fromage blanc & Skyr</li>
-                    </ul>
-                </div>
-                <div class="space-y-2">
-                    <h3 class="font-bold text-amber-400">Fruits, Légumes & Oléagineux</h3>
-                    <ul class="text-xs text-slate-300 space-y-1">
-                        <li><i class="fa-solid fa-check text-amber-500 mr-2"></i> Bananes, Pommes, Myrtilles</li>
-                        <li><i class="fa-solid fa-check text-amber-500 mr-2"></i> Courgettes, Brocolis, Épinards</li>
-                        <li><i class="fa-solid fa-check text-amber-500 mr-2"></i> Beurre de cacahuète & Amandes</li>
-                    </ul>
-                </div>
-            `;
-        }
-
-        function copyGroceryList() {
-            const text = "LISTE DE COURSES - NUTRIFIT TRIATHLON\n- 2.5kg Flocons d'avoine\n- 2kg Riz basmati & complet\n- 1kg Patates douces\n- 2kg Blanc de poulet & dinde\n- 1.2kg Saumon & Thon\n- 30 Œufs bio\n- Fruits, légumes & oléagineux";
-            
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-
-            showNotification(`Liste de courses copiée dans le presse-papier !`);
-        }
-
-        // --- EXPORT & MODAL FUNCTIONS ---
+        // --- EXPORTATIONS & SYNCHRONISATION ---
         function openExportModal() {
-            const modal = document.getElementById('export-modal');
-            if (modal) {
-                updateTextSummary();
-                modal.classList.remove('hidden');
-            }
+            updateTextSummary();
+            document.getElementById('export-modal').classList.remove('hidden');
         }
 
         function closeExportModal() {
-            const modal = document.getElementById('export-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
+            document.getElementById('export-modal').classList.add('hidden');
         }
 
         function updateTextSummary() {
-            const textarea = document.getElementById('export-text-preview');
-            if (!textarea) return;
-
-            let text = `=== PROGRAMME NUTRIFIT TRIATHLON ===\n`;
-            text += `Objectif Poids: ${profile.targetWeight} kg | Poids Actuel: ${profile.currentWeight} kg\n\n`;
-
-            programDays.forEach((day, idx) => {
-                const bmr = getBMR();
-                const targetKcal = Math.round(bmr + day.caloriesBurn - profile.deficit);
-                text += `J${idx + 1} (${day.dateStr}) : ${day.discipline} - ${day.duration} min | Cible Nutri: ${targetKcal} kcal\n`;
+            const el = document.getElementById('export-text-preview');
+            if (!el) return;
+            let txt = `=== PROGRAMME NUTRIFIT TRIATHLON (CYCLE 28 JOURS) ===\n`;
+            txt += `Objectif : ${profile.targetWeight} kg (Actuel: ${profile.currentWeight} kg) | BMR: ${getBMR()} kcal | Déficit: ${profile.deficit} kcal\n\n`;
+            programDays.forEach((d, idx) => {
+                const { targetKcal } = getDayTargets(d);
+                txt += `J${idx + 1} (${d.dateStr}) : ${d.discipline} (${d.duration}m, +${d.caloriesBurn}kcal) => Cible Nutri: ${targetKcal} kcal\n`;
             });
-
-            textarea.value = text;
+            el.value = txt;
         }
 
         function copyTextSummary() {
-            const textarea = document.getElementById('export-text-preview');
-            if (textarea) {
-                textarea.select();
-                document.execCommand('copy');
-                showNotification("Résumé copié dans le presse-papier !");
+            const el = document.getElementById('export-text-preview');
+            if (el) {
+                navigator.clipboard.writeText(el.value).then(() => {
+                    showNotification("Résumé copié dans le presse-papier !");
+                });
             }
         }
 
         function exportToICS() {
-            let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//NutriFit Triathlon//FR\n";
-
+            let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//NutriFit Triathlon App//FR\nCALSCALE:GREGORIAN\n";
             programDays.forEach(day => {
-                if (day.duration > 0) {
-                    const cleanDate = day.dateStr.replace(/-/g, '');
-                    icsContent += "BEGIN:VEVENT\n";
-                    icsContent += `SUMMARY:Triathlon - ${day.discipline}\n`;
-                    icsContent += `DESCRIPTION:${day.description || 'Séance NutriFit'} - Dépense: ${day.caloriesBurn} kcal\n`;
-                    icsContent += `DTSTART;VALUE=DATE:${cleanDate}\n`;
-                    icsContent += `DTEND;VALUE=DATE:${cleanDate}\n`;
-                    icsContent += "END:VEVENT\n";
+                if (day.duration > 0 || day.discipline !== 'Repos') {
+                    const cDate = day.dateStr.replace(/-/g, '');
+                    const { targetKcal } = getDayTargets(day);
+                    ics += "BEGIN:VEVENT\n";
+                    ics += `SUMMARY:Triathlon - ${day.discipline}\n`;
+                    ics += `DESCRIPTION:${day.description || 'Séance'} | Dépense: ${day.caloriesBurn} kcal | Cible Nutrition: ${targetKcal} kcal\n`;
+                    ics += `DTSTART;VALUE=DATE:${cDate}\n`;
+                    ics += `DTEND;VALUE=DATE:${cDate}\n`;
+                    ics += "END:VEVENT\n";
                 }
             });
+            ics += "END:VCALENDAR";
 
-            icsContent += "END:VCALENDAR";
-
-            const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+            const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', 'nutrifit_programme.ics');
-            document.body.appendChild(link);
+            link.download = 'nutrifit_triathlon.ics';
             link.click();
-            document.body.removeChild(link);
-            showNotification("Calendrier .ics généré et téléchargé !");
+            showNotification("Calendrier .ics téléchargé !");
         }
 
         function exportJSON() {
@@ -1083,58 +1596,48 @@
                 profile,
                 programStartDateStr: formatDateISO(programStartDateObj),
                 weightLogs,
-                programDays: programDays.map(d => ({
-                    dayIndex: d.dayIndex,
-                    dateStr: d.dateStr,
-                    discipline: d.discipline,
-                    duration: d.duration,
-                    caloriesBurn: d.caloriesBurn,
-                    description: d.description
-                }))
+                programDays
             };
-
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', 'nutrifit_backup.json');
-            document.body.appendChild(link);
+            link.download = 'nutrifit_backup.json';
             link.click();
-            document.body.removeChild(link);
             showNotification("Sauvegarde JSON exportée !");
         }
 
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = e => {
                 try {
                     const data = JSON.parse(e.target.result);
                     if (data.profile) profile = data.profile;
                     if (data.weightLogs) weightLogs = data.weightLogs;
-
                     if (data.programStartDateStr) {
                         initProgramDays(new Date(data.programStartDateStr));
                     }
-
-                    if (data.programDays && Array.isArray(data.programDays)) {
-                        data.programDays.forEach(impDay => {
-                            const day = programDays.find(d => d.dayIndex === impDay.dayIndex || d.dateStr === impDay.dateStr);
-                            if (day) {
-                                day.discipline = impDay.discipline;
-                                day.duration = impDay.duration;
-                                day.caloriesBurn = impDay.caloriesBurn;
-                                day.description = impDay.description;
+                    if (data.programDays) {
+                        data.programDays.forEach(imp => {
+                            const d = programDays.find(p => p.dayIndex === imp.dayIndex || p.dateStr === imp.dateStr);
+                            if (d) {
+                                d.discipline = imp.discipline;
+                                d.duration = imp.duration;
+                                d.caloriesBurn = imp.caloriesBurn;
+                                d.description = imp.description;
                             }
                         });
                     }
-
+                    saveToStorage();
+                    syncProfileFormFields();
                     renderCalendar();
+                    populateRecipeDayPicker();
                     renderDayRecipes();
                     renderWeightChart();
-                    showNotification("Données restaurées depuis la sauvegarde !");
+                    renderWeightHistory();
                     closeExportModal();
+                    showNotification("Données restaurées depuis la sauvegarde !");
                 } catch (err) {
                     showNotification("Erreur lors de la lecture du fichier JSON.", true);
                 }
@@ -1143,8 +1646,14 @@
             event.target.value = '';
         }
 
+        // --- INITIALISATION AU CHARGEMENT ---
         window.onload = function() {
-            initProgramDays();
+            const hasData = loadFromStorage();
+            if (!hasData) {
+                initProgramDays();
+            }
+            syncProfileFormFields();
+            document.getElementById('weight-date').value = formatDateISO(todayDateObj);
             renderCalendar();
             populateRecipeDayPicker();
             renderDayRecipes();
