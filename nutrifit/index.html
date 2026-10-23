@@ -1504,14 +1504,36 @@
 
             const entries = [];
             rows.forEach(r => {
+                const titleVal = titleKey ? (r[titleKey] || 'Entraînement') : 'Entraînement';
+                const descVal = descKey ? (r[descKey] || '') : '';
+                
+                // Normalisation pour détecter les séances d'introduction / notes de semaine
+                const normalizedText = (titleVal + ' ' + descVal)
+                    .toLowerCase()
+                    .normalize("NFD")
+                    .replace(/[\u0300-\u036f]/g, "");
+
+                // Ignorer les séances de type introduction / mot de la semaine
+                const isIntroSession = 
+                    normalizedText.includes("introduction de la semaine") ||
+                    normalizedText.includes("introduction de de le semaine") ||
+                    normalizedText.includes("intro de la semaine") ||
+                    normalizedText.includes("intro semaine") ||
+                    normalizedText.includes("mot du coach") ||
+                    normalizedText.includes("presentation de la semaine");
+
+                if (isIntroSession) {
+                    return; // Ignore cette entrée informative
+                }
+
                 const dateISO = parseFlexibleDate(r[dateKey]);
                 if (dateISO) {
                     entries.push({
                         dateStr: dateISO,
-                        title: titleKey ? (r[titleKey] || 'Entraînement') : 'Entraînement',
+                        title: titleVal,
                         duration: durKey ? parseFlexibleDuration(r[durKey]) : 0,
                         calories: calKey ? (parseInt(r[calKey], 10) || 0) : 0,
-                        description: descKey ? (r[descKey] || '') : ''
+                        description: descVal
                     });
                 }
             });
